@@ -26,3 +26,6 @@ Thumbs.db
 
 # 환경설정 (DB 정보 포함)
 **/application.properties
+
+# STS 워크스페이스
+.metadata/
