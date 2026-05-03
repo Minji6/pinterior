@@ -29,28 +29,28 @@
         <sub>FullStack</sub>
       </td>
       <td align="center">
-        <a href="">
-          <img src="" width="100px;" alt=""/>
+        <a href="https://github.com/garden-kim-git">
+          <img src="https://github.com/garden-kim-git.png" width="100px;" alt=""/>
           <br />
-          <sub><b>팀원 : 이름</b></sub>
+          <sub><b>팀원 : 김정원</b></sub>
         </a>
         <br />
         <sub>FullStack</sub>
       </td>
       <td align="center">
-        <a href="">
-          <img src="" width="100px;" alt=""/>
+        <a href="https://github.com/KimHyo1">
+          <img src="https://github.com/KimHyo1.png" width="100px;" alt=""/>
           <br />
-          <sub><b>팀원 : 이름</b></sub>
+          <sub><b>팀원 : 김효</b></sub>
         </a>
         <br />
         <sub>FullStack</sub>
       </td>
       <td align="center">
-        <a href="">
-          <img src="" width="100px;" alt=""/>
+        <a href="https://github.com/kennedy0919">
+          <img src="https://github.com/kennedy0919.png" width="100px;" alt=""/>
           <br />
-          <sub><b>팀원 : 이름</b></sub>
+          <sub><b>팀원 : 천승현</b></sub>
         </a>
         <br />
         <sub>FullStack</sub>
@@ -58,6 +58,8 @@
     </tr>
   </tbody>
 </table>
+
+
 
 ## 3. Key Features (주요 기능)
 
@@ -72,15 +74,39 @@
 <br>
 
 ## 4. ERD
-사진 첨부 예정
+사진 첨부 예
 
 ## 5. Technology Stack (기술 스택)
-뱃지 추가 예정
+**Backend**
+
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+
+**Frontend**
+
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+
+**Database**
+
+![Oracle](https://img.shields.io/badge/Oracle-F80000?style=for-the-badge&logo=oracle&logoColor=white)
+
+**Infra**
+
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
+**Tools**
+
+![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
+![Eclipse](https://img.shields.io/badge/Eclipse-FE7A16.svg?style=for-the-badge&logo=Eclipse&logoColor=white)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 
 ## 6. Development Workflow (개발 워크플로우)
 ### 브랜치 전략
 Git Flow를 기반으로 하되, 단기 프로젝트 규모에 맞게 `release`·`hotfix` 브랜치는 생략합니다.
-사진 첨부 예정
+![branch strategy](./docs/feature-branch.svg)
 
 | 브랜치 | 역할 | 규칙 |
 |--------|------|------|
@@ -131,5 +157,3 @@ Git Flow를 기반으로 하되, 단기 프로젝트 규모에 맞게 `release`�
 | `docs` | 문서 수정 |
 | `chore` | 빌드 설정, 패키지 수정 등 |
 | `style` | 코드 포맷팅, 세미콜론 누락 등 |
-
-
