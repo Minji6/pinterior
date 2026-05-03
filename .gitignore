@@ -23,3 +23,6 @@ frontend/.env
 *.iml
 .DS_Store
 Thumbs.db
+
+# 환경설정 (DB 정보 포함)
+**/application.properties
