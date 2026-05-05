@@ -3,6 +3,7 @@ package com.mycompany.pinterior.service;
 import com.mycompany.pinterior.dao.UserDao;
 import com.mycompany.pinterior.dto.LoginRequestDto;
 import com.mycompany.pinterior.dto.LoginResponseDto;
+import com.mycompany.pinterior.exception.ApiException;
 import com.mycompany.pinterior.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,13 +24,15 @@ public class AuthService {
 		Map<String, Object> user = userDao.findByEmail(request.getEmail());
 
 		if (user == null) {
-			throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+			// 인증 실패: 이메일이 존재하지 않거나 잘못된 자격증명
+			throw new ApiException(401, "이메일 또는 비밀번호가 올바르지 않습니다.");
 		}
 
 		// 비밀번호 검증
 		String storedPassword = (String) user.get("PASSWORD");
 		if (!passwordEncoder.matches(request.getPassword(), storedPassword)) {
-			throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+			// 인증 실패: 비밀번호 불일치
+			throw new ApiException(401, "이메일 또는 비밀번호가 올바르지 않습니다.");
 		}
 
 		// JWT 발급
