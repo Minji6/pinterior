@@ -5,14 +5,30 @@
 
 <mapper namespace="com.mycompany.pinterior.dao.UserDao">
 
-	<select id="findByEmail" parameterType="String" resultType="map">
-		SELECT user_id,
-		email,
-		password,
-		nickname,
-		profile_img
-		FROM users
-		WHERE email = #{email}
-	</select>
+    <resultMap id="usersResultMap" type="com.mycompany.pinterior.entity.Users">
+        <id property="userId" column="user_id"/>
+        <result property="email" column="email"/>
+        <result property="nickname" column="nickname"/>
+        <result property="profileImg" column="profile_img"/>
+        <result property="userBio" column="user_bio"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findByEmail" parameterType="String" resultType="map">
+        SELECT user_id,
+               email,
+               password,
+               nickname,
+               profile_img
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <select id="findByUserId" parameterType="Long" resultMap="usersResultMap">
+        SELECT user_id, email, nickname, profile_img, user_bio, created_at
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 
 </mapper>
