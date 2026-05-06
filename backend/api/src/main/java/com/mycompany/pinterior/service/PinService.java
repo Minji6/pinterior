@@ -18,6 +18,8 @@ import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.util.CursorUtil;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 
 @Service
+@Slf4j
 public class PinService {
 	@Autowired
 	private PinDao pinDao;
@@ -55,7 +58,12 @@ public class PinService {
 
 		// 핀 등록
 		pinDao.insert(pin);
-
+		log.info("날짜 조회: ", pin.getCreatedAt());
+		
+		// DB에서 다시 조회 (createdAt 채우기)
+		Pin savedPin = pinDao.selectById(pin.getPinId());
+		pin.setCreatedAt(savedPin.getCreatedAt());
+		
 		// 태그 등록
 		if (pin.getTags() != null && !pin.getTags().isEmpty()) {
 			for (String tagName : pin.getTags()) {

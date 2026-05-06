@@ -54,7 +54,8 @@ public class PinController {
 	    data.setLinkUrl(pin.getLinkUrl());
 	    data.setTags(pin.getTags());
 	    data.setCreatedAt(pin.getCreatedAt());
-
+	    log.info("날짜 조회: ", pin.getCreatedAt());
+	    
 	    return ResponseEntity.status(201)
 	        .body(ApiResponse.of(201, "핀 등록 성공", data));
 	}
@@ -70,5 +71,5 @@ public class PinController {
 
 	}
 
-
+	
 }

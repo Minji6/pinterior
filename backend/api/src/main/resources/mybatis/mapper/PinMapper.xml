@@ -10,11 +10,20 @@
 			order="BEFORE">
 			SELECT pin_seq.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO pin (pin_id, user_id, title, description, image_url, link_url,
+		INSERT INTO pin (pin_id, user_id, title, description, image_url,
+		link_url,
 		created_at)
-		VALUES (#{pinId}, #{userId}, #{title}, #{description}, #{imageUrl}, #{linkUrl},
+		VALUES (#{pinId}, #{userId}, #{title},
+		#{description}, #{imageUrl}, #{linkUrl},
 		SYSDATE)
 	</insert>
+
+	<select id="selectById" parameterType="int"
+		resultType="com.mycompany.pinterior.entity.Pin">
+		SELECT pin_id, user_id, title, description, image_url, link_url, created_at
+		FROM pin
+		WHERE pin_id = #{pinId}
+	</select>
 
 	<!-- ===== 김효: 전체 핀 목록 조회 ===== -->
 	<select id="selectList"
@@ -23,7 +32,8 @@
 		pin_id,
 		image_url,
 		title,
-		NULL AS board_id, <!-- TODO: saved_pin 테이블 생성 후 서브쿼리로 변경 -->
+		NULL AS board_id, <!-- TODO: saved_pin 테이블 
+			생성 후 서브쿼리로 변경 -->
 		created_at
 		FROM pin
 		WHERE 1=1
