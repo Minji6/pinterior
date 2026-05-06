@@ -1,13 +1,17 @@
 package com.mycompany.pinterior.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.PinCreateRequestDto;
@@ -27,7 +31,8 @@ public class PinController {
 	private PinService pinService;
 
 	@PostMapping("")
-	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@Valid @RequestBody PinCreateRequestDto request) {
+	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@Valid @ModelAttribute PinCreateRequestDto request, 
+			@RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
 	    Pin pin = new Pin();
 	    
@@ -38,7 +43,7 @@ public class PinController {
 	    pin.setLinkUrl(request.getLinkUrl());
 	    pin.setTags(request.getTags());
 
-	    pinService.insertPin(pin);
+	    pinService.insertPin(pin, image);
 
 	    PinCreateResponseDto data = new PinCreateResponseDto();
 	    data.setPinId(pin.getPinId());
