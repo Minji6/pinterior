@@ -1,0 +1,25 @@
+package com.mycompany.pinterior.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Builder;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Users {
+	private Long userId;
+	private String email;
+	private String password;
+	private String nickname;
+	private String profileImg;
+	private String userBio; 
+	private LocalDateTime createdAt; 
+	private LocalDateTime updatedAt;
+}
