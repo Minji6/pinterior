@@ -4,9 +4,12 @@
 
 <mapper namespace="com.mycompany.pinterior.dao.PinDao">
 
-    <insert id="insert" parameterType="com.mycompany.pinterior.entity.Pin">
-        INSERT INTO pin (title, description, image_url, link_url, created_at)
-        VALUES (#{title}, #{description}, #{imageUrl}, #{linkUrl}, SYSDATE)
-    </insert>
+	<insert id="insert"
+		parameterType="com.mycompany.pinterior.entity.Pin">
+		INSERT INTO pin (pin_id, title, description, image_url, link_url,
+		created_at)
+		VALUES (pin_seq.NEXTVAL, #{title}, #{description}, #{imageUrl}, #{linkUrl},
+		SYSDATE)
+	</insert>
 
 </mapper>
