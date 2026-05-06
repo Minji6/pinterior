@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
 import com.mycompany.pinterior.dto.PinCreateRequestDto;
 import com.mycompany.pinterior.dto.PinCreateResponseDto;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.service.PinService;
+import com.mycompany.pinterior.dto.ApiResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,24 +21,43 @@ import lombok.extern.slf4j.Slf4j;
 public class PinController {
 	@Autowired
 	private PinService pinService;
-	
+
 	@PostMapping("")
-	public PinCreateResponseDto create(@RequestBody PinCreateRequestDto request) {
-		Pin pin = new Pin();
-		pin.setTitle(request.getTitle());
-		pin.setDescription(request.getDescription());
-		pin.setImageUrl(request.getImageUrl());
-		pin.setLinkUrl(request.getLinkUrl());
-		
-		int result = pinService.insertPim(pin);
-		
-		PinCreateResponseDto response = new PinCreateResponseDto();
-		response.setSuccess(result);
-		response.setMessage(result > 0 ? "핀등록성공" : "핀등록실패");
-		
-		return response;
-		
+	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@RequestBody PinCreateRequestDto request) {
+	    
+	    // 태그 null/빈값 체크
+	    if (request.getTags() == null || request.getTags().isEmpty() ||
+	        request.getTags().stream().anyMatch(tag -> tag == null || tag.trim().isEmpty())) {
+	        return ResponseEntity.badRequest()
+	            .body(ApiResponse.of(400, "태그는 필수이며 빈 값을 포함할 수 없습니다", null));
+	    }
+
+	    try {
+	        Pin pin = new Pin();
+	        pin.setTitle(request.getTitle());
+	        pin.setDescription(request.getDescription());
+	        pin.setImageUrl(request.getImageUrl());
+	        pin.setLinkUrl(request.getLinkUrl());
+	        pin.setTags(request.getTags());
+
+	        pinService.insertPin(pin);
+
+	        PinCreateResponseDto data = new PinCreateResponseDto();
+	        data.setPinId(pin.getPinId());
+	        data.setImageUrl(pin.getImageUrl());
+	        data.setTitle(pin.getTitle());
+	        data.setDescription(pin.getDescription());
+	        data.setLinkUrl(pin.getLinkUrl());
+	        data.setTags(pin.getTags());
+	        data.setCreatedAt(pin.getCreatedAt());
+
+	        return ResponseEntity.status(201)
+	            .body(ApiResponse.of(201, "핀 등록 성공", data));
+
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500)
+	            .body(ApiResponse.of(500, "서버 오류: " + e.getMessage(), null));
+	    }
 	}
-	
-	
+
 }
