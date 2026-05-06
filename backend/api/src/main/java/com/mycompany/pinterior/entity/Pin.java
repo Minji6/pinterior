@@ -1,6 +1,8 @@
 package com.mycompany.pinterior.entity;
 
+
 import java.util.Date;
+import java.util.List;
 
 import lombok.Data;
 
@@ -13,4 +15,5 @@ public class Pin {
 	private String linkUrl;
 	private Date createdAt;
 	private Date updatedAt;
+	private List<String> tags;
 }
