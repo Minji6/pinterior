@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.PinTagDao;
@@ -24,12 +25,13 @@ public class PinService {
     @Autowired
     private PinTagDao pinTagDao;
     
-
+    
+    @Transactional
     public int insertPin(Pin pin) {
-        // 1. PIN insert
+        // 1. pin 등록 
         pinDao.insert(pin);
 
-        // 2. 태그 처리
+        // 2. 태그 등록 
         if (pin.getTags() != null && !pin.getTags().isEmpty()) {
             for (String tagName : pin.getTags()) {
                 Tag tag = tagDao.selectByTagName(tagName);

@@ -16,6 +16,7 @@ import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.service.PinService;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -26,41 +27,31 @@ public class PinController {
 	private PinService pinService;
 
 	@PostMapping("")
-	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@RequestBody PinCreateRequestDto request) {
+	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@Valid @RequestBody PinCreateRequestDto request) {
+
+	    Pin pin = new Pin();
 	    
-	    // 태그 null/빈값 체크
-	    if (request.getTags() == null || request.getTags().isEmpty() ||
-	        request.getTags().stream().anyMatch(tag -> tag == null || tag.trim().isEmpty())) {
-	        return ResponseEntity.badRequest()
-	            .body(ApiResponse.of(400, "태그는 필수이며 빈 값을 포함할 수 없습니다", null));
-	    }
+	    pin.setUserId(request.getUserId());
+	    pin.setTitle(request.getTitle());
+	    pin.setDescription(request.getDescription());
+	    pin.setImageUrl(request.getImageUrl());
+	    pin.setLinkUrl(request.getLinkUrl());
+	    pin.setTags(request.getTags());
 
-	    try {
-	        Pin pin = new Pin();
-	        pin.setTitle(request.getTitle());
-	        pin.setDescription(request.getDescription());
-	        pin.setImageUrl(request.getImageUrl());
-	        pin.setLinkUrl(request.getLinkUrl());
-	        pin.setTags(request.getTags());
+	    pinService.insertPin(pin);
 
-	        pinService.insertPin(pin);
+	    PinCreateResponseDto data = new PinCreateResponseDto();
+	    data.setPinId(pin.getPinId());
+	    data.setUserId(pin.getUserId());
+	    data.setImageUrl(pin.getImageUrl());
+	    data.setTitle(pin.getTitle());
+	    data.setDescription(pin.getDescription());
+	    data.setLinkUrl(pin.getLinkUrl());
+	    data.setTags(pin.getTags());
+	    data.setCreatedAt(pin.getCreatedAt());
 
-	        PinCreateResponseDto data = new PinCreateResponseDto();
-	        data.setPinId(pin.getPinId());
-	        data.setImageUrl(pin.getImageUrl());
-	        data.setTitle(pin.getTitle());
-	        data.setDescription(pin.getDescription());
-	        data.setLinkUrl(pin.getLinkUrl());
-	        data.setTags(pin.getTags());
-	        data.setCreatedAt(pin.getCreatedAt());
-
-	        return ResponseEntity.status(201)
-	            .body(ApiResponse.of(201, "핀 등록 성공", data));
-
-	    } catch (Exception e) {
-	        return ResponseEntity.status(500)
-	            .body(ApiResponse.of(500, "서버 오류: " + e.getMessage(), null));
-	    }
+	    return ResponseEntity.status(201)
+	        .body(ApiResponse.of(201, "핀 등록 성공", data));
 	}
 
 
