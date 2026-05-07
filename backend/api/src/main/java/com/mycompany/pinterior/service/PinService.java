@@ -22,6 +22,7 @@ public class PinService {
 	@Autowired
 	private PinDao pinDao;
 	
+	
 	@Autowired
 	private PinTagDao pinTagDao;
 	
