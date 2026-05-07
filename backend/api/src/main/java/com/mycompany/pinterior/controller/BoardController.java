@@ -1,6 +1,10 @@
 package com.mycompany.pinterior.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -9,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.pinterior.dto.BoardCreateRequestDto;
 import com.mycompany.pinterior.dto.BoardCreateResponseDto;
+import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.entity.Board;
 import com.mycompany.pinterior.security.JwtTokenProvider;
 import com.mycompany.pinterior.service.BoardService;
@@ -44,12 +49,21 @@ public class BoardController {
 		// 응답 생성
 		BoardCreateResponseDto response = new BoardCreateResponseDto();
 		response.setBoardId(dbBoard.getBoardId());
-		response.setUserId(dbBoard.getUserId());
+		response.setUserId(userId);
 		response.setBoardName(dbBoard.getBoardName());
 		response.setBoardInfo(dbBoard.getBoardInfo());
 		response.setCreatedAt(dbBoard.getCreatedAt());
 		response.setUpdatedAt(dbBoard.getUpdatedAt());
 		
 		return response;
+	}
+	
+	@GetMapping("/user/{userId}")
+	public List<BoardListResponseDto> readList (@PathVariable("userId") Long userId) {
+		// 서비스를 이용해서 유저의 보드 목록 가져오기
+		List<BoardListResponseDto> dbBoard = boardService.getBoardList(userId);
+		
+		
+		return dbBoard;
 	}
 }

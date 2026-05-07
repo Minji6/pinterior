@@ -1,9 +1,12 @@
 package com.mycompany.pinterior.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mycompany.pinterior.dao.BoardDao;
+import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.entity.Board;
 
 @Service
@@ -17,4 +20,17 @@ public class BoardService {
 		return dbBoard;
 	}
 	
+	public Board getBoard (Long BoardId) {
+		Board board = boardDao.selectByBoardId(BoardId);
+		return board;
+	}
+	
+	// 보드 목록 조회
+	public List<BoardListResponseDto> getBoardList (Long userId) {
+		// 유저 아이디에 일치하는 보드의 목록 불러오기
+		List<BoardListResponseDto> boardList = boardDao.selectBoardListByUserId(userId);
+		
+		
+		return boardList;
+	}
 }

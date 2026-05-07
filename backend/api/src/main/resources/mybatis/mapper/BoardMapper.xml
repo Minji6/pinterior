@@ -10,15 +10,40 @@
 			SELECT board_seq.NEXTVAL FROM DUAL
 		</selectKey>
 		INSERT INTO board 
-		(board_id, user_id, board_name, board_info, created_at)
+		(board_id, user_id, board_name, board_info, created_at, updated_at)
 		VALUES 
-		(#{boardId}, #{userId}, #{boardName}, #{boardInfo}, SYSDATE)
+		(#{boardId}, #{userId}, #{boardName}, #{boardInfo}, SYSDATE, SYSDATE)
 	</insert>
 
-	<!-- 보드 선택 -->
+	<!-- 보드 선택 (보드ID가 일치하는 경우) -->
 	<select id="selectByBoardId" parameterType="Long" resultType="com.mycompany.pinterior.entity.Board">
 		select board_id, board_name, board_info, created_at, updated_at
 		from board
 		where board_id=#{boardId}
 	</select>
+	
+
+	<!-- 보드 목록 조회 -->
+	<select id="selectBoardListByUserId" parameterType="Long" resultType="com.mycompany.pinterior.dto.BoardListResponseDto">
+		SELECT b.board_id,
+		b.board_name,
+		b.updated_at,
+		COUNT(sp.pin_id) AS pin_count
+		FROM board b
+		LEFT JOIN saved_pin sp ON b.board_id = sp.board_id
+		WHERE b.user_id = #{userId}
+		GROUP BY b.board_id, b.board_name, b.updated_at
+	</select>
+	
+	<!-- 보드 목록 썸네일 조회 (핀 이미지 구현 후 수정) -->
+	<select id="selectThumbnailsByBoardId" parameterType="Long" resultType="String">
+	    <![CDATA[
+	    SELECT p.image_url
+	    FROM saved_pin sp
+	    JOIN pin p ON sp.pin_id = p.pin_id
+	    WHERE sp.board_id = #{boardId}
+	    AND ROWNUM <= 3
+	    ]]>
+	</select>
+	
 </mapper>
