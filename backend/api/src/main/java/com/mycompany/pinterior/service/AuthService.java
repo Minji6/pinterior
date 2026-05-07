@@ -6,6 +6,8 @@ import com.mycompany.pinterior.dto.LoginResponseDto;
 import com.mycompany.pinterior.exception.ApiException;
 import com.mycompany.pinterior.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
 	private final UserDao userDao;
@@ -42,6 +45,7 @@ public class AuthService {
 		String profileImg = (String) user.get("PROFILE_IMG");
 
 		String token = jwtTokenProvider.generateToken(userId, email);
+		log.info("로그인 성공 - userId: {}, email: {}", userId, email);
 
 		return new LoginResponseDto(token, userId, nickname, profileImg);
 	}
