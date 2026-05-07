@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.pinterior.dto.BoardCreateRequestDto;
 import com.mycompany.pinterior.dto.BoardCreateResponseDto;
+import com.mycompany.pinterior.dto.BoardItemResponseDto;
 import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.entity.Board;
 import com.mycompany.pinterior.security.JwtTokenProvider;
@@ -62,7 +63,14 @@ public class BoardController {
 	public List<BoardListResponseDto> readList (@PathVariable("userId") Long userId) {
 		// 서비스를 이용해서 유저의 보드 목록 가져오기
 		List<BoardListResponseDto> dbBoard = boardService.getBoardList(userId);
-		
+				
+		return dbBoard;
+	}
+	
+	@GetMapping("/{boardId}")
+	public List<BoardItemResponseDto> readBoardItem (@PathVariable("boardId") Long boardId) {
+		// 서비스를 이용해서 보드의 핀 목록 가져오기
+		List<BoardItemResponseDto> dbBoard = boardService.getBoardItem(boardId);
 		
 		return dbBoard;
 	}

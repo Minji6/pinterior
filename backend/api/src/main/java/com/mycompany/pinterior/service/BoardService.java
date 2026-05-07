@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mycompany.pinterior.dao.BoardDao;
+import com.mycompany.pinterior.dto.BoardItemResponseDto;
 import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.entity.Board;
 
@@ -32,5 +33,12 @@ public class BoardService {
 		
 		
 		return boardList;
+	}
+	
+	public List<BoardItemResponseDto> getBoardItem (Long boardId) {
+		// 보드 아이디에 일치하는 보드의 핀 목록 불러오기
+		List<BoardItemResponseDto> boardItems = boardDao.selectThumbnailsByBoardId(boardId);
+		
+		return boardItems;
 	}
 }
