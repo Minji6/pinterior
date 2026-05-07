@@ -183,5 +183,24 @@ public class PinService {
 
 		return new PinDownloadResponseDto(imageUrl);
 	}
-}
+	
+	// 핀 삭제 
+	public void deletePin(Long pinId, Long userId) {
+		 Long authorId = pinDao.selectUserIdByPinId(pinId);
+		    if (authorId == null) {
+		        throw new ApiException(404, "존재하지 않는 핀입니다.");
+		    }
+		    
+		    // 권한 본인 삭제 가능
+		    if (!authorId.equals(userId)) {
+		        throw new ApiException(403, "본인 핀만 삭제할 수 있습니다.");
+		    }
+		    // 핀태그 먼저삭제
+		    pinDao.deletePinTagsByPinId(pinId);
+		    
+		    // 삭제
+		    pinDao.deletePin(pinId);
+		}
+	}
+
 
