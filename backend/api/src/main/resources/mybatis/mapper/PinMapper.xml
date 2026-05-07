@@ -21,7 +21,8 @@
 		pin_id,
 		image_url,
 		title,
-		NULL AS board_id, <!-- TODO: saved_pin 테이블 생성 후 서브쿼리로 변경 -->
+		NULL AS board_id, <!-- TODO: saved_pin 테이블 
+			생성 후 서브쿼리로 변경 -->
 		created_at
 		FROM pin
 		WHERE 1=1
@@ -30,6 +31,28 @@
 		</if>
 		ORDER BY pin_id DESC
 		FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+	<update id="update"
+		parameterType="com.mycompany.pinterior.entity.Pin">
+		UPDATE pin
+		SET title = #{title},
+		description =
+		#{description},
+		link_url = #{linkUrl},
+		image_url = #{imageUrl},
+		updated_at = SYSDATE
+		WHERE pin_id = #{pinId}
+		AND user_id = #{userId}
+	</update>
+
+	<select id="selectById" parameterType="int"
+		resultType="com.mycompany.pinterior.entity.Pin">
+		SELECT pin_id, user_id, title, description, image_url,
+		link_url, created_at,
+		updated_at
+		FROM pin
+		WHERE pin_id = #{pinId}
 	</select>
 
 </mapper>

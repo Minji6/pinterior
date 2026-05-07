@@ -3,7 +3,9 @@ package com.mycompany.pinterior.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,9 +15,12 @@ import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.PinCreateRequestDto;
 import com.mycompany.pinterior.dto.PinCreateResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinUpdateRequestDto;
+import com.mycompany.pinterior.dto.PinUpdateResponseDto;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.service.PinService;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -52,5 +57,16 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 목록 조회 성공", data));
 
 	}
+	
+	@PutMapping("/{pinId}")
+	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(
+	        @PathVariable("pinId") int pinId,
+	        @Valid @RequestBody PinUpdateRequestDto request) {
+
+	    PinUpdateResponseDto data = pinService.updatePin(pinId, request);
+
+	    return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
+	}
+	
 
 }
