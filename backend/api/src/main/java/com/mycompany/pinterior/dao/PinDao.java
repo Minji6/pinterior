@@ -12,7 +12,11 @@ import com.mycompany.pinterior.entity.Pin;
 
 @Mapper
 public interface PinDao {
+	// 핀 등
 	public int insert(Pin pin);
+	
+	// 핀 단건 조회 
+	Pin selectById(int pinId);
 
 	// ===== 전체 조회 =====
 	List<PinSummaryDto> selectList(@Param("cursorId") Long cursorId, @Param("size") int size);
