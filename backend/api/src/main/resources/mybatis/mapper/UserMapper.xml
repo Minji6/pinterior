@@ -5,30 +5,56 @@
 
 <mapper namespace="com.mycompany.pinterior.dao.UserDao">
 
-    <resultMap id="usersResultMap" type="com.mycompany.pinterior.entity.Users">
-        <id property="userId" column="user_id"/>
-        <result property="email" column="email"/>
-        <result property="nickname" column="nickname"/>
-        <result property="profileImg" column="profile_img"/>
-        <result property="userBio" column="user_bio"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
-    </resultMap>
+	<!-- ResultMap: DB 컬럼명 → Java 필드명 매핑 -->
+	<resultMap id="usersResultMap"
+		type="com.mycompany.pinterior.entity.Users">
+		<id property="userId" column="user_id" />
+		<result property="email" column="email" />
+		<result property="nickname" column="nickname" />
+		<result property="profileImg" column="profile_img" />
+		<result property="profileImgData" column="profile_img_data" />
+		<result property="userBio" column="user_bio" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
 
-    <select id="findByEmail" parameterType="String" resultType="map">
-        SELECT user_id,
-               email,
-               password,
-               nickname,
-               profile_img
-        FROM users
-        WHERE email = #{email}
-    </select>
+	<!-- 이메일로 유저 조회 (로그인 시 비밀번호 검증용) -->
+	<select id="findByEmail" parameterType="String" resultType="map">
+		SELECT user_id,
+		email,
+		password,
+		nickname,
+		profile_img
+		FROM users
+		WHERE
+		email = #{email}
+	</select>
 
-    <select id="findByUserId" parameterType="Long" resultMap="usersResultMap">
-        SELECT user_id, email, nickname, profile_img, user_bio, created_at
-        FROM users
-        WHERE user_id = #{userId}
-    </select>
+	<!-- userId로 유저 단건 조회 (프로필 조회용) -->
+	<select id="findByUserId" parameterType="Long"
+		resultMap="usersResultMap">
+		SELECT user_id, email, nickname, profile_img, user_bio,
+		created_at
+		FROM users
+		WHERE user_id = #{userId}
+	</select>
+
+	<!-- userId로 유저 단건 조회 (이미지 등록/수정/삭제 시 기존 데이터 확인용) -->
+	<select id="findProfileImageByUserId" parameterType="Long"
+		resultMap="usersResultMap">
+		SELECT user_id, profile_img, profile_img_data
+		FROM users
+		WHERE user_id = #{userId}
+	</select>
+
+	<!-- 프로필 이미지 업데이트 (등록/수정/삭제 공통) -->
+	<update id="updateProfileImage">
+		UPDATE users
+		SET profile_img_data = #{profileImgData,
+		jdbcType=BLOB},
+		profile_img = #{profileImg, jdbcType=VARCHAR},
+		updated_at = CURRENT_TIMESTAMP
+		WHERE user_id = #{userId}
+	</update>
 
 </mapper>

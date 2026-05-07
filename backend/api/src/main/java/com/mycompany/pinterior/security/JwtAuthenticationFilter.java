@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 유효한 토큰 → 인증 정보 저장
         Long userId = jwtTokenProvider.getUserId(token);
+        request.setAttribute("userId", userId);
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 userId, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
