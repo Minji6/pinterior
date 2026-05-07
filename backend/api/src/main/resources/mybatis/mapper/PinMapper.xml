@@ -40,7 +40,6 @@
 		description =
 		#{description},
 		link_url = #{linkUrl},
-		image_url = #{imageUrl},
 		updated_at = SYSDATE
 		WHERE pin_id = #{pinId}
 		AND user_id = #{userId}
