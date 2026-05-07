@@ -44,4 +44,38 @@
 		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
+	<!-- 김효: 핀 상세 조회 -->
+	<select id="selectDetail"
+		resultType="com.mycompany.pinterior.dto.PinDetailResponseDto">
+		SELECT
+		pin_id,
+		image_url,
+		title,
+		description,
+		link_url,
+		NULL AS board_id,  <!-- TODO: saved_pin 테이블 생성 후 변경 -->
+		created_at
+		FROM pin
+		WHERE pin_id = #{pinId}
+	</select>
+
+	<!--김효: 핀 작성자 조회 -->
+	<select id="selectAuthorByPinId"
+		resultType="com.mycompany.pinterior.dto.AuthorDto">
+		SELECT
+		u.user_id,
+		u.profile_img AS profile_image_url
+		FROM pin p
+		JOIN users u ON p.user_id = u.user_id
+		WHERE p.pin_id = #{pinId}
+	</select>
+
+	<!-- 핀 태그 목록 조회 -->
+	<select id="selectTagsByPinId" resultType="string">
+		SELECT t.tag_name
+		FROM pin_tag pt
+		JOIN tag t ON pt.tag_id = t.tag_id
+		WHERE pt.pin_id = #{pinId}
+		ORDER BY t.tag_name
+	</select>
 </mapper>

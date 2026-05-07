@@ -16,6 +16,12 @@ import com.mycompany.pinterior.entity.Tag;
 
 import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinSummaryDto;
+import com.mycompany.pinterior.dto.AuthorDto;
+import com.mycompany.pinterior.dto.PinDetailResponseDto;
+import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinSummaryDto;
+import com.mycompany.pinterior.entity.Pin;
+import com.mycompany.pinterior.exception.ApiException;
 import com.mycompany.pinterior.util.CursorUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -100,4 +106,27 @@ public class PinService {
 		return new PinListResponseDto(pins, nextCursor, hasNext);
 	}
 
+	// 
+	public PinDetailResponseDto getPinDetail(Long pinId) {
+		
+		PinDetailResponseDto detail = pinDao.selectDetail(pinId);
+		if (detail == null) {
+			throw new ApiException(404, "존재하지 않는 핀입니다.");
+		}
+
+	
+		AuthorDto author = pinDao.selectAuthorByPinId(pinId);
+		detail.setAuthor(author);
+
+	
+		List<String> tags = pinDao.selectTagsByPinId(pinId);
+		detail.setTags(tags);
+
+		//임시 값
+		detail.setLikeCount(0);
+		detail.setLiked(false);
+		detail.setCommentEnabled(1);
+
+		return detail;
+	}
 }
