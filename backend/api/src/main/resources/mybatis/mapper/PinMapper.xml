@@ -107,8 +107,4 @@
 		WHERE pin_id = #{pinId}
 	</delete>
 
-	<delete id="deleteSavedPinsByPinId">
-		DELETE FROM saved_pin
-		WHERE pin_id = #{pinId}
-	</delete>
 </mapper>

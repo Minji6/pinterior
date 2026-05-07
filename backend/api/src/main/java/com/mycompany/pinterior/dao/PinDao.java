@@ -42,6 +42,5 @@ public interface PinDao {
 	//  핀 삭제
 	int deletePin(@Param("pinId") Long pinId);
 	
-	// 핀의 saved 삭제
-	int deleteSavedPinsByPinId(@Param("pinId") Long pinId);
+
 }
