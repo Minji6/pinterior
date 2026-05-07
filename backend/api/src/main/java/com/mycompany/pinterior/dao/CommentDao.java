@@ -11,4 +11,6 @@ public interface CommentDao {
     
     // 댓글 단건 조회 (등록 후 응답용)
     Comment selectById(Long commentId);
+    
+    
 }

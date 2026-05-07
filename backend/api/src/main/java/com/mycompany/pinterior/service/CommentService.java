@@ -9,7 +9,10 @@ import com.mycompany.pinterior.dto.CommentCreateRequestDto;
 import com.mycompany.pinterior.dto.CommentCreateResponseDto;
 import com.mycompany.pinterior.entity.Comment;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class CommentService {
 	
 	@Autowired
@@ -26,13 +29,19 @@ public class CommentService {
 
         // DB에서 다시 조회 (createdAt 채우기)
         Comment saved = commentDao.selectById(comment.getCommentId());
-
+        
+        log.info("saved: {}", saved);
+        log.info("nickname: {}", saved.getUserNickname());
+        log.info("profileImg: {}", saved.getUserProfileImg());
+        
         CommentCreateResponseDto data = new CommentCreateResponseDto();
         data.setCommentId(saved.getCommentId());
         data.setUserId(saved.getUserId());
         data.setPinId(saved.getPinId());
         data.setContent(saved.getCommentContent());
         data.setCreatedAt(saved.getCreatedAt());
+        data.setUserNickname(saved.getUserNickname());
+        data.setUserProfileImg(saved.getUserProfileImg());
 
         return data;
     }

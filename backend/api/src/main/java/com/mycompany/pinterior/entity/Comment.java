@@ -13,4 +13,8 @@ public class Comment {
 	private Date createdAt;
 	private Date updatedAt;
 	private Long parentId;
+	
+	// 유저 정보 (조회용)
+    private String userNickname;
+    private String userProfileImg;
 }

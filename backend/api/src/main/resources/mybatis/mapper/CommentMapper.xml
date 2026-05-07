@@ -4,20 +4,33 @@
 
 <mapper namespace="com.mycompany.pinterior.dao.CommentDao">
 
-    <!-- 댓글 등록 -->
-    <insert id="insert" parameterType="com.mycompany.pinterior.entity.Comment">
-        <selectKey keyProperty="commentId" resultType="long" order="BEFORE">
-            SELECT comment_seq.NEXTVAL FROM DUAL
-        </selectKey>
-        INSERT INTO comment (comment_id, user_id, pin_id, comment_content, created_at)
-        VALUES (#{commentId}, #{userId}, #{pinId}, #{commentContent}, SYSDATE)
-    </insert>
+	<!-- 댓글 등록 -->
+	<insert id="insert"
+		parameterType="com.mycompany.pinterior.entity.Comment">
+		<selectKey keyProperty="commentId" resultType="long"
+			order="BEFORE">
+			SELECT comment_seq.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO comments (comment_id, user_id, pin_id, comment_content,
+		created_at)
+		VALUES (#{commentId}, #{userId}, #{pinId},
+		#{commentContent}, SYSDATE)
+	</insert>
 
-    <!-- 댓글 단건 조회 -->
-    <select id="selectById" parameterType="long" resultType="com.mycompany.pinterior.entity.Comment">
-        SELECT comment_id, user_id, pin_id, comment_content, created_at, update_at
-        FROM comment
-        WHERE comment_id = #{commentId}
-    </select>
+	<!-- 댓글 단건 조회 -->
+	<select id="selectById" parameterType="long"
+		resultType="com.mycompany.pinterior.entity.Comment">
+		SELECT
+		c.comment_id AS commentId,
+		c.user_id AS userId,
+		c.pin_id AS pinId,
+		c.comment_content AS commentContent,
+		c.created_at AS createdAt,
+		u.nickname AS userNickname,
+		u.profile_img AS userProfileImg
+		FROM comments c
+		JOIN users u ON c.user_id = u.user_id
+		WHERE c.comment_id = #{commentId}
+	</select>
 
 </mapper>

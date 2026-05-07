@@ -26,7 +26,7 @@ public class CommentController {
 	
 	@PostMapping("/{pinId}/comments")
 	public ResponseEntity<ApiResponse<CommentCreateResponseDto>> create(
-	        @PathVariable Long pinId,
+	        @PathVariable("pinId") Long pinId,
 	        @Valid @RequestBody CommentCreateRequestDto request) {
 
 	    Long userId = (Long) SecurityContextHolder
