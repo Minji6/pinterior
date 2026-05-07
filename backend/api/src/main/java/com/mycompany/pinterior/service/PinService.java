@@ -153,6 +153,7 @@ public class PinService {
 		    }
 		    // 핀태그 먼저삭제
 		    pinDao.deletePinTagsByPinId(pinId);
+		    pinDao.deleteSavedPinsByPinId(pinId); 
 		    
 		    // 삭제
 		    pinDao.deletePin(pinId);
