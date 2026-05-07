@@ -14,7 +14,7 @@
 		SYSDATE)
 	</insert>
 
-	<!-- ===== 김효: 전체 핀 목록 조회 ===== -->
+	<!-- ===== 전체 핀 조회 ===== -->
 	<select id="selectList"
 		resultType="com.mycompany.pinterior.dto.PinSummaryDto">
 		SELECT
@@ -33,7 +33,7 @@
 		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-	<!-- 김효: 핀 상세 조회 -->
+	<!-- 상세 조회 -->
 	<select id="selectDetail"
 		resultType="com.mycompany.pinterior.dto.PinDetailResponseDto">
 		SELECT
@@ -48,7 +48,7 @@
 		WHERE pin_id = #{pinId}
 	</select>
 
-	<!--김효: 핀 작성자 조회 -->
+	<!-- 작성자 조회 -->
 	<select id="selectAuthorByPinId"
 		resultType="com.mycompany.pinterior.dto.AuthorDto">
 		SELECT
@@ -67,4 +67,12 @@
 		WHERE pt.pin_id = #{pinId}
 		ORDER BY t.tag_name
 	</select>
+	
+	 <!-- ===== 김효: 핀 이미지 URL 조회 ===== -->
+    <select id="selectImageUrlByPinId" resultType="string">
+        SELECT image_url
+        FROM pin
+        WHERE pin_id = #{pinId}
+    </select>
+    
 </mapper>

@@ -14,15 +14,18 @@ import com.mycompany.pinterior.entity.Pin;
 public interface PinDao {
 	public int insert(Pin pin);
 
-	// ===== 김효: 전체 핀 목록 조회 =====
+	// ===== 전체 조회 =====
 	List<PinSummaryDto> selectList(@Param("cursorId") Long cursorId, @Param("size") int size);
 
-	// ===== 김효: 핀 상세 조회 =====
+	// ===== 상세 조회 =====
 	PinDetailResponseDto selectDetail(@Param("pinId") Long pinId);
 
-	// ===== 김효: 핀 작성자 조회 =====
+	// =====  작성자 조회 =====
 	AuthorDto selectAuthorByPinId(@Param("pinId") Long pinId);
 
-	// ===== 김효: 핀 태그 목록 조회 =====
+	// =====  태그 목록 조회 =====
 	List<String> selectTagsByPinId(@Param("pinId") Long pinId);
+	
+	// ===== 이미지 다운로드 =====
+	String selectImageUrlByPinId(@Param("pinId") Long pinId);
 }
