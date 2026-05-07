@@ -37,13 +37,10 @@
 	
 	<!-- 보드 목록 썸네일 조회 (핀 이미지 구현 후 수정) -->
 	<select id="selectThumbnailsByBoardId" parameterType="Long" resultType="String">
-	    <![CDATA[
 	    SELECT p.image_url
 	    FROM saved_pin sp
 	    JOIN pin p ON sp.pin_id = p.pin_id
 	    WHERE sp.board_id = #{boardId}
-	    AND ROWNUM <= 3
-	    ]]>
 	</select>
 	
 </mapper>
