@@ -19,6 +19,7 @@ public class Users {
 	private String password;
 	private String nickname;
 	private String profileImg;
+	private byte[] profileImgData;
 	private String userBio; 
 	private LocalDateTime createdAt; 
 	private LocalDateTime updatedAt;
