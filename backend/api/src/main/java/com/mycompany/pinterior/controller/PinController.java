@@ -20,6 +20,7 @@ import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.PinCreateRequestDto;
 import com.mycompany.pinterior.dto.PinCreateResponseDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
+import com.mycompany.pinterior.dto.PinDownloadResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinUpdateRequestDto;
 import com.mycompany.pinterior.dto.PinUpdateResponseDto;
@@ -94,6 +95,12 @@ public class PinController {
 	    return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
 	}
 	
+	//이미지 다운로드
+	@GetMapping("/{pinId}/download")
+	public ResponseEntity<ApiResponse<PinDownloadResponseDto>> downdloadPin(@PathVariable("pinId") Long pinId) {
+		PinDownloadResponseDto data = pinService.getDownloadUrl(pinId);
+		return ResponseEntity.ok(ApiResponse.of(200, "핀 이미지 다운로드 성공", data));
+	}
 
 	
 }

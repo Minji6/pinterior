@@ -64,4 +64,11 @@
         ORDER BY t.tag_name
     </select>
 
+	<!-- ===== 김효: 핀 이미지 URL 조회 ===== -->
+    <select id="selectImageUrlByPinId" resultType="string">
+        SELECT image_url
+        FROM pin
+        WHERE pin_id = #{pinId}
+    </select>
+
 </mapper>
