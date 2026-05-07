@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 public class PinCreateResponseDto {
-    private int pinId;
-    private int userId;
+    private Long pinId;
+    private Long userId;
     private String imageUrl;
     private String title;
     private String description;
