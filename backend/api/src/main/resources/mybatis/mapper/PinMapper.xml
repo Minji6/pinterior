@@ -4,53 +4,64 @@
 
 <mapper namespace="com.mycompany.pinterior.dao.PinDao">
 
-	<insert id="insert"
-		parameterType="com.mycompany.pinterior.entity.Pin">
-		INSERT INTO pin (pin_id, title, description, image_url,
-		link_url,
-		created_at)
-		VALUES (pin_seq.NEXTVAL, #{title}, #{description},
-		#{imageUrl}, #{linkUrl},
-		SYSDATE)
-	</insert>
+    <insert id="insert" parameterType="com.mycompany.pinterior.entity.Pin">
+        <selectKey keyProperty="pinId" resultType="int" order="BEFORE">
+            SELECT pin_seq.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO pin (pin_id, user_id, title, description, image_url, link_url, created_at)
+        VALUES (#{pinId}, #{userId}, #{title}, #{description}, #{imageUrl}, #{linkUrl}, SYSDATE)
+    </insert>
 
-	<!-- ===== 김효: 전체 핀 목록 조회 ===== -->
-	<select id="selectList"
-		resultType="com.mycompany.pinterior.dto.PinSummaryDto">
-		SELECT
-		pin_id,
-		image_url,
-		title,
-		NULL AS board_id, <!-- TODO: saved_pin 테이블 생성 후 서브쿼리로 변경 -->
-		created_at
-		FROM pin
-		WHERE 1=1
-		<if test="cursorId != null">
-			AND pin_id &lt; #{cursorId}
-		</if>
-		ORDER BY pin_id DESC
-		FETCH FIRST #{size} ROWS ONLY
-	</select>
+    <select id="selectById" parameterType="int" resultType="com.mycompany.pinterior.entity.Pin">
+        SELECT pin_id, user_id, title, description, image_url, link_url, created_at, updated_at
+        FROM pin
+        WHERE pin_id = #{pinId}
+    </select>
 
-	<update id="update"
-		parameterType="com.mycompany.pinterior.entity.Pin">
-		UPDATE pin
-		SET title = #{title},
-		description =
-		#{description},
-		link_url = #{linkUrl},
-		updated_at = SYSDATE
-		WHERE pin_id = #{pinId}
-		AND user_id = #{userId}
-	</update>
+    <!-- ===== 김효: 전체 핀 목록 조회 ===== -->
+    <select id="selectList" resultType="com.mycompany.pinterior.dto.PinSummaryDto">
+        SELECT pin_id, image_url, title, NULL AS board_id, created_at
+        FROM pin
+        WHERE 1=1
+        <if test="cursorId != null">
+            AND pin_id &lt; #{cursorId}
+        </if>
+        ORDER BY pin_id DESC
+        FETCH FIRST #{size} ROWS ONLY
+    </select>
 
-	<select id="selectById" parameterType="int"
-		resultType="com.mycompany.pinterior.entity.Pin">
-		SELECT pin_id, user_id, title, description, image_url,
-		link_url, created_at,
-		updated_at
-		FROM pin
-		WHERE pin_id = #{pinId}
-	</select>
+    <update id="update" parameterType="com.mycompany.pinterior.entity.Pin">
+        UPDATE pin
+        SET title = #{title},
+            description = #{description},
+            link_url = #{linkUrl},
+            updated_at = SYSDATE
+        WHERE pin_id = #{pinId}
+        AND user_id = #{userId}
+    </update>
+
+    <!-- 김효: 핀 상세 조회 -->
+    <select id="selectDetail" resultType="com.mycompany.pinterior.dto.PinDetailResponseDto">
+        SELECT pin_id, image_url, title, description, link_url, NULL AS board_id, created_at
+        FROM pin
+        WHERE pin_id = #{pinId}
+    </select>
+
+    <!-- 김효: 핀 작성자 조회 -->
+    <select id="selectAuthorByPinId" resultType="com.mycompany.pinterior.dto.AuthorDto">
+        SELECT u.user_id, u.profile_img AS profile_image_url
+        FROM pin p
+        JOIN users u ON p.user_id = u.user_id
+        WHERE p.pin_id = #{pinId}
+    </select>
+
+    <!-- 핀 태그 목록 조회 -->
+    <select id="selectTagsByPinId" resultType="string">
+        SELECT t.tag_name
+        FROM pin_tag pt
+        JOIN tag t ON pt.tag_id = t.tag_id
+        WHERE pt.pin_id = #{pinId}
+        ORDER BY t.tag_name
+    </select>
 
 </mapper>

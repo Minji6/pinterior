@@ -1,5 +1,7 @@
 package com.mycompany.pinterior.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,13 +9,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.PinCreateRequestDto;
 import com.mycompany.pinterior.dto.PinCreateResponseDto;
+import com.mycompany.pinterior.dto.PinDetailResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinUpdateRequestDto;
 import com.mycompany.pinterior.dto.PinUpdateResponseDto;
@@ -31,23 +37,36 @@ public class PinController {
 	private PinService pinService;
 
 	@PostMapping("")
-	public PinCreateResponseDto create(@RequestBody PinCreateRequestDto request) {
-		Pin pin = new Pin();
-		pin.setTitle(request.getTitle());
-		pin.setDescription(request.getDescription());
-		pin.setImageUrl(request.getImageUrl());
-		pin.setLinkUrl(request.getLinkUrl());
+	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@Valid @ModelAttribute PinCreateRequestDto request, 
+			@RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
-		int result = pinService.insertPin(pin);
+	    Pin pin = new Pin();
+	    
+	    pin.setUserId(request.getUserId());
+	    pin.setTitle(request.getTitle());
+	    pin.setDescription(request.getDescription());
+	    pin.setImageUrl(request.getImageUrl());
+	    pin.setLinkUrl(request.getLinkUrl());
+	    pin.setTags(request.getTags());
 
-		PinCreateResponseDto response = new PinCreateResponseDto();
-		response.setSuccess(result);
-		response.setMessage(result > 0 ? "핀등록성공" : "핀등록실패");
+	    pinService.insertPin(pin, image);
 
-		return response;
+	    PinCreateResponseDto data = new PinCreateResponseDto();
+	    data.setPinId(pin.getPinId());
+	    data.setUserId(pin.getUserId());
+	    data.setImageUrl(pin.getImageUrl());
+	    data.setTitle(pin.getTitle());
+	    data.setDescription(pin.getDescription());
+	    data.setLinkUrl(pin.getLinkUrl());
+	    data.setTags(pin.getTags());
+	    data.setCreatedAt(pin.getCreatedAt());
+	    log.info("날짜 조회: ", pin.getCreatedAt());
+	    
+	    return ResponseEntity.status(201)
+	        .body(ApiResponse.of(201, "핀 등록 성공", data));
 	}
 
-	//////
+
 	@GetMapping
 	public ResponseEntity<ApiResponse<PinListResponseDto>> getPinList(
 			@RequestParam(value = "cursor", required = false) String cursor,
@@ -55,7 +74,14 @@ public class PinController {
 
 		PinListResponseDto data = pinService.getPinList(cursor, size);
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 목록 조회 성공", data));
+	}
+	
+	//상세 조회
+	@GetMapping("/{pinId}")
+	public ResponseEntity<ApiResponse<PinDetailResponseDto>> getPinDetail(@PathVariable("pinId") Long pinId) {
 
+		PinDetailResponseDto data = pinService.getPinDetail(pinId);
+		return ResponseEntity.ok(ApiResponse.of(200, "핀 상세 조회 성공", data));
 	}
 	
 	@PutMapping("/{pinId}")
@@ -69,4 +95,5 @@ public class PinController {
 	}
 	
 
+	
 }
