@@ -109,7 +109,7 @@ public class PinService {
 	}
 	
 	@Transactional
-	public PinUpdateResponseDto updatePin(int pinId, PinUpdateRequestDto request) {
+	public PinUpdateResponseDto updatePin(Long pinId, PinUpdateRequestDto request) {
 	    Pin pin = new Pin();
 	    pin.setPinId(pinId);
 	    pin.setUserId(request.getUserId());

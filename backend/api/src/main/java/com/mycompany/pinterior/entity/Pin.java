@@ -8,8 +8,8 @@ import lombok.Data;
 
 @Data
 public class Pin {
-	private int pinId;
-	private int userId;
+	private Long pinId;
+	private Long userId;
 	private String title;
 	private String description;
 	private String imageUrl;

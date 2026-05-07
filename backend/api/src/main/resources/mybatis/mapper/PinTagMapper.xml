@@ -9,7 +9,7 @@
         VALUES (#{pinId}, #{tagId})
     </insert>
 
-    <delete id="deleteByPinId" parameterType="int">
+    <delete id="deleteByPinId" parameterType="long">
         DELETE FROM pin_tag WHERE pin_id = #{pinId}
     </delete>
 

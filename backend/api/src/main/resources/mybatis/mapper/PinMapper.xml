@@ -5,14 +5,14 @@
 <mapper namespace="com.mycompany.pinterior.dao.PinDao">
 
     <insert id="insert" parameterType="com.mycompany.pinterior.entity.Pin">
-        <selectKey keyProperty="pinId" resultType="int" order="BEFORE">
+        <selectKey keyProperty="pinId" resultType="long" order="BEFORE">
             SELECT pin_seq.NEXTVAL FROM DUAL
         </selectKey>
         INSERT INTO pin (pin_id, user_id, title, description, image_url, link_url, created_at)
         VALUES (#{pinId}, #{userId}, #{title}, #{description}, #{imageUrl}, #{linkUrl}, SYSDATE)
     </insert>
 
-    <select id="selectById" parameterType="int" resultType="com.mycompany.pinterior.entity.Pin">
+    <select id="selectById" parameterType="long" resultType="com.mycompany.pinterior.entity.Pin">
         SELECT pin_id, user_id, title, description, image_url, link_url, created_at, updated_at
         FROM pin
         WHERE pin_id = #{pinId}

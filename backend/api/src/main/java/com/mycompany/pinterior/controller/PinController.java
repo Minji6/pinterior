@@ -86,7 +86,7 @@ public class PinController {
 	
 	@PutMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(
-	        @PathVariable("pinId") int pinId,
+	        @PathVariable("pinId") Long pinId,
 	        @Valid @RequestBody PinUpdateRequestDto request) {
 
 	    PinUpdateResponseDto data = pinService.updatePin(pinId, request);
