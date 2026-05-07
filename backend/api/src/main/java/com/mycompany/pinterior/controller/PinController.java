@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -22,6 +24,8 @@ import com.mycompany.pinterior.dto.PinCreateResponseDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
 import com.mycompany.pinterior.dto.PinDownloadResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinUpdateRequestDto;
+import com.mycompany.pinterior.dto.PinUpdateResponseDto;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.service.PinService;
 
@@ -81,7 +85,17 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 상세 조회 성공", data));
 	}
 
-	// 이미지 다운로드
+	@PutMapping("/{pinId}")
+	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(
+	        @PathVariable("pinId") Long pinId,
+	        @Valid @RequestBody PinUpdateRequestDto request) {
+
+	    PinUpdateResponseDto data = pinService.updatePin(pinId, request);
+
+	    return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
+	}
+	
+	//이미지 다운로드
 	@GetMapping("/{pinId}/download")
 	public ResponseEntity<ApiResponse<PinDownloadResponseDto>> downdloadPin(@PathVariable("pinId") Long pinId) {
 		PinDownloadResponseDto data = pinService.getDownloadUrl(pinId);
