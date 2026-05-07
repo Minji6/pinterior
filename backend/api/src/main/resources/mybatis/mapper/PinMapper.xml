@@ -6,13 +6,24 @@
 
 	<insert id="insert"
 		parameterType="com.mycompany.pinterior.entity.Pin">
-		INSERT INTO pin (pin_id, title, description, image_url,
+		<selectKey keyProperty="pinId" resultType="int"
+			order="BEFORE">
+			SELECT pin_seq.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO pin (pin_id, user_id, title, description, image_url,
 		link_url,
 		created_at)
-		VALUES (pin_seq.NEXTVAL, #{title}, #{description},
-		#{imageUrl}, #{linkUrl},
+		VALUES (#{pinId}, #{userId}, #{title},
+		#{description}, #{imageUrl}, #{linkUrl},
 		SYSDATE)
 	</insert>
+
+	<select id="selectById" parameterType="int"
+		resultType="com.mycompany.pinterior.entity.Pin">
+		SELECT pin_id, user_id, title, description, image_url, link_url, created_at
+		FROM pin
+		WHERE pin_id = #{pinId}
+	</select>
 
 	<!-- ===== 김효: 전체 핀 목록 조회 ===== -->
 	<select id="selectList"
