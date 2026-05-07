@@ -21,8 +21,7 @@
 		pin_id,
 		image_url,
 		title,
-		NULL AS board_id, <!-- TODO: saved_pin 테이블 
-			생성 후 서브쿼리로 변경 -->
+		NULL AS board_id, <!-- TODO: saved_pin 테이블 생성 후 서브쿼리로 변경 -->
 		created_at
 		FROM pin
 		WHERE 1=1
