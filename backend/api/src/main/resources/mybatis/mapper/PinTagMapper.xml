@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.pinterior.dao.PinTagDao">
+
+    <insert id="insert">
+        INSERT INTO pin_tag (pin_id, tag_id)
+        VALUES (#{pinId}, #{tagId})
+    </insert>
+
+    <delete id="deleteByPinId" parameterType="long">
+        DELETE FROM pin_tag WHERE pin_id = #{pinId}
+    </delete>
+
+</mapper>
