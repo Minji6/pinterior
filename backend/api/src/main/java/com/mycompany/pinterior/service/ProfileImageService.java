@@ -33,10 +33,9 @@ public class ProfileImageService {
 			throw new ApiException(500, "서버 에러가 발생했습니다.");
 		}
 
-		String mimeType = image.getContentType();
-		userDao.updateProfileImage(userId, imageBytes, mimeType);
-
-		String imageUrl = "/images/profile/" + userId;
+		String imageUrl = "/api/users/" + userId + "/image";
+		userDao.updateProfileImage(userId, imageBytes, imageUrl);
+		
 		return new ProfileImageResponseDto(imageUrl);
 	}
 	
