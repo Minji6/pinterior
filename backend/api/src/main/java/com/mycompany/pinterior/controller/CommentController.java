@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.CommentCreateRequestDto;
 import com.mycompany.pinterior.dto.CommentCreateResponseDto;
+import com.mycompany.pinterior.dto.CommentUpdateRequestDto;
+import com.mycompany.pinterior.dto.CommentUpdateResponseDto;
 import com.mycompany.pinterior.service.CommentService;
 
 import jakarta.validation.Valid;
@@ -38,6 +40,21 @@ public class CommentController {
 
 	    return ResponseEntity.status(201)
 	            .body(ApiResponse.of(201, "댓글 작성 성공", data));
+	}
+	
+	@PutMapping("/comments/{commentId}")
+	public ResponseEntity<ApiResponse<CommentUpdateResponseDto>> update(
+	        @PathVariable("commentId") Long commentId,
+	        @Valid @RequestBody CommentUpdateRequestDto request) {
+
+	    Long userId = (Long) SecurityContextHolder
+	            .getContext()
+	            .getAuthentication()
+	            .getPrincipal();
+
+	    CommentUpdateResponseDto data = commentService.updateComment(commentId, userId, request);
+
+	    return ResponseEntity.ok(ApiResponse.of(200, "댓글 수정 성공", data));
 	}
 	
 }
