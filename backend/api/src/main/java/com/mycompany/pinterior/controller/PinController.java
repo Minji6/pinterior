@@ -118,5 +118,4 @@ public class PinController {
 		
 	    return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));
 	}
-
 }

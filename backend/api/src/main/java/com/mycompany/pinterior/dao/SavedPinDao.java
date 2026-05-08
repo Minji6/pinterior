@@ -15,5 +15,10 @@ public interface SavedPinDao {
 	int countPinById(@Param("pinId") Long pinId);
 
 	Long selectBoardOwnerByBoardId(@Param("boardId") Long boardId);
+	
+	Long selectUserIdBySavedPinId(@Param("savedPinId") Long savedPinId);
+	
+	int deleteSavedPin(@Param("savedPinId") Long savedPinId);
+	
 
 }
