@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mycompany.pinterior.dao.CommentDao;
 import com.mycompany.pinterior.dto.CommentCreateRequestDto;
 import com.mycompany.pinterior.dto.CommentCreateResponseDto;
+import com.mycompany.pinterior.dto.CommentUpdateRequestDto;
+import com.mycompany.pinterior.dto.CommentUpdateResponseDto;
 import com.mycompany.pinterior.entity.Comment;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,27 @@ public class CommentService {
         data.setCreatedAt(saved.getCreatedAt());
         data.setUserNickname(saved.getUserNickname());
         data.setUserProfileImg(saved.getUserProfileImg());
+
+        return data;
+    }
+    
+    @Transactional
+    public CommentUpdateResponseDto updateComment(Long commentId, Long userId, CommentUpdateRequestDto request) {
+        // 댓글 수정
+        Comment comment = new Comment();
+        comment.setCommentId(commentId);
+        comment.setUserId(userId);
+        comment.setCommentContent(request.getContent());
+
+        commentDao.update(comment);
+
+        // 수정된 댓글 조회
+        Comment updated = commentDao.selectById(commentId);
+
+        CommentUpdateResponseDto data = new CommentUpdateResponseDto();
+        data.setCommentId(updated.getCommentId());
+        data.setContent(updated.getCommentContent());
+        data.setUpdatedAt(updated.getUpdatedAt());
 
         return data;
     }

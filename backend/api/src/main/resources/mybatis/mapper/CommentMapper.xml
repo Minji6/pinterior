@@ -25,12 +25,24 @@
 		c.user_id AS userId,
 		c.pin_id AS pinId,
 		c.comment_content AS commentContent,
-		c.created_at AS createdAt,
+		c.created_at AS
+		createdAt,
+		c.updated_at AS updatedAt,
 		u.nickname AS userNickname,
 		u.profile_img AS userProfileImg
 		FROM comments c
 		JOIN users u ON c.user_id = u.user_id
-		WHERE c.comment_id = #{commentId}
+		WHERE c.comment_id
+		= #{commentId}
 	</select>
+
+	<!-- 댓글 수정 -->
+	<update id="update"
+		parameterType="com.mycompany.pinterior.entity.Comment">
+		UPDATE comments
+		SET comment_content = #{commentContent},
+		updated_at = SYSDATE
+		WHERE comment_id = #{commentId}
+	</update>
 
 </mapper>
