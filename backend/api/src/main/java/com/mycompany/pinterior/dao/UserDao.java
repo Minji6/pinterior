@@ -20,4 +20,14 @@ public interface UserDao {
     void updateProfileImage(@Param("userId") Long userId,
                             @Param("profileImgData") byte[] profileImgData,
                             @Param("profileImg") String profileImg);
+    
+    // 닉네임으로 유저 존재 여부 조회 (중복 검사)
+    Users findByNickname(@Param("nickname") String nickname);
+    
+    // userId로 유저 조회 (본인 확인)
+    Users findById(@Param("userId") Long userId);
+    
+    // 닉네임 업데이트
+    int updateNickname(@Param("userId") Long userId, @Param("nickname") String nickname);
+    
 }
