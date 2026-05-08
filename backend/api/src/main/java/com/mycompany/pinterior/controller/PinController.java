@@ -44,8 +44,12 @@ public class PinController {
 			@RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
 		Pin pin = new Pin();
-
-		pin.setUserId(request.getUserId());
+		
+		Long userId = (Long) SecurityContextHolder
+	            .getContext()
+	            .getAuthentication()
+	            .getPrincipal();
+		pin.setUserId(userId);
 		pin.setTitle(request.getTitle());
 		pin.setDescription(request.getDescription());
 		pin.setImageUrl(request.getImageUrl());
