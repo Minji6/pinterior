@@ -43,6 +43,7 @@
 		SET comment_content = #{commentContent},
 		updated_at = SYSDATE
 		WHERE comment_id = #{commentId}
+		AND user_id = #{userId}
 	</update>
 
 </mapper>
