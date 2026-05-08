@@ -57,4 +57,25 @@
 		WHERE user_id = #{userId}
 	</update>
 
+	<!-- 닉네임 유저 조회 (중복 검사) -->
+	<select id="findByNickname" resultMap="usersResultMap">
+		SELECT * FROM USERS WHERE
+		nickname = #{nickname}
+	</select>
+
+	<!-- userId로 유저 조회 (존재 확인) -->
+	<select id="findById"
+		resultMap="usersResultMap">
+		SELECT user_id, nickname FROM users WHERE user_id = #{userId}
+	</select>
+
+	<!-- 닉네임 업데이트 -->
+	<update id="updateNickname">
+		UPDATE USERS
+		SET nickname = #{nickname},
+		updated_at = CURRENT_TIMESTAMP
+		WHERE user_id = #{userId}
+	</update>
+
+
 </mapper>
