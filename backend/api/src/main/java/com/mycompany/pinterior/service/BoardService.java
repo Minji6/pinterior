@@ -1,5 +1,6 @@
 package com.mycompany.pinterior.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.entity.Board;
 import com.mycompany.pinterior.exception.ApiException;
 
-import io.jsonwebtoken.lang.Arrays;
 
 @Service
 public class BoardService {
