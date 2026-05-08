@@ -27,6 +27,7 @@
 		c.comment_content AS commentContent,
 		c.created_at AS
 		createdAt,
+		c.updated_at AS updatedAt,
 		u.nickname AS userNickname,
 		u.profile_img AS userProfileImg
 		FROM comments c
