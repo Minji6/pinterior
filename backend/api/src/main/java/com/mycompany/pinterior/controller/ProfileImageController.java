@@ -41,7 +41,7 @@ public class ProfileImageController {
     }
 
     // 프로필 이미지 서빙 (조회)
-    @GetMapping("/{userId}/image")
+    @GetMapping("/{userId}/image/view")
     public ResponseEntity<byte[]> serveProfileImage(@PathVariable("userId") Long userId) {
         Users user = userDao.findProfileImageByUserId(userId);
 
@@ -76,20 +76,4 @@ public class ProfileImageController {
         ProfileImageResponseDto data = profileImageService.deleteProfileImage(userId);
         return ResponseEntity.ok(ApiResponse.of(200, "프로필 이미지 삭제 성공", data));
     }
-    
-    // 프로필 이미지 삭제
-    @DeleteMapping("/{userId}/image/delete")
-    public ResponseEntity<ApiResponse<ProfileImageResponseDto>> deleteProfileImage(
-			@PathVariable("userId") Long userId,
-			HttpServletRequest request) {
-
-		// 본인 여부 확인
-		Long loginUserId = (Long) request.getAttribute("userId");
-		if (!loginUserId.equals(userId)) {
-			throw new ApiException(403, "본인 프로필만 수정할 수 있습니다.");
-		}
-		
-		ProfileImageResponseDto data = profileImageService.deleteProfileImage(userId);
-		return ResponseEntity.ok(ApiResponse.of(200, "프로필 이미지 삭제 성공", data));
-	}
 }

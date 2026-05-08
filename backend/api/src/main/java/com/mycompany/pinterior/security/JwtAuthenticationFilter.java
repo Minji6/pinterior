@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 이미지 서빙 GET 요청 토큰 없이 통과
-        if ("GET".equals(method) && path.matches("/api/users/\\d+/image")) {
+        if ("GET".equals(method) && path.matches("/api/users/\\d+/image/view")) {
             filterChain.doFilter(request, response);
             return;
         }
