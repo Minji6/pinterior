@@ -1,6 +1,8 @@
 package com.mycompany.pinterior.service;
 
 import com.mycompany.pinterior.dao.UserDao;
+import com.mycompany.pinterior.dto.BioUpdateRequestDto;
+import com.mycompany.pinterior.dto.BioUpdateResponseDto;
 import com.mycompany.pinterior.dto.LoginRequestDto;
 import com.mycompany.pinterior.dto.LoginResponseDto;
 import com.mycompany.pinterior.dto.NicknameUpdateRequestDto;
@@ -81,4 +83,12 @@ public class AuthService {
 		
 	}
 	
+	// 소개 수정
+	public BioUpdateResponseDto updateBio(Long loginUserId, Long targetUserId, BioUpdateRequestDto request) {
+		if (!loginUserId.equals(targetUserId)) {
+			throw new ApiException(403, "본인만 소개를 수정할 수 있습니다.");
+		}
+		userDao.updateBio(loginUserId, request.getBio());
+		return new BioUpdateResponseDto(request.getBio());
+	}
 }
