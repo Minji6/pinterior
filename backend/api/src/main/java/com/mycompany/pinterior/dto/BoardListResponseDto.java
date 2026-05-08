@@ -12,5 +12,6 @@ public class BoardListResponseDto {
 	private int pinCount;
 	private Date updatedAt;
 	private List<String> thumbnails;
+	private String thumbnailStr;
 	
 }

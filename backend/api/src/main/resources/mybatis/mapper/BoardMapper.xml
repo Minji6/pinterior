@@ -24,19 +24,33 @@
 	
 
 	<!-- 보드 목록 조회 -->
+	<!-- 썸네일용 이미지 3개 : 최근 저장순으로, 첫 3개를 로드 -->
 	<select id="selectBoardListByUserId" parameterType="Long" resultType="com.mycompany.pinterior.dto.BoardListResponseDto">
+		<![CDATA[
 		SELECT b.board_id,
-		b.board_name,
-		b.updated_at,
-		COUNT(sp.pin_id) AS pin_count
+		       b.board_name,
+		       b.updated_at,
+       	COUNT(sp.pin_id) AS pin_count,
+	       (
+	           SELECT LISTAGG(p.image_url, ',') WITHIN GROUP (ORDER BY p.pin_id)
+	           FROM (
+	               SELECT p2.image_url, p2.pin_id
+	               FROM saved_pin sp2
+	               JOIN pin p2 ON sp2.pin_id = p2.pin_id
+	               WHERE sp2.board_id = b.board_id
+	               ORDER BY sp2.saved_pin_id DESC
+	               FETCH FIRST 3 ROWS ONLY
+	           ) p
+	       ) AS thumbnail_str
 		FROM board b
 		LEFT JOIN saved_pin sp ON b.board_id = sp.board_id
 		WHERE b.user_id = #{userId}
 		GROUP BY b.board_id, b.board_name, b.updated_at
+		]]>
 	</select>
 	
-	<!-- 보드 목록 썸네일 조회 (핀 이미지 구현 후 수정) -->
-	<select id="selectThumbnailsByBoardId" parameterType="Long" resultType="com.mycompany.pinterior.dto.BoardItemResponseDto">
+	<!-- 보드 내 핀 목록 조회 -->
+	<select id="selectPinsByBoardId" parameterType="Long" resultType="com.mycompany.pinterior.dto.BoardItemResponseDto">
 	    SELECT p.image_url, p.title, sp.pin_id, p.link_url
 	    FROM saved_pin sp
 	    JOIN pin p ON sp.pin_id = p.pin_id
