@@ -3,6 +3,8 @@ package com.mycompany.pinterior.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,14 @@ public class SavedPinController {
 		return ResponseEntity.status(201)
 				.body(ApiResponse.of(201, "핀 저장 성공", data));
 		
+	}
+	@DeleteMapping("/{savedPinId}")
+	public ResponseEntity<ApiResponse<Void>> unsave(@PathVariable("savedPinId") Long savedPinId) {
+		Long userId = (Long) SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		savedPinService.unsave(savedPinId, userId);
+		return ResponseEntity.ok(ApiResponse.of(200, "저장 해제 성공", null));
 	}
 
 }
