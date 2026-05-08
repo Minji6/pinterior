@@ -17,4 +17,5 @@ public class Pin {
 	private Date createdAt;
 	private Date updatedAt;
 	private List<String> tags;
+	private Long boardId;
 }

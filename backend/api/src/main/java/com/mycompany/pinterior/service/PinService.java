@@ -58,11 +58,15 @@ public class PinService {
 
 		// 이미지 저장
 		if (image != null && !image.isEmpty()) {
-			String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-			Path savePath = Paths.get(uploadPath + fileName);
-			Files.createDirectories(savePath.getParent());
-			Files.write(savePath, image.getBytes());
-			pin.setImageUrl(uploadUrl + fileName);
+		    log.info("이미지 있음: {}", image.getOriginalFilename());
+		    String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+		    Path savePath = Paths.get(uploadPath + fileName);
+		    Files.createDirectories(savePath.getParent());
+		    Files.write(savePath, image.getBytes());
+		    pin.setImageUrl(uploadUrl + fileName);
+		    log.info("imageUrl: {}", pin.getImageUrl());
+		} else {
+		    log.info("이미지 없음");
 		}
 
 		// 핀 등록

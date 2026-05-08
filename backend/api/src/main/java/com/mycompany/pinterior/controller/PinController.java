@@ -50,6 +50,7 @@ public class PinController {
 	            .getAuthentication()
 	            .getPrincipal();
 		pin.setUserId(userId);
+		pin.setBoardId(request.getBoardId());
 		pin.setTitle(request.getTitle());
 		pin.setDescription(request.getDescription());
 		pin.setImageUrl(request.getImageUrl());
@@ -61,6 +62,7 @@ public class PinController {
 		PinCreateResponseDto data = new PinCreateResponseDto();
 		data.setPinId(pin.getPinId());
 		data.setUserId(pin.getUserId());
+		data.setBoardId(pin.getBoardId());
 		data.setImageUrl(pin.getImageUrl());
 		data.setTitle(pin.getTitle());
 		data.setDescription(pin.getDescription());
