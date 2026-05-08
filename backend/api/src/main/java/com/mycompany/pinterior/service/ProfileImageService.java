@@ -33,16 +33,28 @@ public class ProfileImageService {
 			throw new ApiException(500, "서버 에러가 발생했습니다.");
 		}
 
-		String mimeType = image.getContentType();
-		userDao.updateProfileImage(userId, imageBytes, mimeType);
-
-		String imageUrl = "/images/profile/" + userId;
+		String imageUrl = "/api/users/" + userId + "/image";
+		userDao.updateProfileImage(userId, imageBytes, imageUrl);
+		
 		return new ProfileImageResponseDto(imageUrl);
+	}
+	
+	// 프로필 이미지 삭제 (DELETE)
+	public ProfileImageResponseDto deleteProfileImage(Long userId) {
+		Users user = userDao.findProfileImageByUserId(userId);
+		if (user == null || (user.getProfileImgData() == null && user.getProfileImg() == null)) {
+			throw new ApiException(404, "등록된 프로필 이미지가 없습니다.");
+			
+		}
+		
+		userDao.updateProfileImage(userId, null, null);
+		
+		return new ProfileImageResponseDto(null);
 	}
 
 	// 파일 유효성 검사 — 실패 시 ApiException throw
 	private void validateImageFile(MultipartFile file) {
-		
+
 		// 파일 존재 여부 및 빈 파일 여부 체크
 		if (file == null || file.isEmpty()) {
 			throw new ApiException(400, "이미지 형식 오류 또는 용량 초과입니다.");
