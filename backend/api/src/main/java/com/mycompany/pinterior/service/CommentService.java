@@ -10,6 +10,7 @@ import com.mycompany.pinterior.dto.CommentCreateResponseDto;
 import com.mycompany.pinterior.dto.CommentUpdateRequestDto;
 import com.mycompany.pinterior.dto.CommentUpdateResponseDto;
 import com.mycompany.pinterior.entity.Comment;
+import com.mycompany.pinterior.exception.ApiException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,4 +69,14 @@ public class CommentService {
 
         return data;
     }
+    
+    // 댓글 삭제 
+    public void deleteComment(Long commentId, Long userId) {
+    	int result = commentDao.deleteById(commentId, userId);
+        if (result == 0) {
+            throw new ApiException(403, "삭제 권한이 없거나 존재하지 않는 댓글입니다.");
+        }
+    }
+    
+    
 }

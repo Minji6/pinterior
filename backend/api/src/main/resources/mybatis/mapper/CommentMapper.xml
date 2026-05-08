@@ -31,7 +31,8 @@
 		u.nickname AS userNickname,
 		u.profile_img AS userProfileImg
 		FROM comments c
-		JOIN users u ON c.user_id = u.user_id
+		JOIN users u ON
+		c.user_id = u.user_id
 		WHERE c.comment_id
 		= #{commentId}
 	</select>
@@ -44,5 +45,12 @@
 		updated_at = SYSDATE
 		WHERE comment_id = #{commentId}
 	</update>
+
+	<!-- 댓글 삭제 -->
+	<delete id="deleteById">
+		DELETE FROM comments
+		WHERE comment_id = #{commentId}
+		AND user_id = #{userId}
+	</delete>
 
 </mapper>

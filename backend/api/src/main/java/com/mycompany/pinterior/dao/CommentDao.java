@@ -1,6 +1,7 @@
 package com.mycompany.pinterior.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.mycompany.pinterior.entity.Comment;
 
@@ -15,4 +16,6 @@ public interface CommentDao {
 	// 댓글 수정
 	int update(Comment comment);
 	
+	// 댓글 삭제
+	int deleteById(@Param("commentId") Long commentId,@Param("userId") Long userId);
 }

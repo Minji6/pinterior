@@ -57,4 +57,18 @@ public class CommentController {
 	    return ResponseEntity.ok(ApiResponse.of(200, "댓글 수정 성공", data));
 	}
 	
+	@DeleteMapping("/comments/{commentId}")
+	public ResponseEntity<ApiResponse<Void>> delete(
+	        @PathVariable("commentId") Long commentId) {
+
+	    Long userId = (Long) SecurityContextHolder
+	            .getContext()
+	            .getAuthentication()
+	            .getPrincipal();
+
+	    commentService.deleteComment(commentId, userId);
+
+	    return ResponseEntity.ok(ApiResponse.of(200, "댓글 삭제 성공", null));
+	}
+	
 }
