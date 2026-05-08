@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,8 @@ import com.mycompany.pinterior.dto.BoardCreateRequestDto;
 import com.mycompany.pinterior.dto.BoardCreateResponseDto;
 import com.mycompany.pinterior.dto.BoardItemResponseDto;
 import com.mycompany.pinterior.dto.BoardListResponseDto;
+import com.mycompany.pinterior.dto.BoardUpdateRequestDto;
+import com.mycompany.pinterior.dto.BoardUpdateResponseDto;
 import com.mycompany.pinterior.entity.Board;
 import com.mycompany.pinterior.security.JwtTokenProvider;
 import com.mycompany.pinterior.service.BoardService;
@@ -81,4 +84,21 @@ public class BoardController {
 
 		return ResponseEntity.ok(ApiResponse.of(200, "보드 내 핀 목록 조회 성공", data));
 	}
+	
+	// 보드 수정
+	@PutMapping("/{boardId}")
+	public ResponseEntity<ApiResponse<BoardUpdateResponseDto>> updateBoard (@PathVariable("boardId") Long boardId,
+			@RequestBody @Valid BoardUpdateRequestDto request,
+			@RequestHeader("Authorization") String token) {
+		
+		// 생성 요청한 유저 확인		
+		Long userId = jwtTokenProvider.getUserId(token.substring(7));
+		
+		// 응답 생성
+		BoardUpdateResponseDto response = boardService.modifyBoard(boardId, userId, request);
+
+		return ResponseEntity.ok(ApiResponse.of(200, "보드 수정 성공", response));
+		
+	}
+	
 }
