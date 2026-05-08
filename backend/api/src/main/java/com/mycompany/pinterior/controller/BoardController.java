@@ -21,6 +21,7 @@ import com.mycompany.pinterior.entity.Board;
 import com.mycompany.pinterior.security.JwtTokenProvider;
 import com.mycompany.pinterior.service.BoardService;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -35,7 +36,7 @@ public class BoardController {
 
 	// 보드 생성하기
 	@PostMapping("")
-	public ResponseEntity<ApiResponse<BoardCreateResponseDto>> create(@RequestBody BoardCreateRequestDto request, 
+	public ResponseEntity<ApiResponse<BoardCreateResponseDto>> create(@RequestBody @Valid BoardCreateRequestDto request, 
 			@RequestHeader("Authorization") String token) {
 		Board board = new Board();
 		
