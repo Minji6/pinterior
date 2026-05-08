@@ -1,6 +1,8 @@
 package com.mycompany.pinterior.controller;
 
 import com.mycompany.pinterior.dto.ApiResponse;
+import com.mycompany.pinterior.dto.BioUpdateRequestDto;
+import com.mycompany.pinterior.dto.BioUpdateResponseDto;
 import com.mycompany.pinterior.dto.LoginRequestDto;
 import com.mycompany.pinterior.dto.LoginResponseDto;
 import com.mycompany.pinterior.dto.NicknameUpdateRequestDto;
@@ -11,7 +13,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,4 +50,19 @@ public class AuthController {
 		NicknameUpdateResponseDto data = authService.updateNickname(loginUserId, userId, request);
 		return ResponseEntity.ok(ApiResponse.of(200, "닉네임 수정 성공", data));
 	}
+    
+    @PutMapping("/{userId}/bio")
+    public Map<String, Object> updateBio(
+    		@PathVariable("userId") Long userId,
+    		@RequestBody @Valid BioUpdateRequestDto request) {
+    	
+    	Long loginUserId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	BioUpdateResponseDto data = authService.updateBio(loginUserId, userId, request);
+    	
+    	Map<String, Object> response = new LinkedHashMap<>();
+    	response.put("status", 200);
+    	response.put("message", "소개 수정 성공");
+    	response.put("data", data);
+    	return response;
+    }
 }
