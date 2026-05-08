@@ -76,4 +76,22 @@ public class BoardService {
 		
 		return boardItems;
 	}
+	
+	// 보드 삭제
+	public void deleteBoard (Long boardId, Long userId) {
+		// BoardId로 보드 조회
+		Board dbBoard = boardDao.selectByBoardId(boardId);
+		
+		// 보드 존재 여부 확인 (존재하지 않을 경우 404)
+		if (dbBoard == null) {
+			throw new ApiException(404, "존재하지 않는 보드입니다.");
+		}
+		
+		// 보드 소유자 여부 확인 (로그인 사용자와 수정하려는 보드 작성자가 다를 경우 403)
+		if (!dbBoard.getUserId().equals(userId)) {
+			throw new ApiException(403, "해당 보드를 수정할 권한이 없습니다.");
+		}
+		
+		boardDao.deleteBoard(boardId);
+	}
 }
