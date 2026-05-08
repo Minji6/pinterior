@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mycompany.pinterior.dao.SavedPinDao">
+
+    <insert id="insert" parameterType="com.mycompany.pinterior.entity.SavedPin">
+        <selectKey keyProperty="savedPinId" resultType="long" order="BEFORE">
+            SELECT saved_pin_seq.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO saved_pin (saved_pin_id, user_id, pin_id, board_id, created_at)
+        VALUES (#{savedPinId}, #{userId}, #{pinId}, #{boardId}, SYSDATE)
+    </insert>
+
+    <select id="countDuplicate" resultType="int">
+        SELECT COUNT(*)
+        FROM saved_pin
+        WHERE user_id = #{userId}
+        AND pin_id = #{pinId}
+        <choose>
+            <when test="boardId == null">
+                AND board_id IS NULL
+            </when>
+            <otherwise>
+                AND board_id = #{boardId}
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 보드 작성자 조회 -->
+    <select id="selectBoardOwnerByBoardId" resultType="long">
+        SELECT user_id
+        FROM board
+        WHERE board_id = #{boardId}
+    </select>
+
+</mapper>
