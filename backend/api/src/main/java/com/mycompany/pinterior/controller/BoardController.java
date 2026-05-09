@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,6 +99,20 @@ public class BoardController {
 		BoardUpdateResponseDto response = boardService.modifyBoard(boardId, userId, request);
 
 		return ResponseEntity.ok(ApiResponse.of(200, "보드 수정 성공", response));
+		
+	}
+	
+	// 보드 삭제
+	@DeleteMapping("/{boardId}")
+	public ResponseEntity<ApiResponse<Void>> deleteBoard (@PathVariable("boardId") Long boardId,
+			@RequestHeader("Authorization") String token) {
+		
+		// 생성 요청한 유저 확인		
+		Long userId = jwtTokenProvider.getUserId(token.substring(7));
+		
+		boardService.deleteBoard(boardId, userId);
+		
+		return ResponseEntity.status(201).body(ApiResponse.of(201, "보드 생성 성공", response));
 		
 	}
 	
