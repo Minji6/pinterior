@@ -64,7 +64,7 @@ public class BoardController {
 		response.setCreatedAt(dbBoard.getCreatedAt());
 		response.setUpdatedAt(dbBoard.getUpdatedAt());
 
-		return ResponseEntity.ok(ApiResponse.of(201, "보드 목록 조회 성공", response));
+		return ResponseEntity.ok(ApiResponse.of(201, "보드 생성 성공", response));
 	}
 
 	// 유저의 보드 목록 조회
@@ -112,7 +112,7 @@ public class BoardController {
 		
 		boardService.deleteBoard(boardId, userId);
 		
-		return ResponseEntity.status(201).body(ApiResponse.of(201, "보드 생성 성공", response));
+		return ResponseEntity.ok(ApiResponse.of(200, "보드 삭제 성공", null));
 		
 	}
 	
