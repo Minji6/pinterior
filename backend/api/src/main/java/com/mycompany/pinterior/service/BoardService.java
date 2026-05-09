@@ -10,6 +10,8 @@ import com.mycompany.pinterior.dao.BoardDao;
 import com.mycompany.pinterior.dao.UserDao;
 import com.mycompany.pinterior.dto.BoardItemResponseDto;
 import com.mycompany.pinterior.dto.BoardListResponseDto;
+import com.mycompany.pinterior.dto.BoardUpdateRequestDto;
+import com.mycompany.pinterior.dto.BoardUpdateResponseDto;
 import com.mycompany.pinterior.entity.Board;
 import com.mycompany.pinterior.exception.ApiException;
 
@@ -75,5 +77,38 @@ public class BoardService {
 		List<BoardItemResponseDto> boardItems = boardDao.selectPinsByBoardId(boardId);
 		
 		return boardItems;
+	}
+	
+	// 보드 수정
+	public BoardUpdateResponseDto modifyBoard (Long boardId, Long userId, BoardUpdateRequestDto request) {
+		// BoardId로 보드 조회
+		Board dbBoard = boardDao.selectByBoardId(boardId);
+		
+		// 보드 존재 여부 확인 (존재하지 않을 경우 404)
+		if (dbBoard == null) {
+			throw new ApiException(404, "존재하지 않는 보드입니다.");
+		}
+		
+		// 보드 소유자 여부 확인 (로그인 사용자와 수정하려는 보드 작성자가 다를 경우 403)
+		if (!dbBoard.getUserId().equals(userId)) {
+			throw new ApiException(403, "해당 보드를 수정할 권한이 없습니다.");
+		}
+		
+		// 수정 데이터로 세팅
+		dbBoard.setBoardName(request.getBoardName());		
+		dbBoard.setBoardInfo(request.getBoardInfo());
+
+		// 보드 업데이트
+		boardDao.updateBoard(dbBoard);
+
+		// 응답 생성
+		BoardUpdateResponseDto response = new BoardUpdateResponseDto();
+		Board updatedBoard = boardDao.selectByBoardId(boardId);
+		response.setBoardId(updatedBoard.getBoardId());
+		response.setBoardName(updatedBoard.getBoardName());
+		response.setUpdatedAt(updatedBoard.getUpdatedAt());
+		
+		return response;
+				
 	}
 }
