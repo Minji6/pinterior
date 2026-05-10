@@ -1,13 +1,10 @@
 package com.mycompany.pinterior.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
 public class BioUpdateResponseDto {
-	private String bio;
-
-	public BioUpdateResponseDto(String bio) {
-		this.bio = bio;
-	}
-
-	public String getBio() {
-		return bio;
-	}
+    private String bio;
 }
