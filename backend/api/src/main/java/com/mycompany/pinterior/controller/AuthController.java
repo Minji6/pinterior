@@ -29,18 +29,21 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
         LoginResponseDto data = authService.login(request);
         return ResponseEntity.ok(ApiResponse.of(200, "로그인 성공", data));
     }
 
+    // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
     	log.info("로그아웃 성공");
         return ResponseEntity.ok(ApiResponse.of(200, "로그아웃 성공", null));
     }
     
+    // 닉네임 등록, 수정
     @PutMapping("/{userId}/nickname")
     public ResponseEntity<ApiResponse<NicknameUpdateResponseDto>> updateNickname(
 			@PathVariable("userId") Long userId,
@@ -51,18 +54,16 @@ public class AuthController {
 		return ResponseEntity.ok(ApiResponse.of(200, "닉네임 수정 성공", data));
 	}
     
+    // 소개 등록, 수정
     @PutMapping("/{userId}/bio")
-    public Map<String, Object> updateBio(
+    public ResponseEntity<ApiResponse<BioUpdateResponseDto>> updateBio(
     		@PathVariable("userId") Long userId,
     		@RequestBody @Valid BioUpdateRequestDto request) {
     	
     	Long loginUserId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     	BioUpdateResponseDto data = authService.updateBio(loginUserId, userId, request);
     	
-    	Map<String, Object> response = new LinkedHashMap<>();
-    	response.put("status", 200);
-    	response.put("message", "소개 수정 성공");
-    	response.put("data", data);
-    	return response;
+    	
+    	return ResponseEntity.ok(ApiResponse.of(200, "소개 수정 성공", data));
     }
 }
