@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function FeedPage() {
+export default function BoardsPage() {
   const router = useRouter();
 
   useEffect(() => {
@@ -14,8 +14,8 @@ export default function FeedPage() {
   return (
     <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
       <div className="text-center">
-        <h2 className="fw-bold">메인 피드</h2>
-        <p className="text-muted mt-2">핀 목록이 여기에 표시될 예정입니다.</p>
+        <h2 className="fw-bold">보드 목록</h2>
+        <p className="text-muted mt-2">보드 목록이 여기에 표시될 예정입니다.</p>
       </div>
     </div>
   );
