@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -33,8 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 이미지 서빙 GET 요청 토큰 없이 통과
+        // 프로필 이미지 서빙 GET 요청 토큰 없이 통과
         if ("GET".equals(method) && path.matches("/api/users/\\d+/image/view")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 핀 이미지 서빙 GET 요청 토큰 없이 통과
+        if ("GET".equals(method) && path.startsWith("/images/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -60,7 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // Authorization: Bearer {token} 헤더에서 토큰 추출
     private String resolveToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
         if (bearer != null && bearer.startsWith("Bearer ")) {
