@@ -177,14 +177,14 @@
 	               p.image_url,
 	               p.title,
 	               p.created_at,
-	               LISTAGG(t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags,
-	               COUNT(pl.pin_id) AS like_count
+	               LISTAGG(DISTINCT t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags,
+	               COUNT(DISTINCT pl.user_id) AS like_count
 	        FROM pin p
 	        LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
 	        LEFT JOIN tag t ON pt.tag_id = t.tag_id
 	        LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
 	        GROUP BY p.pin_id, p.image_url, p.title, p.created_at
-	        HAVING COUNT(pl.pin_id) > 0
+	        HAVING COUNT(DISTINCT pl.user_id) > 0
 	    )
 	    <where>
 	        <if test="cursorId != null">
