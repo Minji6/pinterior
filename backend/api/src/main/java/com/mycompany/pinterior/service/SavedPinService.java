@@ -94,7 +94,7 @@ public class SavedPinService {
 			savedPinDao.deleteSavedPin(savedPinId);
 		} else {
 			// 기본 저장함에 없음 → UPDATE
-			savedPinDao.updateBoardIdToNull(savedPinId);
+			savedPinDao.updateBoardIdToNull(savedPinId, userId);
 		}
 
 	}
