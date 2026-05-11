@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,18 +36,13 @@ public class BoardController {
 	@Autowired
 	private BoardService boardService;
 
-	@Autowired
-	private JwtTokenProvider jwtTokenProvider;
-
 	// 보드 생성하기
 	@PostMapping("")
-	public ResponseEntity<ApiResponse<BoardCreateResponseDto>> create(@RequestBody @Valid BoardCreateRequestDto request,
-			@RequestHeader("Authorization") String token) {
+	public ResponseEntity<ApiResponse<BoardCreateResponseDto>> create(
+			@RequestBody @Valid BoardCreateRequestDto request) {
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
 		Board board = new Board();
-
-		// 생성 요청한 유저 확인
-		Long userId = jwtTokenProvider.getUserId(token.substring(7));
-
 		// 보드 생성 요청 확인
 		board.setBoardName(request.getBoardName());
 		board.setBoardInfo(request.getBoardInfo());
@@ -66,13 +62,12 @@ public class BoardController {
 
 		return ResponseEntity.ok(ApiResponse.of(201, "보드 생성 성공", response));
 	}
-
+	
 	// 유저의 보드 목록 조회
 	@GetMapping("/user/{userId}")
 	public ResponseEntity<ApiResponse<List<BoardListResponseDto>>> readList(@PathVariable("userId") Long userId) {
 		// 서비스를 이용해서 유저의 보드 목록 가져오기
 		List<BoardListResponseDto> data = boardService.getBoardList(userId);
-
 		return ResponseEntity.ok(ApiResponse.of(200, "보드 목록 조회 성공", data));
 	}
 
@@ -82,33 +77,29 @@ public class BoardController {
 			@PathVariable("boardId") Long boardId) {
 		// 서비스를 이용해서 보드의 핀 목록 가져오기
 		List<BoardItemResponseDto> data = boardService.getBoardItem(boardId);
-
 		return ResponseEntity.ok(ApiResponse.of(200, "보드 내 핀 목록 조회 성공", data));
 	}
-	
+
 	// 보드 수정
 	@PutMapping("/{boardId}")
-	public ResponseEntity<ApiResponse<BoardUpdateResponseDto>> updateBoard (@PathVariable("boardId") Long boardId,
-			@RequestBody @Valid BoardUpdateRequestDto request,
-			@RequestHeader("Authorization") String token) {
-		
-		// 생성 요청한 유저 확인		
-		Long userId = jwtTokenProvider.getUserId(token.substring(7));
-		
-		// 응답 생성
+	public ResponseEntity<ApiResponse<BoardUpdateResponseDto>> updateBoard(@PathVariable("boardId") Long boardId,
+			@RequestBody @Valid BoardUpdateRequestDto request) {
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
 		BoardUpdateResponseDto response = boardService.modifyBoard(boardId, userId, request);
 
 		return ResponseEntity.ok(ApiResponse.of(200, "보드 수정 성공", response));
-		
+
 	}
-	
+
 	// 보드 삭제
 	@DeleteMapping("/{boardId}")
 	public ResponseEntity<ApiResponse<Void>> deleteBoard (@PathVariable("boardId") Long boardId,
 			@RequestHeader("Authorization") String token) {
 		
 		// 생성 요청한 유저 확인		
-		Long userId = jwtTokenProvider.getUserId(token.substring(7));
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
 		
 		boardService.deleteBoard(boardId, userId);
 		

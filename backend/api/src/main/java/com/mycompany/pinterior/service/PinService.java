@@ -1,6 +1,11 @@
 package com.mycompany.pinterior.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,33 +14,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.mycompany.pinterior.entity.Tag;
 import com.mycompany.pinterior.dao.PinDao;
+import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.dao.PinTagDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
 import com.mycompany.pinterior.dao.TagDao;
-import com.mycompany.pinterior.dao.PinLikeDao;
-import com.mycompany.pinterior.entity.Pin;
-import com.mycompany.pinterior.entity.SavedPin;
-import com.mycompany.pinterior.dto.PinListResponseDto;
-import com.mycompany.pinterior.dto.PinSummaryDto;
+import com.mycompany.pinterior.dao.UserDao;
 import com.mycompany.pinterior.dto.AuthorDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
-
+import com.mycompany.pinterior.dto.PinDownloadResponseDto;
+import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.dto.PinUpdateRequestDto;
 import com.mycompany.pinterior.dto.PinUpdateResponseDto;
-
-import com.mycompany.pinterior.dto.PinDownloadResponseDto;
+import com.mycompany.pinterior.dto.SavedPinListResponseDto;
+import com.mycompany.pinterior.entity.Pin;
+import com.mycompany.pinterior.entity.SavedPin;
+import com.mycompany.pinterior.entity.Tag;
 import com.mycompany.pinterior.exception.ApiException;
 import com.mycompany.pinterior.util.CursorUtil;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -47,10 +46,12 @@ public class PinService {
 	@Autowired
 	private PinTagDao pinTagDao;
 	@Autowired
-
 	private SavedPinDao savedPinDao;
-
+	@Autowired
 	private PinLikeDao pinLikeDao;
+
+	@Autowired
+	private UserDao userDao;
 
 	@Value("${file.upload.path}")
 	private String uploadPath;
@@ -249,4 +250,27 @@ public class PinService {
 		pinDao.deletePin(pinId);
 
 	}
+
+	
+	// 저장된 핀 조회
+	public List<SavedPinListResponseDto> getSavedPinList(Long userId, Long loginUserId) {
+		
+
+		if (!loginUserId.equals(userId)) {
+			throw new ApiException(403, "해당 유저의 저장 핀을 조회할 권한이 없습니다.");
+		}
+	
+		
+		// 유저 존재 여부 확인 (존재하지 않을 경우 404)
+		if (userDao.findById(userId) == null) {
+			throw new ApiException(404, "존재하지 않는 유저입니다.");
+		}
+		
+		// 조회
+		List<SavedPinListResponseDto> result = savedPinDao.selectSavedPinsByUserId(userId);
+
+		return result;
+	}
 }
+
+

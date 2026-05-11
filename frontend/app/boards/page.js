@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+
 
 // ─── 더미 데이터 ─────────────────────────────────────────────
 const DUMMY_BOARDS = [
@@ -56,11 +56,13 @@ function BoardCard({ board }) {
 }
 
 // ─── 만들기 카드 ─────────────────────────────────────────────
-function CreateCard() {
+function CreateCard({ onOpen }) {
   return (
     <div style={{ width: 236, cursor: "pointer" }}>
       <div style={{ height: 160, borderRadius: 16, backgroundColor: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span className="btn btn-light btn-sm rounded-pill px-3 fw-semibold" style={{ fontSize: 14 }}>만들기</span>
+        <span className="btn btn-light btn-sm rounded-pill px-3 fw-semibold" style={{ fontSize: 14 }} onClick={onOpen}>
+          만들기
+        </span>
       </div>
     </div>
   );
@@ -69,6 +71,7 @@ function CreateCard() {
 // ─── 메인 ───────────────────────────────────────────────────
 export default function BoardListContent() {
   const [activeTab, setActiveTab] = useState("board");
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="px-4 py-4" style={{ fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -109,7 +112,9 @@ export default function BoardListContent() {
         <>
           {/* 만들기 버튼 */}
           <div className="d-flex justify-content-end mb-3">
-            <button className="btn btn-danger rounded-pill px-4 fw-bold" style={{ fontSize: 15 }}>만들기</button>
+            <button className="btn btn-danger rounded-pill px-4 fw-bold" style={{ fontSize: 15 }} onClick={() => setShowModal(true)}>
+              만들기
+            </button>
           </div>
 
           {/* 보드 그리드 */}
@@ -117,9 +122,39 @@ export default function BoardListContent() {
             {DUMMY_BOARDS.map((board) => (
               <BoardCard key={board.boardId} board={board} />
             ))}
-            <CreateCard />
+            <CreateCard onOpen={setShowModal} />
           </div>
         </>
+      )}
+
+      {/* 모달 */}
+      {showModal && (
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content rounded-4 p-3">
+
+              <div className="modal-header border-0">
+                <h5 className="modal-title fw-bold">보드 만들기</h5>
+                <button className="btn-close" onClick={() => setShowModal(false)} />
+              </div>
+
+              <div className="modal-body">
+                <label className="form-label fw-semibold">보드 이름 *</label>
+                <input className="form-control mb-3" placeholder="보드 이름을 입력하세요" maxLength={50} />
+                <label className="form-label fw-semibold">설명 (선택)</label>
+                <input className="form-control" placeholder="보드 설명을 입력하세요" />
+              </div>
+
+              <div className="modal-footer border-0">
+                <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setShowModal(false)}>
+                  취소
+                </button>
+                <button className="btn btn-dark rounded-pill px-4">생성</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
