@@ -20,5 +20,7 @@ public interface SavedPinDao {
 	
 	int deleteSavedPin(@Param("savedPinId") Long savedPinId);
 	
+	int updateBoardIdToNull(@Param("savedPinId") Long savedPinId);
+	
 
 }

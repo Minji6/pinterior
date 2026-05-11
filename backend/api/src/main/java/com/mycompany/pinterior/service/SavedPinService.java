@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
+import com.mycompany.pinterior.dto.SavedPinBoardRemoveResponseDto;
 import com.mycompany.pinterior.dto.SavedPinCreateRequestDto;
 import com.mycompany.pinterior.dto.SavedPinResponseDto;
 import com.mycompany.pinterior.entity.SavedPin;
@@ -60,7 +61,7 @@ public class SavedPinService {
 		response.setCreatedAt(java.time.LocalDateTime.now());
 
 		return response;
-		
+
 	}
 
 	public void unsave(Long savedPinId, Long userId) {
@@ -75,4 +76,23 @@ public class SavedPinService {
 
 		savedPinDao.deleteSavedPin(savedPinId);
 	}
+
+	public SavedPinBoardRemoveResponseDto removeBoardFromSavedPin(Long savedPinId, Long userId) {
+		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
+		if (ownerId == null) {
+			throw new ApiException(404, " 존재하지 않는 저장입니다.");
+		}
+
+		if (!ownerId.equals(userId)) {
+			throw new ApiException(403, "본인이 저장한 핀만 보드에서 제거할 수 있습니다.");
+		}
+
+		savedPinDao.updateBoardIdToNull(savedPinId);
+
+		SavedPinBoardRemoveResponseDto response = new SavedPinBoardRemoveResponseDto();
+		response.setSavedPinId(savedPinId);
+		response.setBoardId(null);
+		return response;
+	}
+
 }

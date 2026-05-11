@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.pinterior.dto.ApiResponse;
+import com.mycompany.pinterior.dto.SavedPinBoardRemoveResponseDto;
 import com.mycompany.pinterior.dto.SavedPinCreateRequestDto;
 import com.mycompany.pinterior.dto.SavedPinResponseDto;
 import com.mycompany.pinterior.service.SavedPinService;
@@ -25,21 +26,25 @@ public class SavedPinController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<SavedPinResponseDto>> save(@Valid @RequestBody SavedPinCreateRequestDto request) {
-		Long userId = (Long) SecurityContextHolder.getContext()
-				.getAuthentication()
-				.getPrincipal();
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		SavedPinResponseDto data = savedPinService.save(userId, request);
-		return ResponseEntity.status(201)
-				.body(ApiResponse.of(201, "핀 저장 성공", data));
-		
+		return ResponseEntity.status(201).body(ApiResponse.of(201, "핀 저장 성공", data));
+
 	}
+
 	@DeleteMapping("/{savedPinId}")
 	public ResponseEntity<ApiResponse<Void>> unsave(@PathVariable("savedPinId") Long savedPinId) {
-		Long userId = (Long) SecurityContextHolder.getContext()
-				.getAuthentication()
-				.getPrincipal();
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		savedPinService.unsave(savedPinId, userId);
 		return ResponseEntity.ok(ApiResponse.of(200, "저장 해제 성공", null));
+	}
+
+	@DeleteMapping("/{savedPinId}/board")
+	public ResponseEntity<ApiResponse<SavedPinBoardRemoveResponseDto>> removeBoardFromSavedPin(
+			@PathVariable("savedPinId") Long savedPinId) {
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		SavedPinBoardRemoveResponseDto data = savedPinService.removeBoardFromSavedPin(savedPinId, userId);
+		return ResponseEntity.ok(ApiResponse.of(200, "보드에서 제거 성공", data));
 	}
 
 }

@@ -46,5 +46,11 @@
 		DELETE FROM saved_pin
 		WHERE saved_pin_id = #{savedPinId}
 	</delete>
+	
+	<update id="updateBoardIdToNull">
+		UPDATE saved_pin
+		SET board_id=NULL
+		WHERE saved_pin_id = #{savedPinId}
+	</update>
 
 </mapper>
