@@ -30,4 +30,7 @@ public interface UserDao {
     // 닉네임 업데이트
     int updateNickname(@Param("userId") Long userId, @Param("nickname") String nickname);
     
+    // 소개 업데이트
+    void updateBio(@Param("userId") Long userId, @Param("bio") String bio);
+    
 }
