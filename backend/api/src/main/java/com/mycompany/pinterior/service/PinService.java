@@ -283,7 +283,10 @@ public class PinService {
 	    }
 
 	    // 좋아요 순 핀 조회 (커서 페이징)
-	    Long likedCursorId = CursorUtil.decode(cursor);
+	    Long likedCursorId = null;
+	    if (cursor != null && !"RANDOM".equals(cursor)) {
+	        likedCursorId = CursorUtil.decode(cursor);
+	    }
 	    List<PinSearchResponseDto> topLikedPins = pinDao.selectTopLikedPins(likedCursorId, size + 1);
 
 	    boolean likedHasNext = topLikedPins.size() > size;
