@@ -86,12 +86,14 @@ public class PinController {
 			@RequestParam(value = "size", defaultValue = "20") int size) {
 
 		if (tag == null || tag.isBlank()) {
-			return ResponseEntity.badRequest().body(ApiResponse.of(400, "검색어를 입력해주세요.", null));
+			return ResponseEntity.badRequest()
+					.body(ApiResponse.of(400, "검색어를 입력해주세요.", null));
 		}
 
 		PinSearchListResponseDto data = pinService.searchPins(tag.trim(), cursor, size);
 
-		if (data.getPins().isEmpty()) {
+		// 검색 결과가 없을 때 -> 안내 메세지
+		if (data.isRecommended()) {
 			String message = tag.trim() + "과(와) 관련하여 저장된 핀을 찾을 수 없습니다.";
 			return ResponseEntity.ok(ApiResponse.of(200, message, data));
 		}
