@@ -12,7 +12,7 @@
     </select>
 
     <insert id="insert" parameterType="com.mycompany.pinterior.entity.Tag">
-        <selectKey keyProperty="tagId" resultType="int" order="BEFORE">
+        <selectKey keyProperty="tagId" resultType="long" order="BEFORE">
             SELECT tag_seq.NEXTVAL FROM DUAL
         </selectKey>
         INSERT INTO tag (tag_id, tag_name)

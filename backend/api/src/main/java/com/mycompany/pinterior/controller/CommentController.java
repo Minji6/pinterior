@@ -65,7 +65,7 @@ public class CommentController {
 	            .getContext()
 	            .getAuthentication()
 	            .getPrincipal();
-
+	    
 	    commentService.deleteComment(commentId, userId);
 
 	    return ResponseEntity.ok(ApiResponse.of(200, "댓글 삭제 성공", null));

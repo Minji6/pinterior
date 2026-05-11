@@ -10,6 +10,7 @@ import lombok.Data;
 public class Pin {
 	private Long pinId;
 	private Long userId;
+	private Long boardId;
 	private String title;
 	private String description;
 	private String imageUrl;

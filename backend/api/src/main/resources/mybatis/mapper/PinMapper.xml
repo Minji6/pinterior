@@ -10,11 +10,12 @@
 			order="BEFORE">
 			SELECT pin_seq.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO pin (pin_id, user_id, title, description, image_url,
+		INSERT INTO pin (pin_id, user_id, title, description,
+		image_url,
 		link_url, created_at)
 		VALUES (#{pinId}, #{userId}, #{title},
-		#{description}, #{imageUrl},
-		#{linkUrl}, SYSDATE)
+		#{description},
+		#{imageUrl}, #{linkUrl}, SYSDATE)
 	</insert>
 
 	<select id="selectById" parameterType="long"
@@ -42,13 +43,13 @@
 	<select id="selectList"
 		resultType="com.mycompany.pinterior.dto.PinSummaryDto">
 		SELECT
-			p.pin_id,
-			p.image_url,
-			p.title,
-			(SELECT board_id FROM saved_pin sp
-			WHERE sp.pin_id = p.pin_id AND ROWNUM = 1)
-			AS board_id,
-			p.created_at
+		p.pin_id,
+		p.image_url,
+		p.title,
+		(SELECT board_id FROM saved_pin sp
+		WHERE sp.pin_id = p.pin_id AND ROWNUM = 1)
+		AS board_id,
+		p.created_at
 		FROM pin p
 		WHERE 1=1
 		<if test="cursorId != null">
@@ -60,16 +61,19 @@
 
 	<select id="selectDetail"
 		resultType="com.mycompany.pinterior.dto.PinDetailResponseDto">
-		SELECT 
-		p.pin_id, 
+		SELECT
+		p.pin_id,
 		p.image_url,
 		p.title,
 		p.description,
 		p.link_url,
-		(SELECT board_id FROM saved_pin sp WHERE sp.pin_id = p.pin_id AND ROWNUM = 1) AS board_id,
-        p.created_at
-    FROM pin p
-    WHERE p.pin_id = #{pinId}
+		(SELECT board_id FROM saved_pin sp
+		WHERE sp.pin_id =
+		p.pin_id AND ROWNUM = 1) AS board_id,
+		p.created_at
+		FROM pin p
+		WHERE
+		p.pin_id = #{pinId}
 	</select>
 
 	<select id="selectAuthorByPinId"

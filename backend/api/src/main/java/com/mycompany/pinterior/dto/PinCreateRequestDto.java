@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 
 public class PinCreateRequestDto {
-	private Long userId;
+	private Long boardId;
 	private String title;
     private String description;
     private String imageUrl;
