@@ -18,6 +18,8 @@ import com.mycompany.pinterior.entity.Pin;
 
 
 import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchResponseDto;
 import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.dto.AuthorDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
@@ -218,7 +220,34 @@ public class PinService {
 		    // 삭제
 		    pinDao.deletePin(pinId);
 		   
-		}
 	}
+	
+	// 핀 태그 검색
+	public PinSearchListResponseDto searchPins(String keyword, String cursor, int size) {
+		Long cursorId = CursorUtil.decode(cursor);
+
+		// size + 1로 조회해서 다음 페이지 존재 여부 체크
+		List<PinSearchResponseDto> pins = pinDao.searchByKeyword(keyword, cursorId, size + 1);
+
+		boolean hasNext = pins.size() > size;
+		if (hasNext) {
+			pins = pins.subList(0, size);
+		}
+
+		// 각 핀에 태그 목록 주입
+		for (PinSearchResponseDto pin : pins) {
+			List<String> tags = pinDao.selectTagsByPinId(pin.getPinId());
+			pin.setTags(tags);
+		}
+		
+		// 다음 페이지 커서 생성 (마지막 핀 ID 기준)
+		String nextCursor = null;
+		if (hasNext && !pins.isEmpty()) {
+			nextCursor = CursorUtil.encode(pins.get(pins.size() -1).getPinId());
+		}
+		
+		return new PinSearchListResponseDto(pins, nextCursor, hasNext);
+	}
+}
 
 
