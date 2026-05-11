@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,7 @@ import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.PinTagDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
 import com.mycompany.pinterior.dao.TagDao;
+import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.entity.SavedPin;
 import com.mycompany.pinterior.dto.PinListResponseDto;
@@ -45,7 +47,10 @@ public class PinService {
 	@Autowired
 	private PinTagDao pinTagDao;
 	@Autowired
+
 	private SavedPinDao savedPinDao;
+
+	private PinLikeDao pinLikeDao;
 
 	@Value("${file.upload.path}")
 	private String uploadPath;
@@ -194,9 +199,16 @@ public class PinService {
 		List<String> tags = pinDao.selectTagsByPinId(pinId);
 		detail.setTags(tags);
 
-		// 임시 값
-		detail.setLikeCount(0);
-		detail.setLiked(false);
+		// 좋아요 수, 좋아요 여부
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		int likeCount = pinLikeDao.countByPinId(pinId);
+		boolean isLiked = pinLikeDao.countByUserIdAndPinId(userId, pinId) > 0;
+
+		detail.setLikeCount(likeCount);
+		detail.setLiked(isLiked);
+
+		// 댓글 허용 여부는 추후 구현 예정
 		detail.setCommentEnabled(1);
 
 		return detail;
@@ -224,10 +236,15 @@ public class PinService {
 		if (!authorId.equals(userId)) {
 			throw new ApiException(403, "본인 핀만 삭제할 수 있습니다.");
 		}
+
+		// 핀 좋아요 삭제
+		pinLikeDao.deleteByPinId(pinId);
+
 		// 핀태그 먼저삭제
 		pinDao.deletePinTagsByPinId(pinId);
 
 		// 삭제
 		pinDao.deletePin(pinId);
+
 	}
 }
