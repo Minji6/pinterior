@@ -18,7 +18,6 @@ public class SavedPinService {
 	@Autowired
 	private PinDao pinDao;
 	
-	@Transactional
 	public SavedPinResponseDto save(Long userId, SavedPinCreateRequestDto request) {
 		Long pinId = request.getPinId();
 		Long boardId = request.getBoardId();

@@ -70,6 +70,7 @@
 		UPDATE saved_pin
 		SET board_id=NULL
 		WHERE saved_pin_id = #{savedPinId}
+		AND user_id = #{userId}
 	</update>
 
 </mapper>
