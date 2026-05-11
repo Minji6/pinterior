@@ -24,7 +24,7 @@ public interface SavedPinDao {
 	
 	int countNullBoardByUserAndPin(@Param("userId") Long userId, @Param("pinId") Long pinId, @Param("excludeSavedPinId") Long excludeSavedPinId);
 	
-	int updateBoardIdToNull(@Param("savedPinId") Long savedPinId);
+	int updateBoardIdToNull(@Param("savedPinId") Long savedPinId, @Param("userId") Long userId);
 	
 
 }
