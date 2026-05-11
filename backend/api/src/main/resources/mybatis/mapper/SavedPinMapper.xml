@@ -12,14 +12,16 @@
 		</selectKey>
 		INSERT INTO saved_pin (saved_pin_id, user_id, pin_id, board_id,
 		created_at)
-		VALUES (#{savedPinId}, #{userId}, #{pinId}, #{boardId}, SYSDATE)
+		VALUES (#{savedPinId}, #{userId}, #{pinId}, #{boardId},
+		SYSDATE)
 	</insert>
 
 	<select id="countDuplicate" resultType="int">
 		SELECT COUNT(*)
 		FROM saved_pin
 		WHERE user_id = #{userId}
-		AND pin_id = #{pinId}
+		AND pin_id =
+		#{pinId}
 		<choose>
 			<when test="boardId == null">
 				AND board_id IS NULL
@@ -44,9 +46,26 @@
 
 	<delete id="deleteSavedPin">
 		DELETE FROM saved_pin
-		WHERE saved_pin_id = #{savedPinId}
+		WHERE saved_pin_id =
+		#{savedPinId}
 	</delete>
-	
+
+	<select id="selectById"
+		resultType="com.mycompany.pinterior.entity.SavedPin">
+		SELECT saved_pin_id, user_id, pin_id, board_id, created_at
+		FROM saved_pin
+		WHERE saved_pin_id = #{savedPinId}
+	</select>
+
+	<select id="countNullBoardByUserAndPin" resultType="int">
+		SELECT COUNT(*)
+		FROM saved_pin
+		WHERE user_id = #{userId}
+		AND pin_id = #{pinId}
+		AND board_id IS NULL
+		AND saved_pin_id != #{excludeSavedPinId}
+	</select>
+
 	<update id="updateBoardIdToNull">
 		UPDATE saved_pin
 		SET board_id=NULL

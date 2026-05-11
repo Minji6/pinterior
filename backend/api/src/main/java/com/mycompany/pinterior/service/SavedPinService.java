@@ -78,16 +78,23 @@ public class SavedPinService {
 	}
 
 	public SavedPinBoardRemoveResponseDto removeBoardFromSavedPin(Long savedPinId, Long userId) {
-		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
-		if (ownerId == null) {
-			throw new ApiException(404, " 존재하지 않는 저장입니다.");
+		SavedPin savedPin = savedPinDao.selectById(savedPinId);
+		if (savedPin == null) {
+			throw new ApiException(404, "존재하지 않는 저장입니다.");
 		}
-
-		if (!ownerId.equals(userId)) {
+		if (!savedPin.getUserId().equals(userId)) {
 			throw new ApiException(403, "본인이 저장한 핀만 보드에서 제거할 수 있습니다.");
 		}
 
-		savedPinDao.updateBoardIdToNull(savedPinId);
+		int duplicateNullCount = savedPinDao.countNullBoardByUserAndPin(userId, savedPin.getPinId(), savedPinId);
+
+		if (duplicateNullCount > 0) {
+			// 이미 기본 저장함에 같은 핀 있음 → 현재 행 DELETE (중복 방지)
+			savedPinDao.deleteSavedPin(savedPinId);
+		} else {
+			// 기본 저장함에 없음 → UPDATE
+			savedPinDao.updateBoardIdToNull(savedPinId);
+		}
 
 		SavedPinBoardRemoveResponseDto response = new SavedPinBoardRemoveResponseDto();
 		response.setSavedPinId(savedPinId);

@@ -20,6 +20,10 @@ public interface SavedPinDao {
 	
 	int deleteSavedPin(@Param("savedPinId") Long savedPinId);
 	
+	SavedPin selectById(@Param("savedPinId") Long savedPinId);
+	
+	int countNullBoardByUserAndPin(@Param("userId") Long userId, @Param("pinId") Long pinId, @Param("excludeSavedPinId") Long excludeSavedPinId);
+	
 	int updateBoardIdToNull(@Param("savedPinId") Long savedPinId);
 	
 
