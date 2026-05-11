@@ -42,13 +42,13 @@
 	<select id="selectList"
 		resultType="com.mycompany.pinterior.dto.PinSummaryDto">
 		SELECT
-			p.pin_id,
-			p.image_url,
-			p.title,
-			(SELECT board_id FROM saved_pin sp
-			WHERE sp.pin_id = p.pin_id AND ROWNUM = 1)
-			AS board_id,
-			p.created_at
+		p.pin_id,
+		p.image_url,
+		p.title,
+		(SELECT board_id FROM saved_pin sp
+		WHERE sp.pin_id = p.pin_id AND ROWNUM = 1)
+		AS board_id,
+		p.created_at
 		FROM pin p
 		WHERE 1=1
 		<if test="cursorId != null">
@@ -60,16 +60,17 @@
 
 	<select id="selectDetail"
 		resultType="com.mycompany.pinterior.dto.PinDetailResponseDto">
-		SELECT 
-		p.pin_id, 
+		SELECT
+		p.pin_id,
 		p.image_url,
 		p.title,
 		p.description,
 		p.link_url,
-		(SELECT board_id FROM saved_pin sp WHERE sp.pin_id = p.pin_id AND ROWNUM = 1) AS board_id,
-        p.created_at
-    FROM pin p
-    WHERE p.pin_id = #{pinId}
+		(SELECT board_id FROM saved_pin sp
+		WHERE sp.pin_id = p.pin_id AND ROWNUM = 1) AS board_id,
+		p.created_at
+		FROM pin p
+		WHERE p.pin_id = #{pinId}
 	</select>
 
 	<select id="selectAuthorByPinId"
@@ -112,5 +113,23 @@
 		DELETE FROM pin
 		WHERE pin_id = #{pinId}
 	</delete>
+
+	<select id="searchByKeyword"
+		resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
+		SELECT DISTINCT p.pin_id, p.image_url, p.title, p.created_at
+		FROM pin p
+		LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
+		LEFT JOIN tag t ON pt.tag_id = t.tag_id
+		WHERE 1=1
+		AND (
+		LOWER(p.title) LIKE '%' || LOWER(#{keyword}) || '%'
+		OR LOWER(t.tag_name) LIKE '%' || LOWER(#{keyword}) || '%'
+		)
+		<if test="cursorId != null">
+			AND p.pin_id &lt; #{cursorId}
+		</if>
+		ORDER BY p.pin_id DESC
+		FETCH FIRST #{size} ROWS ONLY
+	</select>
 
 </mapper>
