@@ -17,9 +17,14 @@
 
 	<!-- 보드 선택 (보드ID가 일치하는 경우) -->
 	<select id="selectByBoardId" parameterType="Long" resultType="com.mycompany.pinterior.entity.Board">
-		select board_id, board_name, board_info, created_at, updated_at
-		from board
-		where board_id=#{boardId}
+		SELECT board_id AS boardId,
+		user_id AS userId,
+		board_name AS boardName,
+		board_info AS boardInfo,
+		created_at AS createdAt,
+		updated_at AS updatedAt
+		FROM board
+		WHERE board_id = #{boardId}
 	</select>
 	
 
@@ -56,5 +61,14 @@
 	    JOIN pin p ON sp.pin_id = p.pin_id
 	    WHERE sp.board_id = #{boardId}
 	</select>
+	
+	<!-- 보드 수정 -->
+	<update id="updateBoard" parameterType="com.mycompany.pinterior.entity.Board">
+		UPDATE board
+		SET board_name = #{boardName},
+		    board_info = #{boardInfo},
+		    updated_at = SYSTIMESTAMP
+		WHERE board_id = #{boardId}
+	</update>
 	
 </mapper>

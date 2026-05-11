@@ -76,6 +76,14 @@
 		updated_at = CURRENT_TIMESTAMP
 		WHERE user_id = #{userId}
 	</update>
+	
+	<!-- 자기소개 업데이트 -->
+	<update id="updateBio">
+        UPDATE USERS
+        SET user_bio = #{bio},
+        	updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
 
 
 </mapper>
