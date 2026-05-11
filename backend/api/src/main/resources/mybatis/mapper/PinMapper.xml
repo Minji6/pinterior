@@ -145,7 +145,7 @@
 		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-	<!-- 좋아요 기준 상위 핀 조회 -->
+	<!-- 랜덤 핀 조회 -->
 	<select id="selectRandomPins"
 	    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
 	    SELECT p.pin_id,
@@ -163,7 +163,7 @@
 	    FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-	<!-- 랜덤 핀 조회 -->
+	<!-- 좋아요 기준 상위 핀 조회 -->
 	<select id="selectTopLikedPins"
 	    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
 	    SELECT *
