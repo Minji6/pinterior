@@ -10,6 +10,7 @@ import lombok.Data;
 public class Pin {
 	private Long pinId;
 	private Long userId;
+	private Long boardId;
 	private String title;
 	private String description;
 	private String imageUrl;
@@ -17,5 +18,4 @@ public class Pin {
 	private Date createdAt;
 	private Date updatedAt;
 	private List<String> tags;
-	private Long boardId;
 }

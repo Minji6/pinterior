@@ -20,5 +20,6 @@ public interface SavedPinDao {
 	
 	int deleteSavedPin(@Param("savedPinId") Long savedPinId);
 	
-
+	// 핀 선택 보드 id 가져오기
+	SavedPin selectByPinId(Long pinId);
 }

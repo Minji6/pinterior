@@ -10,9 +10,11 @@
 			order="BEFORE">
 			SELECT pin_seq.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO pin (pin_id, user_id, board_id, title, description,
-		image_url, link_url, created_at)
-		VALUES (#{pinId}, #{userId}, #{boardId}, #{title}, #{description},
+		INSERT INTO pin (pin_id, user_id, title, description,
+		image_url,
+		link_url, created_at)
+		VALUES (#{pinId}, #{userId}, #{title},
+		#{description},
 		#{imageUrl}, #{linkUrl}, SYSDATE)
 	</insert>
 
@@ -66,10 +68,12 @@
 		p.description,
 		p.link_url,
 		(SELECT board_id FROM saved_pin sp
-		WHERE sp.pin_id = p.pin_id AND ROWNUM = 1) AS board_id,
+		WHERE sp.pin_id =
+		p.pin_id AND ROWNUM = 1) AS board_id,
 		p.created_at
 		FROM pin p
-		WHERE p.pin_id = #{pinId}
+		WHERE
+		p.pin_id = #{pinId}
 	</select>
 
 	<select id="selectAuthorByPinId"
