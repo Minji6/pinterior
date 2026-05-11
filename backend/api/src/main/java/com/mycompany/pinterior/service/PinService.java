@@ -1,5 +1,7 @@
 package com.mycompany.pinterior.service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import com.mycompany.pinterior.dao.PinTagDao;
 import com.mycompany.pinterior.dao.TagDao;
 import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.entity.Pin;
-
 
 import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinSearchListResponseDto;
@@ -38,8 +39,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-
-
 
 @Service
 @Slf4j
@@ -74,11 +73,11 @@ public class PinService {
 		// 핀 등록
 		pinDao.insert(pin);
 		log.info("날짜 조회: ", pin.getCreatedAt());
-		
+
 		// DB에서 다시 조회 (createdAt 채우기)
 		Pin savedPin = pinDao.selectById(pin.getPinId());
 		pin.setCreatedAt(savedPin.getCreatedAt());
-		
+
 		// 태그 등록
 		if (pin.getTags() != null && !pin.getTags().isEmpty()) {
 			for (String tagName : pin.getTags()) {
@@ -114,49 +113,50 @@ public class PinService {
 
 		return new PinListResponseDto(pins, nextCursor, hasNext);
 	}
-	
+
 	@Transactional
 	public PinUpdateResponseDto updatePin(Long pinId, PinUpdateRequestDto request) {
-	    Pin pin = new Pin();
-	    pin.setPinId(pinId);
-	    pin.setUserId(request.getUserId());
-	    pin.setTitle(request.getTitle());
-	    pin.setDescription(request.getDescription());
-	    pin.setLinkUrl(request.getLinkUrl());
-	    pin.setTags(request.getTags());
+		Pin pin = new Pin();
+		pin.setPinId(pinId);
+		pin.setUserId(request.getUserId());
+		pin.setTitle(request.getTitle());
+		pin.setDescription(request.getDescription());
+		pin.setLinkUrl(request.getLinkUrl());
+		pin.setTags(request.getTags());
 
-	    pinDao.update(pin);
+		pinDao.update(pin);
 
-	    // 기존 태그 연결 삭제
-	    pinTagDao.deleteByPinId(pinId);
+		// 기존 태그 연결 삭제
+		pinTagDao.deleteByPinId(pinId);
 
-	    // 태그 재등록
-	    if (pin.getTags() != null && !pin.getTags().isEmpty()) {
-	        for (String tagName : pin.getTags()) {
-	            Tag tag = tagDao.selectByTagName(tagName);
-	            if (tag == null) {
-	                tag = new Tag();
-	                tag.setTagName(tagName);
-	                tagDao.insert(tag);
-	            }
-	            pinTagDao.insert(pin.getPinId(), tag.getTagId());
-	        }
-	    }
+		// 태그 재등록
+		if (pin.getTags() != null && !pin.getTags().isEmpty()) {
+			for (String tagName : pin.getTags()) {
+				Tag tag = tagDao.selectByTagName(tagName);
+				if (tag == null) {
+					tag = new Tag();
+					tag.setTagName(tagName);
+					tagDao.insert(tag);
+				}
+				pinTagDao.insert(pin.getPinId(), tag.getTagId());
+			}
+		}
 
-	    // 수정된 핀 조회 후 DTO 반환
-	    Pin updatedPin = pinDao.selectById(pinId);
-	    PinUpdateResponseDto data = new PinUpdateResponseDto();
-	    data.setPinId(updatedPin.getPinId());
-	    data.setUserId(updatedPin.getUserId());
-	    data.setTitle(updatedPin.getTitle());
-	    data.setDescription(updatedPin.getDescription());
-	    data.setLinkUrl(updatedPin.getLinkUrl());
-	    data.setTags(updatedPin.getTags());
-	    data.setUpdatedAt(updatedPin.getUpdatedAt());
+		// 수정된 핀 조회 후 DTO 반환
+		Pin updatedPin = pinDao.selectById(pinId);
+		PinUpdateResponseDto data = new PinUpdateResponseDto();
+		data.setPinId(updatedPin.getPinId());
+		data.setUserId(updatedPin.getUserId());
+		data.setTitle(updatedPin.getTitle());
+		data.setDescription(updatedPin.getDescription());
+		data.setLinkUrl(updatedPin.getLinkUrl());
+		data.setTags(updatedPin.getTags());
+		data.setUpdatedAt(updatedPin.getUpdatedAt());
 
-	    return data;
+		return data;
 	}
-	// 
+
+	//
 	//
 	public PinDetailResponseDto getPinDetail(Long pinId) {
 
@@ -170,19 +170,17 @@ public class PinService {
 
 		List<String> tags = pinDao.selectTagsByPinId(pinId);
 		detail.setTags(tags);
-	
+
 		// 좋아요 수, 좋아요 여부
-		Long userId = (Long) SecurityContextHolder.getContext()
-				.getAuthentication()
-				.getPrincipal();
-		
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
 		int likeCount = pinLikeDao.countByPinId(pinId);
 		boolean isLiked = pinLikeDao.countByUserIdAndPinId(userId, pinId) > 0;
-		
+
 		detail.setLikeCount(likeCount);
 		detail.setLiked(isLiked);
-		
-		//댓글 허용 여부는 추후 구현 예정
+
+		// 댓글 허용 여부는 추후 구현 예정
 		detail.setCommentEnabled(1);
 
 		return detail;
@@ -198,56 +196,90 @@ public class PinService {
 
 		return new PinDownloadResponseDto(imageUrl);
 	}
-	
-	// 핀 삭제 
+
+	// 핀 삭제
 	public void deletePin(Long pinId, Long userId) {
-		 Long authorId = pinDao.selectUserIdByPinId(pinId);
-		    if (authorId == null) {
-		        throw new ApiException(404, "존재하지 않는 핀입니다.");
-		    }
-		    
-		    // 권한 본인 삭제 가능
-		    if (!authorId.equals(userId)) {
-		        throw new ApiException(403, "본인 핀만 삭제할 수 있습니다.");
-		    }
-		    
-		    // 핀 좋아요 삭제
-		    pinLikeDao.deleteByPinId(pinId);
-		    
-		    // 핀태그 먼저삭제
-		    pinDao.deletePinTagsByPinId(pinId);
-		    
-		    // 삭제
-		    pinDao.deletePin(pinId);
-		   
+		Long authorId = pinDao.selectUserIdByPinId(pinId);
+		if (authorId == null) {
+			throw new ApiException(404, "존재하지 않는 핀입니다.");
+		}
+
+		// 권한 본인 삭제 가능
+		if (!authorId.equals(userId)) {
+			throw new ApiException(403, "본인 핀만 삭제할 수 있습니다.");
+		}
+
+		// 핀 좋아요 삭제
+		pinLikeDao.deleteByPinId(pinId);
+
+		// 핀태그 먼저삭제
+		pinDao.deletePinTagsByPinId(pinId);
+
+		// 삭제
+		pinDao.deletePin(pinId);
+
 	}
-	
+
 	// 핀 태그 검색
 	public PinSearchListResponseDto searchPins(String keyword, String cursor, int size) {
-		Long cursorId = CursorUtil.decode(cursor);
+	    Long cursorId = CursorUtil.decode(cursor);
 
-		// size + 1로 조회해서 다음 페이지 존재 여부 체크
-		List<PinSearchResponseDto> pins = pinDao.searchByKeyword(keyword, cursorId, size + 1);
+	    // size + 1로 조회해서 다음 페이지 존재 여부 체크
+	    List<PinSearchResponseDto> pins = pinDao.searchByKeyword(keyword, cursorId, size + 1);
 
-		boolean hasNext = pins.size() > size;
-		if (hasNext) {
-			pins = pins.subList(0, size);
-		}
+	    boolean hasNext = pins.size() > size;
+	    if (hasNext) {
+	        pins = pins.subList(0, size);
+	    }
 
-		// 각 핀에 태그 목록 주입
-		for (PinSearchResponseDto pin : pins) {
-			List<String> tags = pinDao.selectTagsByPinId(pin.getPinId());
-			pin.setTags(tags);
-		}
-		
-		// 다음 페이지 커서 생성 (마지막 핀 ID 기준)
-		String nextCursor = null;
-		if (hasNext && !pins.isEmpty()) {
-			nextCursor = CursorUtil.encode(pins.get(pins.size() -1).getPinId());
-		}
-		
-		return new PinSearchListResponseDto(pins, nextCursor, hasNext);
+	    // 태그 변환
+	    convertTags(pins);
+
+	    // 검색 결과 있을 때
+	    if (!pins.isEmpty()) {
+	        String nextCursor = null;
+	        if (hasNext) {
+	            nextCursor = CursorUtil.encode(pins.get(pins.size() - 1).getPinId());
+	        }
+	        return new PinSearchListResponseDto(pins, nextCursor, hasNext, false);
+	    }
+
+	    // 검색 결과 없을 때 → cursor가 "RANDOM"이면 랜덤 핀 반환
+	    if ("RANDOM".equals(cursor)) {
+	        List<PinSearchResponseDto> randomPins = pinDao.selectRandomPins(size);
+	        convertTags(randomPins);
+	        return new PinSearchListResponseDto(randomPins, null, false, true);
+	    }
+
+	    // 좋아요 순 핀 조회 (커서 페이징)
+	    Long likedCursorId = CursorUtil.decode(cursor);
+	    List<PinSearchResponseDto> topLikedPins = pinDao.selectTopLikedPins(likedCursorId, size + 1);
+
+	    boolean likedHasNext = topLikedPins.size() > size;
+	    if (likedHasNext) {
+	        topLikedPins = topLikedPins.subList(0, size);
+	    }
+
+	    convertTags(topLikedPins);
+
+	    // 좋아요 핀 다 소진됐으면 다음 커서를 "RANDOM"으로
+	    if (!likedHasNext) {
+	        return new PinSearchListResponseDto(topLikedPins, "RANDOM", true, true);
+	    }
+
+	    // 좋아요 핀 아직 남아있으면 커서 페이징 유지
+	    String nextCursor = CursorUtil.encode(topLikedPins.get(topLikedPins.size() - 1).getPinId());
+	    return new PinSearchListResponseDto(topLikedPins, nextCursor, true, true);
+	}
+
+	// 태그 문자열 → 리스트 변환 공통 메서드
+	private void convertTags(List<PinSearchResponseDto> pins) {
+	    for (PinSearchResponseDto pin : pins) {
+	        if (pin.getTags() != null && !pin.getTags().isEmpty()) {
+	            pin.setTagList(Arrays.asList(pin.getTags().split(",")));
+	        } else {
+	            pin.setTagList(Collections.emptyList());
+	        }
+	    }
 	}
 }
-
-
