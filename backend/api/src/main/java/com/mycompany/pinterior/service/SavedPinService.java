@@ -2,10 +2,10 @@ package com.mycompany.pinterior.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
-import com.mycompany.pinterior.dto.SavedPinBoardRemoveResponseDto;
 import com.mycompany.pinterior.dto.SavedPinCreateRequestDto;
 import com.mycompany.pinterior.dto.SavedPinResponseDto;
 import com.mycompany.pinterior.entity.SavedPin;
@@ -17,7 +17,8 @@ public class SavedPinService {
 	private SavedPinDao savedPinDao;
 	@Autowired
 	private PinDao pinDao;
-
+	
+	@Transactional
 	public SavedPinResponseDto save(Long userId, SavedPinCreateRequestDto request) {
 		Long pinId = request.getPinId();
 		Long boardId = request.getBoardId();
@@ -77,7 +78,8 @@ public class SavedPinService {
 		savedPinDao.deleteSavedPin(savedPinId);
 	}
 
-	public SavedPinBoardRemoveResponseDto removeBoardFromSavedPin(Long savedPinId, Long userId) {
+	@Transactional
+	public void removeBoardFromSavedPin(Long savedPinId, Long userId) {
 		SavedPin savedPin = savedPinDao.selectById(savedPinId);
 		if (savedPin == null) {
 			throw new ApiException(404, "존재하지 않는 저장입니다.");
@@ -96,10 +98,6 @@ public class SavedPinService {
 			savedPinDao.updateBoardIdToNull(savedPinId);
 		}
 
-		SavedPinBoardRemoveResponseDto response = new SavedPinBoardRemoveResponseDto();
-		response.setSavedPinId(savedPinId);
-		response.setBoardId(null);
-		return response;
 	}
 
 }
