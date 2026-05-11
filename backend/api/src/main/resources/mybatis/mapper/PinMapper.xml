@@ -10,11 +10,12 @@
 			order="BEFORE">
 			SELECT pin_seq.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO pin (pin_id, user_id, title, description, image_url,
+		INSERT INTO pin (pin_id, user_id, title, description,
+		image_url,
 		link_url, created_at)
 		VALUES (#{pinId}, #{userId}, #{title},
-		#{description}, #{imageUrl},
-		#{linkUrl}, SYSDATE)
+		#{description},
+		#{imageUrl}, #{linkUrl}, SYSDATE)
 	</insert>
 
 	<select id="selectById" parameterType="long"

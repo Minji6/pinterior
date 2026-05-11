@@ -14,10 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.mycompany.pinterior.entity.Tag;
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.PinTagDao;
+import com.mycompany.pinterior.dao.SavedPinDao;
 import com.mycompany.pinterior.dao.TagDao;
 import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.entity.Pin;
-
+import com.mycompany.pinterior.entity.SavedPin;
 import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinSearchListResponseDto;
 import com.mycompany.pinterior.dto.PinSearchResponseDto;
@@ -50,6 +51,8 @@ public class PinService {
 	@Autowired
 	private PinTagDao pinTagDao;
 	@Autowired
+	private SavedPinDao savedPinDao;
+	@Autowired
 	private PinLikeDao pinLikeDao;
 
 	@Value("${file.upload.path}")
@@ -59,15 +62,19 @@ public class PinService {
 	private String uploadUrl;
 
 	@Transactional
-	public int insertPin(Pin pin, MultipartFile image) throws IOException {
-
+	public void insertPin(Pin pin, MultipartFile image, Long boardId) throws IOException {
+		log.info("boardId: {}", boardId);
 		// 이미지 저장
 		if (image != null && !image.isEmpty()) {
+			log.info("이미지 있음: {}", image.getOriginalFilename());
 			String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
 			Path savePath = Paths.get(uploadPath + fileName);
 			Files.createDirectories(savePath.getParent());
 			Files.write(savePath, image.getBytes());
 			pin.setImageUrl(uploadUrl + fileName);
+			log.info("imageUrl: {}", pin.getImageUrl());
+		} else {
+			log.info("이미지 없음");
 		}
 
 		// 핀 등록
@@ -77,6 +84,31 @@ public class PinService {
 		// DB에서 다시 조회 (createdAt 채우기)
 		Pin savedPin = pinDao.selectById(pin.getPinId());
 		pin.setCreatedAt(savedPin.getCreatedAt());
+
+		// 보드 선택했으면 saved_pin에 저장
+		if (boardId != null) {
+			// 보드 소유자 확인
+			Long boardOwner = savedPinDao.selectBoardOwnerByBoardId(boardId);
+			if (boardOwner == null || !boardOwner.equals(pin.getUserId())) {
+				throw new ApiException(403, "본인 보드에만 저장할 수 있습니다.");
+			}
+
+			// 중복 저장 확인
+			int duplicate = savedPinDao.countDuplicate(pin.getUserId(), pin.getPinId(), boardId);
+			if (duplicate > 0) {
+				throw new ApiException(409, "이미 해당 보드에 저장된 핀입니다.");
+			}
+
+			SavedPin newSavedPin = new SavedPin();
+			newSavedPin.setPinId(pin.getPinId());
+			newSavedPin.setBoardId(boardId);
+			newSavedPin.setUserId(pin.getUserId());
+			savedPinDao.insert(newSavedPin);
+
+			// 다시 조회해서 boardId 채우기
+			SavedPin saved = savedPinDao.selectByPinId(pin.getPinId());
+			pin.setBoardId(saved.getBoardId());
+		}
 
 		// 태그 등록
 		if (pin.getTags() != null && !pin.getTags().isEmpty()) {
@@ -90,7 +122,6 @@ public class PinService {
 				pinTagDao.insert(pin.getPinId(), tag.getTagId());
 			}
 		}
-		return 1;
 	}
 
 	// ===== 전체 핀 조회 =====

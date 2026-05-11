@@ -9,6 +9,7 @@ import lombok.Data;
 public class PinCreateResponseDto {
     private Long pinId;
     private Long userId;
+    private Long boardId;
     private String imageUrl;
     private String title;
     private String description;
