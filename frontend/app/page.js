@@ -30,15 +30,6 @@ export default function LandingPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#fff' }}>
       <style>{styles}</style>
 
-      <nav className="navbar px-4 py-3 d-flex justify-content-between align-items-center border-bottom">
-        <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#E60023' }}>
-          Pinterior
-        </span>
-        <button className="login-btn" onClick={() => router.push('/login')}>
-          로그인
-        </button>
-      </nav>
-
       <div className="text-center py-5">
         <h1 style={{ fontSize: '3rem', fontWeight: 'bold' }}>
           집안 꾸미기 아이디어를 찾아보세요

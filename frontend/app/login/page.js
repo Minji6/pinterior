@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function LoginPage() {
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
       localStorage.setItem('nickname', nickname);
-      localStorage.setItem('profileImg', profileImg || '');
+      localStorage.setItem('profileImg', profileImg && profileImg.startsWith('/') ? `http://localhost:8080${profileImg}` : '');
       router.push('/feed');
     } catch (err) {
       setError(err.response?.data?.message || '로그인에 실패했습니다.');
@@ -67,7 +68,7 @@ export default function LoginPage() {
             className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? '🙈' : '👁️'}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
 
