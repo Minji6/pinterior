@@ -15,4 +15,5 @@ public interface BoardDao {
 	public List<BoardListResponseDto> selectBoardListByUserId(Long userId);
 	public List<BoardItemResponseDto> selectPinsByBoardId(Long boardId); 
 	public int updateBoard(Board board);
+	public int deleteBoard(Long boardId);
 }

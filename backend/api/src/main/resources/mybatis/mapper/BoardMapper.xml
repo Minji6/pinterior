@@ -17,14 +17,14 @@
 
 	<!-- 보드 선택 (보드ID가 일치하는 경우) -->
 	<select id="selectByBoardId" parameterType="Long" resultType="com.mycompany.pinterior.entity.Board">
-		SELECT board_id AS boardId,
-		user_id AS userId,
-		board_name AS boardName,
-		board_info AS boardInfo,
-		created_at AS createdAt,
-		updated_at AS updatedAt
-		FROM board
-		WHERE board_id = #{boardId}
+	    SELECT board_id AS boardId,
+	    user_id AS userId,
+	    board_name AS boardName,
+	    board_info AS boardInfo,
+	    created_at AS createdAt,
+	    updated_at AS updatedAt
+	    FROM board
+	    WHERE board_id = #{boardId}
 	</select>
 	
 
@@ -70,5 +70,11 @@
 		    updated_at = SYSTIMESTAMP
 		WHERE board_id = #{boardId}
 	</update>
+	
+	<!--  보드 삭제  -->
+	<delete id="deleteBoard">
+	    DELETE FROM board
+	    WHERE board_id = #{boardId}
+	</delete>
 	
 </mapper>
