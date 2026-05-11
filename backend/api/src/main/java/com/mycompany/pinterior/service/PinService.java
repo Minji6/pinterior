@@ -82,6 +82,12 @@ public class PinService {
 		
 		// 보드 선택했으면 saved_pin에 저장
 	    if (boardId != null) {
+	    	// 보드 소유자 확인
+	        Long boardOwner = savedPinDao.selectBoardOwnerByBoardId(boardId);
+	        if (boardOwner == null || !boardOwner.equals(pin.getUserId())) {
+	            throw new ApiException(403, "본인 보드에만 저장할 수 있습니다.");
+	        }
+	    	
 	        SavedPin newSavedPin = new SavedPin();
 	        newSavedPin.setPinId(pin.getPinId());
 	        newSavedPin.setBoardId(boardId);
