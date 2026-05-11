@@ -64,7 +64,9 @@ public class PinService {
 		// 이미지 저장
 		if (image != null && !image.isEmpty()) {
 			log.info("이미지 있음: {}", image.getOriginalFilename());
-			String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+			String ext = image.getOriginalFilename()
+			        .substring(image.getOriginalFilename().lastIndexOf("."));
+			String fileName = UUID.randomUUID().toString() + ext;
 			Path savePath = Paths.get(uploadPath + fileName);
 			Files.createDirectories(savePath.getParent());
 			Files.write(savePath, image.getBytes());
