@@ -67,10 +67,12 @@
 		p.description,
 		p.link_url,
 		(SELECT board_id FROM saved_pin sp
-		WHERE sp.pin_id = p.pin_id AND ROWNUM = 1) AS board_id,
+		WHERE sp.pin_id =
+		p.pin_id AND ROWNUM = 1) AS board_id,
 		p.created_at
 		FROM pin p
-		WHERE p.pin_id = #{pinId}
+		WHERE
+		p.pin_id = #{pinId}
 	</select>
 
 	<select id="selectAuthorByPinId"
@@ -114,22 +116,77 @@
 		WHERE pin_id = #{pinId}
 	</delete>
 
+	<!-- 핀 태그 검색 -->
 	<select id="searchByKeyword"
 		resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
-		SELECT DISTINCT p.pin_id, p.image_url, p.title, p.created_at
+		SELECT p.pin_id,
+		p.image_url,
+		p.title,
+		p.created_at,
+		LISTAGG(t.tag_name,
+		',') WITHIN GROUP (ORDER BY t.tag_name) AS tags
 		FROM pin p
-		LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
-		LEFT JOIN tag t ON pt.tag_id = t.tag_id
-		WHERE 1=1
-		AND (
+		LEFT JOIN
+		pin_tag pt ON p.pin_id = pt.pin_id
+		LEFT JOIN tag t ON pt.tag_id =
+		t.tag_id
+		WHERE (
 		LOWER(p.title) LIKE '%' || LOWER(#{keyword}) || '%'
-		OR LOWER(t.tag_name) LIKE '%' || LOWER(#{keyword}) || '%'
+		OR
+		LOWER(t.tag_name) LIKE '%' || LOWER(#{keyword}) || '%'
 		)
 		<if test="cursorId != null">
 			AND p.pin_id &lt; #{cursorId}
 		</if>
-		ORDER BY p.pin_id DESC
+		GROUP BY p.pin_id, p.image_url, p.title, p.created_at
+		ORDER BY p.pin_id
+		DESC
 		FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+	<!-- 좋아요 기준 상위 핀 조회 -->
+	<select id="selectRandomPins"
+	    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
+	    SELECT p.pin_id,
+	           p.image_url,
+	           p.title,
+	           p.created_at,
+	           LISTAGG(t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags
+	    FROM pin p
+	    LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
+	    LEFT JOIN tag t ON pt.tag_id = t.tag_id
+	    LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
+	    GROUP BY p.pin_id, p.image_url, p.title, p.created_at
+	    HAVING COUNT(pl.pin_id) = 0
+	    ORDER BY DBMS_RANDOM.VALUE
+	    FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+	<!-- 랜덤 핀 조회 -->
+	<select id="selectTopLikedPins"
+	    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
+	    SELECT *
+	    FROM (
+	        SELECT p.pin_id,
+	               p.image_url,
+	               p.title,
+	               p.created_at,
+	               LISTAGG(t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags,
+	               COUNT(pl.pin_id) AS like_count
+	        FROM pin p
+	        LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
+	        LEFT JOIN tag t ON pt.tag_id = t.tag_id
+	        LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
+	        GROUP BY p.pin_id, p.image_url, p.title, p.created_at
+	        HAVING COUNT(pl.pin_id) > 0
+	    )
+	    <where>
+	        <if test="cursorId != null">
+	            pin_id &lt; #{cursorId}
+	        </if>
+	    </where>
+	    ORDER BY like_count DESC, pin_id DESC
+	    FETCH FIRST #{size} ROWS ONLY
 	</select>
 
 </mapper>
