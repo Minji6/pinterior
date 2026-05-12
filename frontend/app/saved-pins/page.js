@@ -5,22 +5,70 @@ import PinList from './PinList';
 
 export default function SavedPinsPage() {
   const router = useRouter();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
+    if (!token || !userId) {
+      router.replace('/login');
+      return;
+    }
+
+    fetch(`/api/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.status === 200) setProfile(json.data);
+      })
+      .catch(() => { });
+  }, []);
+
+  const profileImgSrc = profile?.profileImg
+    ? `http://localhost:8080${profile.profileImg.replace(/\/api\/users\/(\d+)\/image$/, '/api/users/$1/image/view')}`
+    : null;
 
   return (
     <div style={{ fontFamily: "'Noto Sans KR', sans-serif" }}>
       <div className="px-4 py-4">
-        {/* 유저 프로필 */}
-        <div className="d-flex justify-content-between align-items-start mb-4">
+        {/* 헤더 */}
+        <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="fw-bold" style={{ fontSize: 28 }}>저장한 아이디어</h1>
-          <div className="d-flex align-items-center gap-3">
-            <div style={{ width: 48, height: 48, borderRadius: "50%", backgroundColor: "#767676", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>정원</div>
-            <div>
-              <p className="fw-bold mb-0">김정원</p>
-              <p className="text-muted mb-0" style={{ fontSize: 13 }}>팔로잉 0명</p>
+
+          {profile && (
+            <div
+              className="d-flex align-items-center gap-3"
+              onClick={() => router.push('/mypage')}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              style={{
+                cursor: 'pointer',
+                transition: 'background-color 0.15s',
+                borderRadius: 16,
+                padding: '8px 12px',
+              }}
+            >
+              {profileImgSrc ? (
+                <img
+                  src={profileImgSrc}
+                  alt="프로필"
+                  style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#767676', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                  {profile.nickname.charAt(0)}
+                </div>
+              )}
+              <div>
+                <p className="fw-bold mb-0" style={{ fontSize: 14 }}>{profile.nickname}</p>
+                {profile.bio && <p className="text-muted mb-0" style={{ fontSize: 12 }}>{profile.bio}</p>}
+              </div>
             </div>
-            <button className="btn btn-outline-secondary rounded-pill btn-sm px-3">프로필 공유</button>
-          </div>
+          )}
         </div>
+
 
         {/* 탭 */}
         <ul className="nav gap-1 mb-3" style={{ borderBottom: "1px solid #ddd" }}>
