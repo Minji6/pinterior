@@ -13,4 +13,5 @@ public class PinSearchResponseDto {
 	private String tags;
 	private List<String> tagList;
 	private LocalDateTime createdAt;
+	private Long likeCount;
 }
