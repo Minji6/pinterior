@@ -22,8 +22,6 @@ export default function MyPage() {
       return;
     }
 
-    setLoading(true);
-
     fetch(`/api/users/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
