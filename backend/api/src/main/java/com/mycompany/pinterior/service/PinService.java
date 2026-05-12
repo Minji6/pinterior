@@ -47,9 +47,8 @@ public class PinService {
 	@Autowired
 	private PinTagDao pinTagDao;
 	@Autowired
-
 	private SavedPinDao savedPinDao;
-
+	@Autowired
 	private PinLikeDao pinLikeDao;
 
 	@Value("${file.upload.path}")
