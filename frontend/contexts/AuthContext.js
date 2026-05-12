@@ -8,7 +8,7 @@ export const AuthContext = createContext();
 export function AuthContextProvider({ children }) {
     // 상태 정의
     const [user, setUser] = useState("");
-    const [accessToken, setAccessToken] = useState("");
+    const [token, setAccessToken] = useState("");
     // Axios 설정 중에 UI가 나오지 않도록 하는 플래그 변수
     const [isLoading, setIsLoading] = useState(true);
 
@@ -16,7 +16,7 @@ export function AuthContextProvider({ children }) {
     const value = {
         user,
         setUser,
-        accessToken,
+        token,
         setAccessToken
     };
 
@@ -24,8 +24,8 @@ export function AuthContextProvider({ children }) {
     // 로컬 스토리지에 저장된 로그인 정보를 읽고, 다시 전역 상태로 복원
     useEffect(() => {
         // 지연 실행 (UI가 나오고 나서 실행), 로컬 스토리지에서 로그인 정보 읽기
-        const storedUser = localStorage.getItem("user") || "";
-        const storedToken = localStorage.getItem("accessToken") || ""
+        const storedUser = localStorage.getItem("userId") || "";
+        const storedToken = localStorage.getItem("token") || ""
 
         // 상태변경 전에 미리 Authrization 헤더를 세팅
         if (storedUser) {
@@ -46,22 +46,22 @@ export function AuthContextProvider({ children }) {
         // 로그인을 했을 경우
         if (user != "") {
             // 로컬 스토리지에 user와 accessToken을 저장
-            localStorage.setItem("user", user);
-            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("userId", user);
+            localStorage.setItem("token", token);
             // Axios 설정 변경 (기본 요청 헤더에 Authorization을 추가)
-            addAuthHeader(accessToken);
+            addAuthHeader(token);
         }
         // 로그아웃을 했을 경우
         else {
             if (!isLoading) {
-                // 로컬 스토리지에 user와 accessToken을 삭제
-                localStorage.removeItem("user");
-                localStorage.removeItem("accessToken");
+                // 로컬 스토리지에 user와 token을 삭제
+                localStorage.removeItem("userId");
+                localStorage.removeItem("token");
                 // Axios 설정 변경 (기본 요청 헤더에 Authorization을 추가)
                 removeAuthHeader();
             }
         }
-    }), [user, accessToken];
+    }, [user, token]);
 
     // Axios 및 전역 상태가 설정 중일 경우 UI를 보여주지 않음
     if(isLoading) {
