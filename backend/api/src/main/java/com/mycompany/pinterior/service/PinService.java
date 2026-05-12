@@ -253,67 +253,65 @@ public class PinService {
 
 	// 핀 태그 검색
 	public PinSearchListResponseDto searchPins(String keyword, String cursor, int size) {
-	    Long cursorId = CursorUtil.decode(cursor);
 
-	    // size + 1로 조회해서 다음 페이지 존재 여부 체크
-	    List<PinSearchResponseDto> pins = pinDao.searchByKeyword(keyword, cursorId, size + 1);
+		// RANDOM 체크를 decode보다 먼저 수행
+		if ("RANDOM".equals(cursor)) {
+			List<PinSearchResponseDto> randomPins = pinDao.selectRandomPins(size);
+			convertTags(randomPins);
+			return new PinSearchListResponseDto(randomPins, null, false, true);
+		}
 
-	    boolean hasNext = pins.size() > size;
-	    if (hasNext) {
-	        pins = pins.subList(0, size);
-	    }
+		Long cursorId = CursorUtil.decode(cursor);
 
-	    // 태그 변환
-	    convertTags(pins);
+		List<PinSearchResponseDto> pins = pinDao.searchByKeyword(keyword, cursorId, size + 1);
 
-	    // 검색 결과 있을 때
-	    if (!pins.isEmpty()) {
-	        String nextCursor = null;
-	        if (hasNext) {
-	            nextCursor = CursorUtil.encode(pins.get(pins.size() - 1).getPinId());
-	        }
-	        return new PinSearchListResponseDto(pins, nextCursor, hasNext, false);
-	    }
+		boolean hasNext = pins.size() > size;
+		if (hasNext) {
+			pins = pins.subList(0, size);
+		}
 
-	    // 검색 결과 없을 때 → cursor가 "RANDOM"이면 랜덤 핀 반환
-	    if ("RANDOM".equals(cursor)) {
-	        List<PinSearchResponseDto> randomPins = pinDao.selectRandomPins(size);
-	        convertTags(randomPins);
-	        return new PinSearchListResponseDto(randomPins, null, false, true);
-	    }
+		convertTags(pins);
 
-	    // 좋아요 순 핀 조회 (커서 페이징)
-	    Long likedCursorId = null;
-	    if (cursor != null && !"RANDOM".equals(cursor)) {
-	        likedCursorId = CursorUtil.decode(cursor);
-	    }
-	    List<PinSearchResponseDto> topLikedPins = pinDao.selectTopLikedPins(likedCursorId, size + 1);
+		// 검색 결과 있을 때
+		if (!pins.isEmpty()) {
+			String nextCursor = null;
+			if (hasNext) {
+				nextCursor = CursorUtil.encode(pins.get(pins.size() - 1).getPinId());
+			}
+			return new PinSearchListResponseDto(pins, nextCursor, hasNext, false);
+		}
 
-	    boolean likedHasNext = topLikedPins.size() > size;
-	    if (likedHasNext) {
-	        topLikedPins = topLikedPins.subList(0, size);
-	    }
+		// 검색 결과 없을 때 → 좋아요 순 페이징
+		long[] likedCursor = CursorUtil.decodeLike(cursor);
+		Long cursorLikeCount = likedCursor != null ? likedCursor[0] : null;
+		Long cursorPinId = likedCursor != null ? likedCursor[1] : null;
 
-	    convertTags(topLikedPins);
+		List<PinSearchResponseDto> topLikedPins = pinDao.selectTopLikedPins(cursorLikeCount, cursorPinId, size + 1);
 
-	    // 좋아요 핀 다 소진됐으면 다음 커서를 "RANDOM"으로
-	    if (!likedHasNext) {
-	        return new PinSearchListResponseDto(topLikedPins, "RANDOM", true, true);
-	    }
+		boolean likedHasNext = topLikedPins.size() > size;
+		if (likedHasNext) {
+			topLikedPins = topLikedPins.subList(0, size);
+		}
 
-	    // 좋아요 핀 아직 남아있으면 커서 페이징 유지
-	    String nextCursor = CursorUtil.encode(topLikedPins.get(topLikedPins.size() - 1).getPinId());
-	    return new PinSearchListResponseDto(topLikedPins, nextCursor, true, true);
+		convertTags(topLikedPins);
+
+		if (!likedHasNext) {
+			return new PinSearchListResponseDto(topLikedPins, "RANDOM", true, true);
+		}
+
+		PinSearchResponseDto last = topLikedPins.get(topLikedPins.size() - 1);
+		String nextCursor = CursorUtil.encodeLike(last.getLikeCount(), last.getPinId());
+		return new PinSearchListResponseDto(topLikedPins, nextCursor, true, true);
 	}
 
 	// 태그 문자열 → 리스트 변환 공통 메서드
 	private void convertTags(List<PinSearchResponseDto> pins) {
-	    for (PinSearchResponseDto pin : pins) {
-	        if (pin.getTags() != null && !pin.getTags().isEmpty()) {
-	            pin.setTagList(Arrays.asList(pin.getTags().split(",")));
-	        } else {
-	            pin.setTagList(Collections.emptyList());
-	        }
-	    }
+		for (PinSearchResponseDto pin : pins) {
+			if (pin.getTags() != null && !pin.getTags().isEmpty()) {
+				pin.setTagList(Arrays.asList(pin.getTags().split(",")));
+			} else {
+				pin.setTagList(Collections.emptyList());
+			}
+		}
 	}
 }
