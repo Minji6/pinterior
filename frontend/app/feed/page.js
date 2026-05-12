@@ -3,8 +3,18 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
+// TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
 function getUserId() { return Number(localStorage.getItem('userId')); }
+
+function getColCount() {
+  const w = window.innerWidth;
+  if (w < 480) return 2;
+  if (w < 768) return 3;
+  if (w < 1024) return 4;
+  if (w < 1280) return 5;
+  return 6;
+}
 
 export default function FeedPage() {
   const router = useRouter();
@@ -15,6 +25,7 @@ export default function FeedPage() {
   const [saveModal, setSaveModal] = useState(null);
   const [boards, setBoards] = useState([]);
   const [savedMap, setSavedMap] = useState({});
+  const [colCount, setColCount] = useState(6);
 
   const bottomRef = useRef(null);
   const fetchingRef = useRef(false);
@@ -23,6 +34,10 @@ export default function FeedPage() {
 
   useEffect(() => {
     if (!localStorage.getItem('token')) router.replace('/login');
+    setColCount(getColCount());
+    const handleResize = () => setColCount(getColCount());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const fetchBoards = useCallback(async () => {
@@ -31,7 +46,9 @@ export default function FeedPage() {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       setBoards(res.data.data || []);
-    } catch (_) {}
+    } catch (error) {
+      console.error(error);
+    }
   }, []);
 
   const fetchPins = useCallback(async () => {
@@ -50,7 +67,9 @@ export default function FeedPage() {
       cursorRef.current = nextCursor;
       hasNextRef.current = more;
       setHasNext(more);
-    } catch (_) {
+    } catch (error) {
+      console.error(error);
+      alert('핀 목록을 불러오는 중 오류가 발생했습니다.');
     } finally {
       fetchingRef.current = false;
       setLoading(false);
@@ -85,7 +104,10 @@ export default function FeedPage() {
       });
       setSavedMap(prev => ({ ...prev, [pinId]: res.data.data.savedPinId }));
       setSaveModal(null);
-    } catch (_) {}
+    } catch (error) {
+      console.error(error);
+      alert('저장 중 오류가 발생했습니다.');
+    }
   };
 
   const handleUnsave = async (e, pinId) => {
@@ -97,12 +119,14 @@ export default function FeedPage() {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       setSavedMap(prev => { const n = { ...prev }; delete n[pinId]; return n; });
-    } catch (_) {}
+    } catch (error) {
+      console.error(error);
+      alert('저장 해제 중 오류가 발생했습니다.');
+    }
   };
 
-  const COL_COUNT = 6;
-  const columns = Array.from({ length: COL_COUNT }, () => []);
-  pins.forEach((pin, i) => columns[i % COL_COUNT].push(pin));
+  const columns = Array.from({ length: colCount }, () => []);
+  pins.forEach((pin, i) => columns[i % colCount].push(pin));
 
   return (
     <div style={{ padding: '4px 4px 0', backgroundColor: '#fff' }}>

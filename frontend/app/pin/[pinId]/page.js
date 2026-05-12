@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart } from 'lucide-react';
 
+// TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
 function getUserId() { return Number(localStorage.getItem('userId')); }
 
@@ -29,7 +30,8 @@ export default function PinDetailPage() {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         setPin(res.data.data);
-      } catch (_) {
+      } catch (error) {
+        console.error(error);
         router.push('/feed');
       } finally {
         setLoading(false);
@@ -42,7 +44,9 @@ export default function PinDetailPage() {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         setBoards(res.data.data || []);
-      } catch (_) {}
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     fetchDetail();
@@ -65,7 +69,10 @@ export default function PinDetailPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
-    } catch (_) {}
+    } catch (error) {
+      console.error(error);
+      alert('다운로드 중 오류가 발생했습니다.');
+    }
   };
 
   const handleDelete = async () => {
@@ -76,7 +83,9 @@ export default function PinDetailPage() {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       router.push('/feed');
-    } catch (_) {
+    } catch (error) {
+      console.error(error);
+      alert('삭제 중 오류가 발생했습니다.');
       setDeleting(false);
     }
   };
@@ -90,7 +99,10 @@ export default function PinDetailPage() {
       });
       setSavedPinId(res.data.data.savedPinId);
       setShowBoardModal(false);
-    } catch (_) {}
+    } catch (error) {
+      console.error(error);
+      alert('저장 중 오류가 발생했습니다.');
+    }
   };
 
   const handleUnsave = async () => {
@@ -100,7 +112,10 @@ export default function PinDetailPage() {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       setSavedPinId(null);
-    } catch (_) {}
+    } catch (error) {
+      console.error(error);
+      alert('저장 해제 중 오류가 발생했습니다.');
+    }
   };
 
   if (loading) {
