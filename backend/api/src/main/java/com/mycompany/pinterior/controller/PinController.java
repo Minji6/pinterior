@@ -3,6 +3,7 @@ package com.mycompany.pinterior.controller;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.PinCreateRequestDto;
 import com.mycompany.pinterior.dto.PinCreateResponseDto;
@@ -39,7 +41,10 @@ import lombok.extern.slf4j.Slf4j;
 public class PinController {
 	@Autowired
 	private PinService pinService;
-
+	
+	@Autowired
+	private PinDao pinDao;
+	
 	@PostMapping("")
 	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@Valid @ModelAttribute PinCreateRequestDto request,
 			@RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
@@ -138,4 +143,17 @@ public class PinController {
 
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));
 	}
+	
+	// 핀 이미지 반환
+	@GetMapping("/{pinId}/image")
+	public ResponseEntity<byte[]> getImage(@PathVariable("pinId") Long pinId) {
+	    Pin pin = pinDao.selectImageDataByPinId(pinId);
+	    if (pin == null || pin.getImageData() == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.IMAGE_JPEG)
+	            .body(pin.getImageData());
+	}
+	
 }

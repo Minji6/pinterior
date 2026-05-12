@@ -11,10 +11,8 @@ export default function AppHeader() {
     const [mounted, setMounted] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState('');
-    const [loginHover, setLoginHover] = useState(false);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
@@ -22,7 +20,15 @@ export default function AppHeader() {
 
     const token = localStorage.getItem('token');
     const nickname = localStorage.getItem('nickname') || '';
-    const profileImg = localStorage.getItem('profileImg') || '';
+    const rawProfileImg = localStorage.getItem('profileImg') || '';
+
+    // /api/users/5/image → /api/users/5/image/view 변환
+    const profileImg = rawProfileImg
+        ? rawProfileImg.replace(
+              /\/api\/users\/(\d+)\/image$/,
+              '/api/users/$1/image/view'
+          )
+        : '';
 
     const handleLogout = async () => {
         try {
@@ -39,7 +45,7 @@ export default function AppHeader() {
 
     const handleProfileEdit = () => {
         setShowDropdown(false);
-        router.push('/profile/edit');
+        router.push('/mypage');
     };
 
     if (!token) {
@@ -52,16 +58,8 @@ export default function AppHeader() {
                 </Link>
                 <button
                     className="btn fw-bold px-4 py-2"
-                    style={{
-                        backgroundColor: loginHover ? '#c0001a' : '#E60023',
-                        color: '#fff',
-                        borderRadius: '24px',
-                        border: 'none',
-                        transition: 'background-color 0.18s',
-                    }}
+                    style={{ backgroundColor: '#E60023', color: '#fff', borderRadius: '24px', border: 'none' }}
                     onClick={() => router.push('/login')}
-                    onMouseEnter={() => setLoginHover(true)}
-                    onMouseLeave={() => setLoginHover(false)}
                 >
                     로그인
                 </button>
@@ -87,13 +85,12 @@ export default function AppHeader() {
                     style={{ border: 'none', background: 'transparent' }}
                 >
                     {profileImg ? (
-                        <Image
+                        <img
                             src={profileImg}
                             alt="profile"
                             width={36}
                             height={36}
-                            className="rounded-circle"
-                            style={{ objectFit: 'cover' }}
+                            style={{ borderRadius: '50%', objectFit: 'cover', width: '36px', height: '36px' }}
                         />
                     ) : (
                         <div

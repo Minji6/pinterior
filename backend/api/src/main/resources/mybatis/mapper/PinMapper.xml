@@ -3,19 +3,25 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.mycompany.pinterior.dao.PinDao">
-
+	
+	<resultMap id="pinResultMap"
+		type="com.mycompany.pinterior.entity.Pin">
+		<result property="imageData" column="image_data"
+			jdbcType="BLOB" javaType="[B" />
+	</resultMap>
+	
 	<insert id="insert"
 		parameterType="com.mycompany.pinterior.entity.Pin">
 		<selectKey keyProperty="pinId" resultType="long"
 			order="BEFORE">
 			SELECT pin_seq.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO pin (pin_id, user_id, title, description,
-		image_url,
-		link_url, created_at)
-		VALUES (#{pinId}, #{userId}, #{title},
-		#{description},
-		#{imageUrl}, #{linkUrl}, SYSDATE)
+		INSERT INTO pin (pin_id, user_id, title, description, image_url,
+		image_data, link_url, created_at)
+		VALUES (#{pinId}, #{userId},
+		#{title}, #{description}, #{imageUrl},
+		#{imageData, jdbcType=BLOB},
+		#{linkUrl}, SYSDATE)
 	</insert>
 
 	<select id="selectById" parameterType="long"
@@ -146,54 +152,72 @@
 	</select>
 
 	<!-- 랜덤 핀 조회 -->
-	<!-- 랜덤 핀 조회 (좋아요 0인 핀만 대상)
-     검색 결과 없을 때 추천 핀 2단계로 사용:
-     1단계: selectTopLikedPins - 좋아요 수 기준 상위 핀 (커서 페이징)
-     2단계: selectRandomPins - 좋아요 0인 핀 랜덤 반환 (cursor="RANDOM" 요청 시)
-	-->
+	<!-- 랜덤 핀 조회 (좋아요 0인 핀만 대상) 검색 결과 없을 때 추천 핀 2단계로 사용: 1단계: selectTopLikedPins 
+		- 좋아요 수 기준 상위 핀 (커서 페이징) 2단계: selectRandomPins - 좋아요 0인 핀 랜덤 반환 (cursor="RANDOM" 
+		요청 시) -->
 	<select id="selectRandomPins"
-	    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
-	    SELECT p.pin_id,
-	           p.image_url,
-	           p.title,
-	           p.created_at,
-	           LISTAGG(t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags
-	    FROM pin p
-	    LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
-	    LEFT JOIN tag t ON pt.tag_id = t.tag_id
-	    LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
-	    GROUP BY p.pin_id, p.image_url, p.title, p.created_at
-	    HAVING COUNT(pl.pin_id) = 0
-	    ORDER BY DBMS_RANDOM.VALUE
-	    FETCH FIRST #{size} ROWS ONLY
+		resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
+		SELECT p.pin_id,
+		p.image_url,
+		p.title,
+		p.created_at,
+		LISTAGG(t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags
+		FROM pin p
+		LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
+		LEFT JOIN tag t
+		ON pt.tag_id = t.tag_id
+		LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
+		GROUP BY p.pin_id, p.image_url, p.title, p.created_at
+		HAVING
+		COUNT(pl.pin_id) = 0
+		ORDER BY DBMS_RANDOM.VALUE
+		FETCH FIRST #{size} ROWS
+		ONLY
 	</select>
 
 	<!-- 좋아요 기준 상위 핀 조회 -->
 	<select id="selectTopLikedPins"
-    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
-	    SELECT *
-	    FROM (
-	        SELECT p.pin_id,
-	               p.image_url,
-	               p.title,
-	               p.created_at,
-	               LISTAGG(DISTINCT t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name) AS tags,
-	               COUNT(DISTINCT pl.user_id) AS like_count
-	        FROM pin p
-	        LEFT JOIN pin_tag pt ON p.pin_id = pt.pin_id
-	        LEFT JOIN tag t ON pt.tag_id = t.tag_id
-	        LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
-	        GROUP BY p.pin_id, p.image_url, p.title, p.created_at
-	        HAVING COUNT(DISTINCT pl.user_id) > 0
-	    )
-	    <where>
-	        <if test="cursorLikeCount != null and cursorPinId != null">
-	            (like_count &lt; #{cursorLikeCount})
-	            OR (like_count = #{cursorLikeCount} AND pin_id &lt; #{cursorPinId})
-	        </if>
-	    </where>
-	    ORDER BY like_count DESC, pin_id DESC
-	    FETCH FIRST #{size} ROWS ONLY
+		resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
+		SELECT *
+		FROM (
+		SELECT p.pin_id,
+		p.image_url,
+		p.title,
+		p.created_at,
+		LISTAGG(DISTINCT t.tag_name, ',') WITHIN GROUP (ORDER BY t.tag_name)
+		AS tags,
+		COUNT(DISTINCT pl.user_id) AS like_count
+		FROM pin p
+		LEFT JOIN
+		pin_tag pt ON p.pin_id = pt.pin_id
+		LEFT JOIN tag t ON pt.tag_id =
+		t.tag_id
+		LEFT JOIN pin_like pl ON p.pin_id = pl.pin_id
+		GROUP BY
+		p.pin_id, p.image_url, p.title, p.created_at
+		HAVING COUNT(DISTINCT
+		pl.user_id) > 0
+		)
+		<where>
+			<if test="cursorLikeCount != null and cursorPinId != null">
+				(like_count &lt; #{cursorLikeCount})
+				OR (like_count =
+				#{cursorLikeCount} AND pin_id &lt; #{cursorPinId})
+			</if>
+		</where>
+		ORDER BY like_count DESC, pin_id DESC
+		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
+	<update id="updateImageUrl">
+		UPDATE pin
+		SET image_url = #{imageUrl}
+		WHERE pin_id =
+		#{pinId}
+	</update>
+
+	<select id="selectImageDataByPinId" parameterType="long"
+		resultMap="pinResultMap">
+		SELECT image_data FROM pin WHERE pin_id = #{pinId}
+	</select>
 </mapper>
