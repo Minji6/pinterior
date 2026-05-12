@@ -1,18 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-
-// ─── 더미 데이터 ─────────────────────────────────────────────
-const DUMMY_BOARDS = [
-  { boardId: 1, boardName: "첫번째핀", pinCount: 2, updatedAt: "33분", thumbnails: ["/sample1.jpg", "/sample2.jpg", "/sample3.jpg"] },
-  { boardId: 2, boardName: "1234", pinCount: 0, updatedAt: "1시간", thumbnails: [] },
-];
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 // ─── 보드 카드 ───────────────────────────────────────────────
 function BoardCard({ board }) {
   const [hover, setHover] = useState(false);
-  const t = board.thumbnails;
+  const t = board.thumbnails || [];
 
   return (
     <div
@@ -56,11 +51,13 @@ function BoardCard({ board }) {
 }
 
 // ─── 만들기 카드 ─────────────────────────────────────────────
-function CreateCard() {
+function CreateCard({ onOpen }) {
   return (
     <div style={{ width: 236, cursor: "pointer" }}>
       <div style={{ height: 160, borderRadius: 16, backgroundColor: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span className="btn btn-light btn-sm rounded-pill px-3 fw-semibold" style={{ fontSize: 14 }}>만들기</span>
+        <span className="btn btn-light btn-sm rounded-pill px-3 fw-semibold" style={{ fontSize: 14 }} onClick={onOpen}>
+          만들기
+        </span>
       </div>
     </div>
   );
@@ -69,6 +66,30 @@ function CreateCard() {
 // ─── 메인 ───────────────────────────────────────────────────
 export default function BoardListContent() {
   const [activeTab, setActiveTab] = useState("board");
+  const [showModal, setShowModal] = useState(false);
+  const [boards, setBoards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      router.push('/login');
+      return;
+    }
+    axios.get(`/api/boards/user/${userId}`)
+      .then((res) => {
+        setBoards(res.data.data);
+      })
+      .catch((err) => {
+        setError(err.response?.data?.message || '보드 목록을 불러오지 못했습니다.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
 
   return (
     <div className="px-4 py-4" style={{ fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -87,16 +108,16 @@ export default function BoardListContent() {
 
       {/* 탭 */}
       <ul className="nav gap-1 mb-3" style={{ borderBottom: "1px solid #ddd" }}>
-        {[{ key: "pin", label: "핀" }, { key: "board", label: "보드" }].map(({ key, label }) => (
+        {[{ key: "pin", label: "핀", href: "/saved-pins" }, { key: "board", label: "보드", href: "/boards" }].map(({ key, label, href }) => (
           <li key={key} className="nav-item">
             <button
               className="nav-link px-3 pb-2"
               style={{
-                border: "none", background: "none", fontWeight: activeTab === key ? 700 : 500,
-                color: activeTab === key ? "#111" : "#767676",
-                borderBottom: activeTab === key ? "2px solid #111" : "2px solid transparent",
+                border: "none", background: "none", fontWeight: key === "board" ? 700 : 500,
+                color: key === "board" ? "#111" : "#767676",
+                borderBottom: key === "board" ? "2px solid #111" : "2px solid transparent",
               }}
-              onClick={() => setActiveTab(key)}
+              onClick={() => router.push(href)}
             >
               {label}
             </button>
@@ -104,22 +125,55 @@ export default function BoardListContent() {
         ))}
       </ul>
 
+
       {/* 보드 탭 */}
       {activeTab === "board" && (
         <>
           {/* 만들기 버튼 */}
           <div className="d-flex justify-content-end mb-3">
-            <button className="btn btn-danger rounded-pill px-4 fw-bold" style={{ fontSize: 15 }}>만들기</button>
+            <button className="btn btn-danger rounded-pill px-4 fw-bold" style={{ fontSize: 15 }} onClick={() => setShowModal(true)}>
+              만들기
+            </button>
           </div>
 
           {/* 보드 그리드 */}
           <div className="d-flex flex-wrap gap-3">
-            {DUMMY_BOARDS.map((board) => (
+            {boards.map((board) => (
               <BoardCard key={board.boardId} board={board} />
             ))}
-            <CreateCard />
+            <CreateCard onOpen={setShowModal} />
           </div>
         </>
+      )}
+
+      {/* 모달 */}
+      {showModal && (
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content rounded-4 p-3">
+
+              <div className="modal-header border-0">
+                <h5 className="modal-title fw-bold">보드 만들기</h5>
+                <button className="btn-close" onClick={() => setShowModal(false)} />
+              </div>
+
+              <div className="modal-body">
+                <label className="form-label fw-semibold">보드 이름 *</label>
+                <input className="form-control mb-3" placeholder="보드 이름을 입력하세요" maxLength={50} />
+                <label className="form-label fw-semibold">설명 (선택)</label>
+                <input className="form-control" placeholder="보드 설명을 입력하세요" />
+              </div>
+
+              <div className="modal-footer border-0">
+                <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setShowModal(false)}>
+                  취소
+                </button>
+                <button className="btn btn-dark rounded-pill px-4">생성</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
