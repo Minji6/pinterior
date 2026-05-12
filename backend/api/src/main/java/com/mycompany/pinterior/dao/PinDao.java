@@ -59,9 +59,10 @@ public interface PinDao {
 	
 	// 좋아요 수 기준 상위 핀 조회
 	List<PinSearchResponseDto> selectTopLikedPins(
-		    @Param("cursorId") Long cursorId,
+		    @Param("cursorLikeCount") Long cursorLikeCount,
+		    @Param("cursorPinId") Long cursorPinId,
 		    @Param("size") int size
-		);
+	);
 	
 	// 랜덤 핀 조회
 	List<PinSearchResponseDto> selectRandomPins(@Param("size") int size);
