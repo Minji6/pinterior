@@ -1,11 +1,15 @@
 package com.mycompany.pinterior.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
+import com.mycompany.pinterior.dao.UserDao;
 import com.mycompany.pinterior.dto.SavedPinCreateRequestDto;
+import com.mycompany.pinterior.dto.SavedPinListResponseDto;
 import com.mycompany.pinterior.dto.SavedPinResponseDto;
 import com.mycompany.pinterior.entity.SavedPin;
 import com.mycompany.pinterior.exception.ApiException;
@@ -16,6 +20,8 @@ public class SavedPinService {
 	private SavedPinDao savedPinDao;
 	@Autowired
 	private PinDao pinDao;
+	@Autowired
+	private UserDao userDao;
 
 	public SavedPinResponseDto save(Long userId, SavedPinCreateRequestDto request) {
 		Long pinId = request.getPinId();
@@ -74,5 +80,25 @@ public class SavedPinService {
 		}
 
 		savedPinDao.deleteSavedPin(savedPinId);
+	}
+	
+	// 저장된 핀 조회
+	public List<SavedPinListResponseDto> getSavedPinList(Long userId, Long loginUserId) {
+
+		// 유저 존재 여부 확인 (존재하지 않을 경우 404)
+		if (userDao.findById(userId) == null) {
+			throw new ApiException(404, "존재하지 않는 유저입니다.");
+		}
+
+		if (!loginUserId.equals(userId)) {
+			throw new ApiException(403, "해당 유저의 저장 핀을 조회할 권한이 없습니다.");
+		}
+	
+		
+		
+		// 조회
+		List<SavedPinListResponseDto> result = savedPinDao.selectSavedPinsByUserId(userId);
+
+		return result;
 	}
 }
