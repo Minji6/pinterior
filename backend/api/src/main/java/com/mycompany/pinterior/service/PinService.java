@@ -50,9 +50,6 @@ public class PinService {
 	@Autowired
 	private PinLikeDao pinLikeDao;
 
-	@Autowired
-	private UserDao userDao;
-
 	@Value("${file.upload.path}")
 	private String uploadPath;
 
@@ -251,26 +248,7 @@ public class PinService {
 
 	}
 
-	
-	// 저장된 핀 조회
-	public List<SavedPinListResponseDto> getSavedPinList(Long userId, Long loginUserId) {
-		
 
-		if (!loginUserId.equals(userId)) {
-			throw new ApiException(403, "해당 유저의 저장 핀을 조회할 권한이 없습니다.");
-		}
-	
-		
-		// 유저 존재 여부 확인 (존재하지 않을 경우 404)
-		if (userDao.findById(userId) == null) {
-			throw new ApiException(404, "존재하지 않는 유저입니다.");
-		}
-		
-		// 조회
-		List<SavedPinListResponseDto> result = savedPinDao.selectSavedPinsByUserId(userId);
-
-		return result;
-	}
 }
 
 

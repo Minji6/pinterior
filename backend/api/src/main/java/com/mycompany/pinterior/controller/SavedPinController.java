@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +17,6 @@ import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.SavedPinCreateRequestDto;
 import com.mycompany.pinterior.dto.SavedPinListResponseDto;
 import com.mycompany.pinterior.dto.SavedPinResponseDto;
-import com.mycompany.pinterior.security.JwtTokenProvider;
 import com.mycompany.pinterior.service.PinService;
 import com.mycompany.pinterior.service.SavedPinService;
 
@@ -59,7 +57,7 @@ public class SavedPinController {
 	    Long loginUserId = (Long) SecurityContextHolder.getContext()
 	            .getAuthentication()
 	            .getPrincipal();
-	    List<SavedPinListResponseDto> data = pinService.getSavedPinList(userId, loginUserId);
+	    List<SavedPinListResponseDto> data = savedPinService.getSavedPinList(userId, loginUserId);
 	    return ResponseEntity.ok(ApiResponse.of(200, "저장된 핀 목록 조회 성공", data));
 	}
 
