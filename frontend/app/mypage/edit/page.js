@@ -71,6 +71,7 @@ export default function ProfileEditPage() {
       setPreviewImg(null);
       setSelectedFile(null);
       setProfile((prev) => ({ ...prev, profileImg: null }));
+      localStorage.removeItem('profileImg');
     } else {
       alert(json.message);
     }
