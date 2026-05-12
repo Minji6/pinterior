@@ -67,5 +67,9 @@ public interface PinDao {
 	// 랜덤 핀 조회
 	List<PinSearchResponseDto> selectRandomPins(@Param("size") int size);
 	
-
+	// 핀 blob 방식으로 넣기
+	int updateImageUrl(@Param("pinId") Long pinId, @Param("imageUrl") String imageUrl);
+	
+	// 핀 이미지 반환
+	Pin selectImageDataByPinId(Long pinId);
 }

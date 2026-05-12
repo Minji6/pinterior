@@ -66,21 +66,24 @@ public class PinService {
 		log.info("boardId: {}", boardId);
 		// 이미지 저장
 		if (image != null && !image.isEmpty()) {
-			log.info("이미지 있음: {}", image.getOriginalFilename());
-			String ext = image.getOriginalFilename()
-			        .substring(image.getOriginalFilename().lastIndexOf("."));
-			String fileName = UUID.randomUUID().toString() + ext;
-			Path savePath = Paths.get(uploadPath + fileName);
-			Files.createDirectories(savePath.getParent());
-			Files.write(savePath, image.getBytes());
-			pin.setImageUrl(uploadUrl + fileName);
-			log.info("imageUrl: {}", pin.getImageUrl());
-		} else {
-			log.info("이미지 없음");
+		    byte[] imageBytes;
+		    try {
+		        imageBytes = image.getBytes();
+		    } catch (IOException e) {
+		        throw new ApiException(500, "서버 에러가 발생했습니다.");
+		    }
+		    pin.setImageData(imageBytes);
 		}
 
-		// 핀 등록
+		// 핀 등록 (여기서 pinId가 채워짐)
 		pinDao.insert(pin);
+
+		// insert 후에 pinId로 URL 세팅
+		if (pin.getImageData() != null) {
+		    String imageUrl = "/api/pins/" + pin.getPinId() + "/image";
+		    pin.setImageUrl(imageUrl);
+		    pinDao.updateImageUrl(pin.getPinId(), imageUrl);
+		}
 		log.info("날짜 조회: ", pin.getCreatedAt());
 
 		// DB에서 다시 조회 (createdAt 채우기)
