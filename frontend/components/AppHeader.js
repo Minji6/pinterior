@@ -11,6 +11,7 @@ export default function AppHeader() {
     const [mounted, setMounted] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState('');
+    const [loginHover, setLoginHover] = useState(false);
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -51,8 +52,16 @@ export default function AppHeader() {
                 </Link>
                 <button
                     className="btn fw-bold px-4 py-2"
-                    style={{ backgroundColor: '#E60023', color: '#fff', borderRadius: '24px', border: 'none' }}
+                    style={{
+                        backgroundColor: loginHover ? '#c0001a' : '#E60023',
+                        color: '#fff',
+                        borderRadius: '24px',
+                        border: 'none',
+                        transition: 'background-color 0.18s',
+                    }}
                     onClick={() => router.push('/login')}
+                    onMouseEnter={() => setLoginHover(true)}
+                    onMouseLeave={() => setLoginHover(false)}
                 >
                     로그인
                 </button>
