@@ -67,29 +67,6 @@ function CreateCard({ onOpen }) {
 export default function BoardListContent() {
   const [activeTab, setActiveTab] = useState("board");
   const [showModal, setShowModal] = useState(false);
-  const [boards, setBoards] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const router = useRouter();
-
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      router.push('/login');
-      return;
-    }
-    axios.get(`/api/boards/user/${userId}`)
-      .then((res) => {
-        setBoards(res.data.data);
-      })
-      .catch((err) => {
-        setError(err.response?.data?.message || '보드 목록을 불러오지 못했습니다.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
 
   return (
     <div className="px-4 py-4" style={{ fontFamily: "'Noto Sans KR', sans-serif" }}>

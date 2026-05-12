@@ -49,6 +49,19 @@
 		WHERE saved_pin_id =
 		#{savedPinId}
 	</delete>
+	
+	<select id="selectSavedPinsByUserId">
+		SELECT
+		sp.saved_pin_id AS saved_pin_id,
+		sp.pin_id AS pin_id,
+		sp.board_id AS board_id,
+		p.image_url AS image_url,
+		p.title AS title,
+		sp.created_at AS created_at
+		FROM saved_pin sp
+		JOIN pin p ON sp.pin_id = p.pin_id
+		WHERE sp.user_id = #{userId}
+	</select>
 
 	<!-- 핀 ID로 저장된 핀 조회 -->
 	<select id="selectByPinId" parameterType="long"
