@@ -170,7 +170,7 @@
 
 	<!-- 좋아요 기준 상위 핀 조회 -->
 	<select id="selectTopLikedPins"
-	    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
+    resultType="com.mycompany.pinterior.dto.PinSearchResponseDto">
 	    SELECT *
 	    FROM (
 	        SELECT p.pin_id,
@@ -187,8 +187,9 @@
 	        HAVING COUNT(DISTINCT pl.user_id) > 0
 	    )
 	    <where>
-	        <if test="cursorId != null">
-	            pin_id &lt; #{cursorId}
+	        <if test="cursorLikeCount != null and cursorPinId != null">
+	            (like_count &lt; #{cursorLikeCount})
+	            OR (like_count = #{cursorLikeCount} AND pin_id &lt; #{cursorPinId})
 	        </if>
 	    </where>
 	    ORDER BY like_count DESC, pin_id DESC
