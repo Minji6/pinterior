@@ -7,7 +7,6 @@ import { Home, LayoutGrid, PlusCircle, Bell, MessageCircle, Settings } from 'luc
 
 
 export default function AppSidebar() {
-  const userId = localStorage.getItem('userId');
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
