@@ -24,6 +24,7 @@ import com.mycompany.pinterior.dto.PinCreateResponseDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
 import com.mycompany.pinterior.dto.PinDownloadResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchListResponseDto;
 import com.mycompany.pinterior.dto.PinUpdateRequestDto;
 import com.mycompany.pinterior.dto.PinUpdateResponseDto;
 import com.mycompany.pinterior.entity.Pin;
@@ -82,6 +83,29 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 목록 조회 성공", data));
 	}
 
+	// 핀 태그 검색
+	@GetMapping("/search")
+	public ResponseEntity<ApiResponse<PinSearchListResponseDto>> searchByKeyword(
+			@RequestParam("tag") String tag,
+			@RequestParam(value = "cursor", required = false) String cursor,
+			@RequestParam(value = "size", defaultValue = "20") int size) {
+
+		if (tag == null || tag.isBlank()) {
+			return ResponseEntity.badRequest()
+					.body(ApiResponse.of(400, "검색어를 입력해주세요.", null));
+		}
+
+		PinSearchListResponseDto data = pinService.searchPins(tag.trim(), cursor, size);
+
+		// 검색 결과가 없을 때 -> 안내 메세지
+		if (data.isRecommended()) {
+			String message = tag.trim() + "과(와) 관련하여 저장된 핀을 찾을 수 없습니다.";
+			return ResponseEntity.ok(ApiResponse.of(200, message, data));
+		}
+
+		return ResponseEntity.ok(ApiResponse.of(200, "핀 검색 성공", data));
+	}
+
 	// 상세 조회
 	@GetMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<PinDetailResponseDto>> getPinDetail(@PathVariable("pinId") Long pinId) {
@@ -91,16 +115,15 @@ public class PinController {
 	}
 
 	@PutMapping("/{pinId}")
-	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(
-	        @PathVariable("pinId") Long pinId,
-	        @Valid @RequestBody PinUpdateRequestDto request) {
+	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(@PathVariable("pinId") Long pinId,
+			@Valid @RequestBody PinUpdateRequestDto request) {
 
-	    PinUpdateResponseDto data = pinService.updatePin(pinId, request);
+		PinUpdateResponseDto data = pinService.updatePin(pinId, request);
 
-	    return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
+		return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
 	}
-	
-	//이미지 다운로드
+
+	// 이미지 다운로드
 	@GetMapping("/{pinId}/download")
 	public ResponseEntity<ApiResponse<PinDownloadResponseDto>> downdloadPin(@PathVariable("pinId") Long pinId) {
 		PinDownloadResponseDto data = pinService.getDownloadUrl(pinId);
@@ -110,11 +133,9 @@ public class PinController {
 	// 핀 삭제
 	@DeleteMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<Void>> deletePin(@PathVariable("pinId") Long pinId) {
-		Long userId = (Long) SecurityContextHolder.getContext()
-				.getAuthentication()
-				.getPrincipal();
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		pinService.deletePin(pinId, userId);
-		
-	    return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));
+
+		return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));
 	}
 }

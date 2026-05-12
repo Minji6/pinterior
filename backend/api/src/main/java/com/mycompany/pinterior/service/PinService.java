@@ -1,5 +1,7 @@
 package com.mycompany.pinterior.service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.entity.SavedPin;
 import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchResponseDto;
 import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.dto.AuthorDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
@@ -47,9 +51,8 @@ public class PinService {
 	@Autowired
 	private PinTagDao pinTagDao;
 	@Autowired
-
 	private SavedPinDao savedPinDao;
-
+	@Autowired
 	private PinLikeDao pinLikeDao;
 
 	@Value("${file.upload.path}")
@@ -248,5 +251,69 @@ public class PinService {
 		// 삭제
 		pinDao.deletePin(pinId);
 
+	}
+
+	// 핀 태그 검색
+	public PinSearchListResponseDto searchPins(String keyword, String cursor, int size) {
+
+		// RANDOM 체크를 decode보다 먼저 수행
+		if ("RANDOM".equals(cursor)) {
+			List<PinSearchResponseDto> randomPins = pinDao.selectRandomPins(size);
+			convertTags(randomPins);
+			return new PinSearchListResponseDto(randomPins, null, false, true);
+		}
+
+		Long cursorId = CursorUtil.decode(cursor);
+
+		List<PinSearchResponseDto> pins = pinDao.searchByKeyword(keyword, cursorId, size + 1);
+
+		boolean hasNext = pins.size() > size;
+		if (hasNext) {
+			pins = pins.subList(0, size);
+		}
+
+		convertTags(pins);
+
+		// 검색 결과 있을 때
+		if (!pins.isEmpty()) {
+			String nextCursor = null;
+			if (hasNext) {
+				nextCursor = CursorUtil.encode(pins.get(pins.size() - 1).getPinId());
+			}
+			return new PinSearchListResponseDto(pins, nextCursor, hasNext, false);
+		}
+
+		// 검색 결과 없을 때 → 좋아요 순 페이징
+		long[] likedCursor = CursorUtil.decodeLike(cursor);
+		Long cursorLikeCount = likedCursor != null ? likedCursor[0] : null;
+		Long cursorPinId = likedCursor != null ? likedCursor[1] : null;
+
+		List<PinSearchResponseDto> topLikedPins = pinDao.selectTopLikedPins(cursorLikeCount, cursorPinId, size + 1);
+
+		boolean likedHasNext = topLikedPins.size() > size;
+		if (likedHasNext) {
+			topLikedPins = topLikedPins.subList(0, size);
+		}
+
+		convertTags(topLikedPins);
+
+		if (!likedHasNext) {
+			return new PinSearchListResponseDto(topLikedPins, "RANDOM", true, true);
+		}
+
+		PinSearchResponseDto last = topLikedPins.get(topLikedPins.size() - 1);
+		String nextCursor = CursorUtil.encodeLike(last.getLikeCount(), last.getPinId());
+		return new PinSearchListResponseDto(topLikedPins, nextCursor, true, true);
+	}
+
+	// 태그 문자열 → 리스트 변환 공통 메서드
+	private void convertTags(List<PinSearchResponseDto> pins) {
+		for (PinSearchResponseDto pin : pins) {
+			if (pin.getTags() != null && !pin.getTags().isEmpty()) {
+				pin.setTagList(Arrays.asList(pin.getTags().split(",")));
+			} else {
+				pin.setTagList(Collections.emptyList());
+			}
+		}
 	}
 }

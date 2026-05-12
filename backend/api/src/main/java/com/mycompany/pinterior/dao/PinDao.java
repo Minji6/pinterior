@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.mycompany.pinterior.dto.AuthorDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
+import com.mycompany.pinterior.dto.PinSearchResponseDto;
 import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.entity.Pin;
 
@@ -48,6 +49,23 @@ public interface PinDao {
 	
 	//  핀 삭제
 	int deletePin(@Param("pinId") Long pinId);
+	
+	// ===== 핀 태그 검색 =====
+	List<PinSearchResponseDto> searchByKeyword(
+			@Param("keyword") String keyword,
+			@Param("cursorId") Long cursorId,
+			@Param("size") int size
+	);
+	
+	// 좋아요 수 기준 상위 핀 조회
+	List<PinSearchResponseDto> selectTopLikedPins(
+		    @Param("cursorLikeCount") Long cursorLikeCount,
+		    @Param("cursorPinId") Long cursorPinId,
+		    @Param("size") int size
+	);
+	
+	// 랜덤 핀 조회
+	List<PinSearchResponseDto> selectRandomPins(@Param("size") int size);
 	
 
 }
