@@ -51,6 +51,8 @@ export default function FeedPage() {
     }
   }, []);
 
+  const [newPinIds] = useState(() => new Set());
+
   const fetchPins = useCallback(async () => {
     if (fetchingRef.current || !hasNextRef.current) return;
     fetchingRef.current = true;
@@ -63,7 +65,10 @@ export default function FeedPage() {
         params,
       });
       const { pins: next, nextCursor, hasNext: more } = res.data.data;
-      setPins(prev => [...prev, ...next]);
+      next.forEach(p => newPinIds.add(p.pinId));
+      requestAnimationFrame(() => {
+        setPins(prev => [...prev, ...next]);
+      });
       cursorRef.current = nextCursor;
       hasNextRef.current = more;
       setHasNext(more);
@@ -137,6 +142,7 @@ export default function FeedPage() {
               <PinCard
                 key={pin.pinId}
                 pin={pin}
+                isNew={newPinIds.has(pin.pinId)}
                 hovered={hoveredPin === pin.pinId}
                 saveModalOpen={saveModal === pin.pinId}
                 saved={!!savedMap[pin.pinId]}
@@ -174,15 +180,17 @@ export default function FeedPage() {
   );
 }
 
-function PinCard({ pin, hovered, saveModalOpen, saved, boards, onMouseEnter, onMouseLeave, onClick, onSaveClick, onUnsave, onBoardSelect }) {
+function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnter, onMouseLeave, onClick, onSaveClick, onUnsave, onBoardSelect }) {
   const minHeight = pin.imageUrl ? 'auto' : `${120 + (pin.pinId % 5) * 40}px`;
-  const [visible, setVisible] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(true);
+  const [visible, setVisible] = useState(!isNew);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isNew) {
+      const timer = setTimeout(() => setVisible(true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isNew]);
 
   return (
     <div
