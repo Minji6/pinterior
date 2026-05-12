@@ -45,6 +45,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        
+        if ("GET".equals(method) && path.matches("/api/pins/\\d+/image")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 토큰 없거나 유효하지 않으면 401
         if (token == null || !jwtTokenProvider.validateToken(token)) {
