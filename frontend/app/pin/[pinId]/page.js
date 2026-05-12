@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart } from 'lucide-react';
+import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -17,6 +18,8 @@ export default function PinDetailPage() {
   const [showBoardModal, setShowBoardModal] = useState(false);
   const [savedPinId, setSavedPinId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
     if (!localStorage.getItem('token')) {
@@ -30,6 +33,8 @@ export default function PinDetailPage() {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         setPin(res.data.data);
+        setLiked(res.data.data.liked);
+        setLikeCount(res.data.data.likeCount ?? 0);
       } catch (error) {
         console.error(error);
         router.push('/feed');
@@ -52,6 +57,27 @@ export default function PinDetailPage() {
     fetchDetail();
     fetchBoards();
   }, [pinId]);
+
+  const handleLike = async () => {
+    try {
+      if (liked) {
+        await axios.delete(`/api/pins/${pinId}/unlike`, {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        setLiked(false);
+        setLikeCount(prev => prev - 1);
+      } else {
+        await axios.post(`/api/pins/${pinId}/like`, {}, {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        setLiked(true);
+        setLikeCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('좋아요 처리 중 오류가 발생했습니다.');
+    }
+  };
 
   const handleDownload = async () => {
     try {
@@ -134,7 +160,8 @@ export default function PinDetailPage() {
 
   if (!pin) return null;
 
-  const isOwner = pin.author?.userId === getUserId();
+  const userId = getUserId();
+  const isOwner = pin.author?.userId === userId && userId !== 0;
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', minHeight: '100vh', padding: '32px 16px', backgroundColor: '#fff' }}>
@@ -185,10 +212,14 @@ export default function PinDetailPage() {
 
             {/* 좋아요 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <button style={iconBtnStyle} title="좋아요">
-                <Heart size={18} />
+              <button
+                onClick={handleLike}
+                style={{ ...iconBtnStyle, color: liked ? '#E60023' : '#333' }}
+                title="좋아요"
+              >
+                <Heart size={18} fill={liked ? '#E60023' : 'none'} />
               </button>
-              <span style={{ fontSize: '0.875rem', color: '#767676' }}>{pin.likeCount ?? 0}</span>
+              <span style={{ fontSize: '0.875rem', color: '#767676' }}>{likeCount}</span>
             </div>
 
             {/* 다운로드 */}
@@ -280,46 +311,10 @@ export default function PinDetailPage() {
   );
 }
 
-function BoardBtn({ label, onClick }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: '100%', textAlign: 'left', border: 'none',
-        backgroundColor: hovered ? '#f0f0f0' : 'transparent',
-        padding: '10px 8px', borderRadius: '8px',
-        cursor: 'pointer', fontSize: '0.9rem',
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
 const iconBtnStyle = {
   width: 40, height: 40, borderRadius: '50%',
   border: 'none', backgroundColor: '#efefef',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   cursor: 'pointer',
 };
-const saveBtnStyle = {
-  backgroundColor: '#E60023', color: '#fff',
-  border: 'none', borderRadius: '24px',
-  padding: '10px 20px', fontWeight: '700',
-  fontSize: '0.9rem', cursor: 'pointer',
-};
-const savedBtnStyle = {
-  backgroundColor: '#111', color: '#fff',
-  border: 'none', borderRadius: '24px',
-  padding: '10px 20px', fontWeight: '700',
-  fontSize: '0.9rem', cursor: 'pointer',
-};
-const boardModalStyle = {
-  position: 'absolute', top: '48px', right: 0,
-  backgroundColor: '#fff', borderRadius: '16px',
-  boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
-  padding: '12px', minWidth: '200px', zIndex: 100,
-};
+

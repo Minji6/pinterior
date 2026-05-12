@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from '../../components/PinStyles';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -51,7 +52,7 @@ export default function FeedPage() {
     }
   }, []);
 
-  const [newPinIds] = useState(() => new Set());
+  const newPinIds = useRef(new Set());
 
   const fetchPins = useCallback(async () => {
     if (fetchingRef.current || !hasNextRef.current) return;
@@ -65,7 +66,7 @@ export default function FeedPage() {
         params,
       });
       const { pins: next, nextCursor, hasNext: more } = res.data.data;
-      next.forEach(p => newPinIds.add(p.pinId));
+      next.forEach(p => newPinIds.current.add(p.pinId));
       requestAnimationFrame(() => {
         setPins(prev => [...prev, ...next]);
       });
@@ -142,7 +143,7 @@ export default function FeedPage() {
               <PinCard
                 key={pin.pinId}
                 pin={pin}
-                isNew={newPinIds.has(pin.pinId)}
+                isNew={newPinIds.current.has(pin.pinId)}
                 hovered={hoveredPin === pin.pinId}
                 saveModalOpen={saveModal === pin.pinId}
                 saved={!!savedMap[pin.pinId]}
@@ -211,10 +212,10 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
         {hovered && (
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }}>
             {saved ? (
-              <button onClick={onUnsave} style={savedBtnStyle}>저장됨</button>
+              <button onClick={onUnsave} style={{ ...savedBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장됨</button>
             ) : (
               <>
-                <button onClick={onSaveClick} style={saveBtnStyle}>저장</button>
+                <button onClick={onSaveClick} style={{ ...saveBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장</button>
                 {saveModalOpen && (
                   <div onClick={(e) => e.stopPropagation()} style={dropdownStyle}>
                     <p style={{ fontSize: '0.8rem', color: '#767676', margin: '0 0 6px', fontWeight: '600' }}>보드에 저장</p>
@@ -232,48 +233,7 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
           </div>
         )}
       </div>
-
-      {pin.title && null}
     </div>
   );
 }
 
-function BoardBtn({ label, onClick }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: '100%', textAlign: 'left', border: 'none',
-        backgroundColor: hovered ? '#f0f0f0' : 'transparent',
-        padding: '8px 4px', borderRadius: '8px',
-        cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500',
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-const saveBtnStyle = {
-  position: 'absolute', top: 8, right: 8,
-  backgroundColor: '#E60023', color: '#fff',
-  border: 'none', borderRadius: '24px',
-  padding: '8px 16px', fontWeight: '700',
-  fontSize: '0.875rem', cursor: 'pointer',
-};
-const savedBtnStyle = {
-  position: 'absolute', top: 8, right: 8,
-  backgroundColor: '#111', color: '#fff',
-  border: 'none', borderRadius: '24px',
-  padding: '8px 16px', fontWeight: '700',
-  fontSize: '0.875rem', cursor: 'pointer',
-};
-const dropdownStyle = {
-  position: 'absolute', top: 44, right: 8,
-  backgroundColor: '#fff', borderRadius: '16px',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-  padding: '12px', minWidth: '160px', zIndex: 10,
-};
