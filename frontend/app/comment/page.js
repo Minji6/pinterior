@@ -81,7 +81,10 @@ export default function CommentSection({ pinId }) {
     };
 
     return (
-        <div style={{ marginTop: '24px', borderTop: '1px solid #efefef', paddingTop: '20px' }}>
+        <div style={{ marginTop: '24px', borderTop: '1px solid #efefef', paddingTop: '16px', padding: '16px' }}>
+
+            {/* 댓글 목록 — 스크롤 가능 */}
+            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
 
             {/* 댓글 목록 */}
             {loading ? (
@@ -112,6 +115,8 @@ export default function CommentSection({ pinId }) {
                     ))}
                 </div>
             )}
+
+            </div>{/* 댓글 목록 스크롤 끝 */}
 
             {/* 댓글 입력창 — Pinterest 스타일 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
