@@ -180,7 +180,7 @@ export default function SearchPage() {
         <PinGrid
           pins={pins}
           onTagClick={handleTagClick}
-          onPinClick={(id) => router.push(`/pins/${id}`)}
+          onPinClick={(id) => router.push(`/pin/${id}`)}
         />
       )}
 
@@ -199,7 +199,7 @@ export default function SearchPage() {
               <PinGrid
                 pins={recommendedPins}
                 onTagClick={handleTagClick}
-                onPinClick={(id) => router.push(`/pins/${id}`)}
+                onPinClick={(id) => router.push(`/pin/${id}`)}
               />
             </div>
           )}
