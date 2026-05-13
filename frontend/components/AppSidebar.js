@@ -3,10 +3,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Home, LayoutGrid, PlusCircle, Bell, MessageCircle, Settings } from 'lucide-react';
+import { Home, LayoutGrid, PlusCircle, Settings } from 'lucide-react';
 
-
-export default function AppSidebar() {
+export default function AppSidebar({ onCreateClick }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
@@ -23,7 +22,6 @@ export default function AppSidebar() {
   const menuItems = [
     { href: '/feed', icon: <Home size={24} />, label: '홈' },
     { href: '/saved-pins', icon: <LayoutGrid size={24} />, label: '보드' },
-    { href: '/pin/create', icon: <PlusCircle size={24} />, label: '만들기' },
   ];
 
   return (
@@ -45,6 +43,17 @@ export default function AppSidebar() {
           {item.icon}
         </Link>
       ))}
+
+      {/* 만들기 버튼 — 부모에서 전달받은 onCreateClick 호출 */}
+      <button
+        onClick={onCreateClick}
+        title="만들기"
+        className="d-flex align-items-center justify-content-center mb-2 border-0 bg-transparent rounded-3"
+        style={{ width: '48px', height: '48px', cursor: 'pointer' }}
+      >
+        <PlusCircle size={24} />
+      </button>
+
       <div className="mt-auto">
         <Link
           href="/feed"
