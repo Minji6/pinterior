@@ -12,7 +12,7 @@
 		INSERT INTO board 
 		(board_id, user_id, board_name, board_info, created_at, updated_at)
 		VALUES 
-		(#{boardId}, #{userId}, #{boardName}, #{boardInfo}, SYSDATE, SYSDATE)
+		(#{boardId}, #{userId}, #{boardName}, #{boardInfo}, SYSTIMESTAMP AT TIME ZONE 'Asia/Seoul', SYSTIMESTAMP AT TIME ZONE 'Asia/Seoul')
 	</insert>
 
 	<!-- 보드 선택 (보드ID가 일치하는 경우) -->
