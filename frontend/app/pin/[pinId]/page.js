@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart, Pencil } from 'lucide-react';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
+import CommentSection from '../../comment/page';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -311,6 +312,9 @@ export default function PinDetailPage() {
               ))}
             </div>
           )}
+
+          {/* 댓글 섹션 */}
+          <CommentSection pinId={pinId} />
 
         </div>
       </div>
