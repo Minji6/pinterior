@@ -5,6 +5,9 @@ import { X, Bookmark, LayoutGrid, Layers } from 'lucide-react';
 const CreatePanel = ({ isOpen, onClose }) => {
     const router = useRouter();
 
+    // 닫혀있으면 DOM에서 완전히 제거 — 클릭 가로채기 원천 차단
+    if (!isOpen) return null;
+
     const menuItems = [
         {
             icon: <Bookmark size={22} color="#fff" />,
@@ -39,48 +42,51 @@ const CreatePanel = ({ isOpen, onClose }) => {
 
     return (
         <>
-            {/* 배경 오버레이 */}
-            {isOpen && (
-                <div
-                    onClick={onClose}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        zIndex: 99,
-                    }}
-                />
-            )}
+            {/* 배경 오버레이 — 패널 외부 클릭 시 닫기 */}
+            <div
+                onClick={onClose}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 40,
+                }}
+            />
 
-            {/* 슬라이드 패널 */}
+            {/* 슬라이드 패널 — 사이드바(80px) 뒤에서 슬라이딩 */}
             <div
                 style={{
                     position: 'fixed',
                     top: 0,
                     left: '80px',
                     height: '100vh',
-                    width: '300px',
+                    width: '320px',
                     background: '#fff',
                     boxShadow: '4px 0 16px rgba(0,0,0,0.08)',
-                    transform: isOpen ? 'translateX(0)' : 'translateX(-110%)',
-                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    zIndex: 100,
+                    zIndex: 50,
                     display: 'flex',
                     flexDirection: 'column',
                     padding: '24px 16px',
+                    animation: 'slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
             >
+                <style>{`
+                    @keyframes slideIn {
+                        from { transform: translateX(-100%); }
+                        to   { transform: translateX(0); }
+                    }
+                `}</style>
                 {/* 헤더 */}
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <span style={{ fontSize: '20px', fontWeight: '700' }}>만들기</span>
                     <button
                         onClick={onClose}
-                        className="d-flex align-items-center justify-content-center border-0 rounded-circle"
-                        style={{ width: '36px', height: '36px', background: '#efefef', cursor: 'pointer' }}
+                        className="d-flex align-items-center justify-content-center border-0 bg-transparent"
+                        style={{ width: '32px', height: '32px', cursor: 'pointer', padding: 0 }}
                     >
-                        <X size={18} />
+                        <X size={22} />
                     </button>
                 </div>
 
