@@ -77,4 +77,36 @@
 	    WHERE board_id = #{boardId}
 	</delete>
 	
+	<!-- 보드에 속한 saved_pin 목록 조회 -->
+<select id="selectSavedPinsByBoardId" parameterType="Long" resultType="com.mycompany.pinterior.entity.SavedPin">
+    SELECT saved_pin_id AS savedPinId,
+           user_id AS userId,
+           pin_id AS pinId,
+           board_id AS boardId
+    FROM saved_pin
+    WHERE board_id = #{boardId}
+</select>
+
+<!-- 동일 user_id + pin_id로 board_id IS NULL인 행 존재 여부 확인 -->
+<select id="countNullBoardSavedPin" resultType="int">
+    SELECT COUNT(*)
+    FROM saved_pin
+    WHERE user_id = #{userId}
+      AND pin_id = #{pinId}
+      AND board_id IS NULL
+</select>
+
+<!-- saved_pin 단건 삭제 -->
+<delete id="deleteSavedPinById" parameterType="Long">
+    DELETE FROM saved_pin
+    WHERE saved_pin_id = #{savedPinId}
+</delete>
+
+<!-- board_id를 null로 업데이트 -->
+<update id="updateBoardIdToNull" parameterType="Long">
+    UPDATE saved_pin
+    SET board_id = NULL
+    WHERE board_id = #{boardId}
+</update>
+	
 </mapper>
