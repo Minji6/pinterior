@@ -127,7 +127,8 @@ export default function PinDetailPage() {
       setShowBoardModal(false);
     } catch (error) {
       console.error(error);
-      alert('저장 중 오류가 발생했습니다.');
+      const message = error.response?.data?.message || '저장 중 오류가 발생했습니다.';
+      alert(message);
     }
   };
 
