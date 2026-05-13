@@ -26,7 +26,6 @@ export default function SearchBar() {
         } else {
             setSearchKeyword('');
         }
-        // 페이지 이동 시 드롭다운 닫기
         setShowRecent(false);
     }, [pathname, searchParams]);
 
@@ -50,7 +49,7 @@ export default function SearchBar() {
         if (!trimmed) return;
         saveRecentSearch(trimmed);
         setShowRecent(false);
-        router.push(`/search?tag=${encodeURIComponent(trimmed)}`);
+        window.location.href = `/search?tag=${encodeURIComponent(trimmed)}`;
     };
 
     return (
@@ -70,18 +69,21 @@ export default function SearchBar() {
 
             {/* 포커스 시 최근 검색어 드롭다운 표시 */}
             {showRecent && recentSearches.length > 0 && (
-                <div style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 8px)',
-                    left: 0,
-                    right: 0,
-                    background: '#fff',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                    border: '1px solid #e0e0e0',
-                    zIndex: 300,
-                    padding: '12px 0',
-                }}>
+                <div
+                    onMouseDown={(e) => e.preventDefault()}
+                    style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        right: 0,
+                        background: '#fff',
+                        borderRadius: '16px',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                        border: '1px solid #e0e0e0',
+                        zIndex: 300,
+                        padding: '12px 0',
+                    }}
+                >
                     <div style={{
                         padding: '4px 16px 8px',
                         fontSize: '13px',
@@ -90,9 +92,9 @@ export default function SearchBar() {
                     }}>
                         최근 검색어
                     </div>
-                    {recentSearches.map(tag => (
+                    {recentSearches.map((tag, index) => (
                         <div
-                            key={tag}
+                            key={index}
                             style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -103,11 +105,14 @@ export default function SearchBar() {
                             }}
                             onMouseEnter={e => e.currentTarget.style.background = '#f5f5f5'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            onClick={() => {
+                                console.log('div 클릭:', tag);
+                                window.location.href = `/search?tag=${encodeURIComponent(tag)}`;
+                            }}
                         >
-                            {/* onMouseDown: onBlur보다 먼저 실행되어 클릭 누락 방지 */}
-                            <span onMouseDown={() => handleSearch(tag)}>{tag}</span>
+                            <span>{tag}</span>
                             <button
-                                onMouseDown={(e) => { e.stopPropagation(); handleDeleteRecent(tag); }}
+                                onClick={(e) => { e.stopPropagation(); handleDeleteRecent(tag); }}
                                 style={{ background: 'none', border: 'none', color: '#767676', cursor: 'pointer', fontSize: '13px' }}
                             >
                                 ✕
