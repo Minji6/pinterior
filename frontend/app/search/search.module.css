@@ -4,69 +4,9 @@
   padding: 24px 16px;
 }
 
-.pinGrid {
-  columns: 5;
-  column-gap: 16px;
-}
-
-@media (max-width: 1024px) {
-  .pinGrid { columns: 3; }
-}
-
-@media (max-width: 640px) {
-  .pinGrid { columns: 2; }
-}
-
-.pinCard {
-  break-inside: avoid;
-  margin-bottom: 16px;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.15s;
-}
-
-.pinCard:hover {
-  transform: scale(1.02);
-}
-
-.pinImage {
-  width: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-.pinTitle {
-  padding: 8px 10px 4px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111;
-  margin: 0;
-}
-
-.tagList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px 10px 10px;
-}
-
-.tag {
-  font-size: 12px;
-  color: #767676;
-  cursor: pointer;
-}
-
-.tag:hover {
-  color: #e60023;
-  text-decoration: underline;
-}
-
 .emptySection {
   text-align: center;
-  padding: 48px 0 24px;
+  padding: 48px 16px 24px;
 }
 
 .emptyMessage {
@@ -76,6 +16,7 @@
 
 .recommendSection {
   margin-top: 8px;
+  padding: 0 16px;
 }
 
 .recommendTitle {
@@ -83,10 +24,12 @@
   font-weight: 700;
   color: #111;
   margin: 0 0 6px;
+  text-align: center;
 }
 
 .recommendSubtitle {
-  font-size: 13px;
+  font-size: 16px;
   color: #767676;
-  margin: 0 0 24px;
+  margin: 0 0 32px;
+  text-align: center;
 }
