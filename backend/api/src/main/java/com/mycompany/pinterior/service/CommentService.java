@@ -1,5 +1,7 @@
 package com.mycompany.pinterior.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mycompany.pinterior.dao.CommentDao;
 import com.mycompany.pinterior.dto.CommentCreateRequestDto;
 import com.mycompany.pinterior.dto.CommentCreateResponseDto;
+import com.mycompany.pinterior.dto.CommentListResponseDto;
+import com.mycompany.pinterior.dto.CommentResponseDto;
 import com.mycompany.pinterior.dto.CommentUpdateRequestDto;
 import com.mycompany.pinterior.dto.CommentUpdateResponseDto;
 import com.mycompany.pinterior.entity.Comment;
@@ -78,5 +82,19 @@ public class CommentService {
         }
     }
     
+    // 댓글 조회
+    public CommentListResponseDto getComments(Long pinId, int page, int size) {
+        int offset = (page - 1) * size;
+        
+        List<CommentResponseDto> comments = commentDao.selectByPinId(pinId, offset, size);
+        int total = commentDao.countByPinId(pinId);
+        
+        CommentListResponseDto data = new CommentListResponseDto();
+        data.setComments(comments);
+        data.setTotal(total);
+        data.setPage(page);
+        
+        return data;
+    }
     
 }

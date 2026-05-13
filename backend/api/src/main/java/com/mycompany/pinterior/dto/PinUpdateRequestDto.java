@@ -10,7 +10,6 @@ import lombok.Data;
 
 @Data
 public class PinUpdateRequestDto {
-    private Long userId;
     private String title;
     private String description;
     private String linkUrl;

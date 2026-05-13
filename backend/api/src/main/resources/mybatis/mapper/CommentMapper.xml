@@ -53,4 +53,26 @@
 		AND user_id = #{userId}
 	</delete>
 
+	<!-- 댓글 목록 조회 -->
+	<select id="selectByPinId"
+		resultType="com.mycompany.pinterior.dto.CommentResponseDto">
+		SELECT
+		c.comment_id AS commentId,
+		c.user_id AS userId,
+		u.nickname AS userNickname,
+		u.profile_img AS userProfileImg,
+		c.comment_content AS content,
+		c.created_at AS createdAt,
+		c.updated_at AS updatedAt
+		FROM comments c
+		JOIN users u ON c.user_id = u.user_id
+		WHERE c.pin_id = #{pinId}
+		ORDER BY c.created_at ASC
+		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+	<!-- 댓글 총 개수 조회 -->
+	<select id="countByPinId" parameterType="long" resultType="int">
+		SELECT COUNT(*) FROM comments WHERE pin_id = #{pinId}
+	</select>
 </mapper>

@@ -1,13 +1,9 @@
 package com.mycompany.pinterior.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,22 +17,15 @@ import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.dao.PinTagDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
 import com.mycompany.pinterior.dao.TagDao;
-import com.mycompany.pinterior.dao.UserDao;
-import com.mycompany.pinterior.dao.PinLikeDao;
-import com.mycompany.pinterior.entity.Pin;
-import com.mycompany.pinterior.entity.SavedPin;
-import com.mycompany.pinterior.dto.PinListResponseDto;
-import com.mycompany.pinterior.dto.PinSearchListResponseDto;
-import com.mycompany.pinterior.dto.PinSearchResponseDto;
-import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.dto.AuthorDto;
 import com.mycompany.pinterior.dto.PinDetailResponseDto;
 import com.mycompany.pinterior.dto.PinDownloadResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchListResponseDto;
+import com.mycompany.pinterior.dto.PinSearchResponseDto;
 import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.dto.PinUpdateRequestDto;
 import com.mycompany.pinterior.dto.PinUpdateResponseDto;
-import com.mycompany.pinterior.dto.SavedPinListResponseDto;
 import com.mycompany.pinterior.entity.Pin;
 import com.mycompany.pinterior.entity.SavedPin;
 import com.mycompany.pinterior.entity.Tag;
@@ -155,10 +144,10 @@ public class PinService {
 	}
 
 	@Transactional
-	public PinUpdateResponseDto updatePin(Long pinId, PinUpdateRequestDto request) {
+	public PinUpdateResponseDto updatePin(Long pinId, Long userId, PinUpdateRequestDto request) {
 		Pin pin = new Pin();
 		pin.setPinId(pinId);
-		pin.setUserId(request.getUserId());
+		pin.setUserId(userId);
 		pin.setTitle(request.getTitle());
 		pin.setDescription(request.getDescription());
 		pin.setLinkUrl(request.getLinkUrl());
@@ -181,7 +170,14 @@ public class PinService {
 				pinTagDao.insert(pin.getPinId(), tag.getTagId());
 			}
 		}
-
+		
+		// 태그 조회
+		List<String> tags = pinDao.selectTagsByPinId(pinId);
+		
+		// 보드id 조회
+		SavedPin savedPin = savedPinDao.selectByPinId(pinId);
+		
+		
 		// 수정된 핀 조회 후 DTO 반환
 		Pin updatedPin = pinDao.selectById(pinId);
 		PinUpdateResponseDto data = new PinUpdateResponseDto();
@@ -190,9 +186,12 @@ public class PinService {
 		data.setTitle(updatedPin.getTitle());
 		data.setDescription(updatedPin.getDescription());
 		data.setLinkUrl(updatedPin.getLinkUrl());
-		data.setTags(updatedPin.getTags());
+		data.setTags(tags);
 		data.setUpdatedAt(updatedPin.getUpdatedAt());
-
+		
+		if (savedPin != null) {
+		    data.setBoardId(savedPin.getBoardId());
+		}
 		return data;
 	}
 
