@@ -1,0 +1,35 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.emptySection {
+  text-align: center;
+  padding: 48px 16px 24px;
+}
+
+.emptyMessage {
+  font-size: 18px;
+  color: #111;
+}
+
+.recommendSection {
+  margin-top: 8px;
+  padding: 0 16px;
+}
+
+.recommendTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.recommendSubtitle {
+  font-size: 16px;
+  color: #767676;
+  margin: 0 0 32px;
+  text-align: center;
+}
