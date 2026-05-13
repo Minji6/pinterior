@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
-import { Download, Trash2, ExternalLink, ArrowLeft, Heart } from 'lucide-react';
+import { Download, Trash2, ExternalLink, ArrowLeft, Heart, Pencil } from 'lucide-react';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
@@ -226,6 +226,13 @@ export default function PinDetailPage() {
             <button onClick={handleDownload} title="이미지 다운로드" style={iconBtnStyle}>
               <Download size={18} />
             </button>
+
+            {/* 수정 (본인만) */}
+            {isOwner && (
+              <button onClick={() => router.push(`/pin/update?pinId=${pinId}`)} title="핀 수정" style={iconBtnStyle}>
+                <Pencil size={18} />
+              </button>
+            )}
 
             {/* 삭제 (본인만) */}
             {isOwner && (
