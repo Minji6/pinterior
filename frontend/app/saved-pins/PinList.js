@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { savedBtnStyle } from '../../components/PinStyles';
+import PinCard from '@/components/PinCard';
 
 function getColCount() {
     const w = window.innerWidth;
@@ -13,50 +13,6 @@ function getColCount() {
     if (w < 1280) return 5;
     return 6;
 }
-////////////////////////////////////////
-// 핀 카드 컴포넌트
-////////////////////////////////////////
-function PinCard({ pin, hovered, onMouseEnter, onMouseLeave, onUnsave }) {
-    const [imgLoaded, setImgLoaded] = useState(false);
-
-    return (
-        <div
-            style={{ position: 'relative', cursor: 'pointer' }}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-        >
-            <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#efefef' }}>
-                {pin.imageUrl && (
-                    <img
-                        src={pin.imageUrl}
-                        alt={pin.title || ''}
-                        onLoad={() => setImgLoaded(true)}
-                        onError={() => setImgLoaded(true)}
-                        draggable="false"
-                        style={{ width: '100%', display: 'block', opacity: imgLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
-                    />
-                )}
-                {hovered && (
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }}>
-                        <button
-                            onClick={onUnsave}
-                            style={{ ...savedBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}
-                        >
-                            저장 취소
-                        </button>
-                    </div>
-                )}
-            </div>
-            {pin.title && (
-                <div style={{ padding: '6px 4px 0' }}>
-                    <p style={{ fontSize: '13px', fontWeight: 500, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {pin.title}
-                    </p>
-                </div>
-            )}
-        </div>
-    );
-}
 
 ////////////////////////////////////////
 // 핀 목록 컴포넌트
@@ -65,8 +21,8 @@ function PinList() {
     // 상태 정의
     const [pins, setPins] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [hoveredPin, setHoveredPin] = useState(null);
     const [colCount, setColCount] = useState(getColCount);
+    const [boards, setBoards] = useState([]);
 
 
     // 라우터 객체 얻기
@@ -88,7 +44,11 @@ function PinList() {
         }
         const work = async () => {
             try {
-                const res = await axios.get(`/api/saved-pins/users/${userId}`);
+                const [resBoards, res] = await Promise.all([
+                    axios.get(`/api/boards/user/${userId}`),
+                    axios.get(`/api/saved-pins/users/${userId}`)
+                ]);
+                setBoards(resBoards.data.data);
                 setPins(res.data.data);
             } catch (err) {
                 console.log(err);
@@ -99,12 +59,10 @@ function PinList() {
         work();
     }, []);
 
-    // 저장 취소
-    const handleUnsave = async (e, savedPinId) => {
-        e.stopPropagation();
+    // 저장
+    const handleSave = async (pinId, boardId) => {
         try {
-            await axios.delete(`/api/saved-pins/${savedPinId}`);
-            setPins(prev => prev.filter(p => p.savedPinId !== savedPinId));
+            await axios.post('/api/saved-pins', { pinId, boardId });
         } catch (err) {
             console.log(err);
         }
@@ -128,10 +86,9 @@ function PinList() {
                                     <PinCard
                                         key={pin.savedPinId}
                                         pin={pin}
-                                        hovered={hoveredPin === pin.savedPinId}
-                                        onMouseEnter={() => setHoveredPin(pin.savedPinId)}
-                                        onMouseLeave={() => setHoveredPin(null)}
-                                        onUnsave={(e) => handleUnsave(e, pin.savedPinId)}
+                                        saved={true}
+                                        showTitle={true}
+                                        onUnsave={(boardId) => handleSave(pin.pinId, boardId)}
                                     />
                                 ))}
                             </div>
