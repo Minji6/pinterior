@@ -24,4 +24,7 @@ public interface SavedPinDao {
 	int deleteSavedPin(@Param("savedPinId") Long savedPinId);
 	List<SavedPinListResponseDto> selectSavedPinsByUserId(Long userId);	// 핀 선택 보드 id 가져오기
 	SavedPin selectByPinId(Long pinId);
+	
+	int updateBoardId(@Param("pinId") Long pinId, @Param("userId") Long userId, @Param("boardId") Long boardId);
+	
 }

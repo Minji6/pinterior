@@ -152,9 +152,14 @@ public class PinService {
 		pin.setDescription(request.getDescription());
 		pin.setLinkUrl(request.getLinkUrl());
 		pin.setTags(request.getTags());
-
+		pin.setBoardId(request.getBoardId());
 		pinDao.update(pin);
-
+		
+		// 보드 변경
+		if (request.getBoardId() != null) {
+		    savedPinDao.updateBoardId(pinId, userId, request.getBoardId());
+		}
+		
 		// 기존 태그 연결 삭제
 		pinTagDao.deleteByPinId(pinId);
 
@@ -185,8 +190,9 @@ public class PinService {
 		data.setLinkUrl(updatedPin.getLinkUrl());
 		data.setTags(tags);
 		data.setUpdatedAt(updatedPin.getUpdatedAt());
-		data.setBoardId(request.getBoardId());
-		
+		SavedPin savedPin = savedPinDao.selectByPinId(pinId);
+		data.setBoardId(savedPin != null ? savedPin.getBoardId() : null);
+	
 		return data;
 	}
 

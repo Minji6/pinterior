@@ -23,6 +23,8 @@ export default function PinUpdatePanel({ pinId, onClose }) {
     const [tags, setTags] = useState([]);
     const [composing, setComposing] = useState(false);
     const [pinImage, setPinImage] = useState('');
+    const [boards, setBoards] = useState([]);
+    const [boardId, setBoardId] = useState('');
 
     useEffect(() => {
         setTimeout(() => setSlideIn(true), 10);
@@ -41,6 +43,7 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                 setLinkUrl(pin.linkUrl || '');
                 setTags(pin.tags || []);
                 setPinImage(pin.imageUrl || '');
+                setBoardId(pin.boardId || '');
             } catch (e) {
                 console.error(e);
                 setError('핀 데이터를 불러오지 못했습니다.');
@@ -48,7 +51,20 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                 setLoading(false);
             }
         };
+
+        const fetchBoards = async () => {
+            try {
+                const res = await axios.get(`/api/boards/user/${getUserId()}`, {
+                    headers: { Authorization: `Bearer ${getToken()}` },
+                });
+                setBoards(res.data.data || []);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
         fetchPin();
+        fetchBoards();
     }, [pinId]);
 
     const handleClose = () => {
@@ -81,6 +97,7 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                 description: description.trim(),
                 linkUrl: linkUrl.trim(),
                 tags,
+                boardId: boardId ? Number(boardId) : null,
             }, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
@@ -183,7 +200,20 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                                     ))}
                                     <input id="update-tag-input" type="text" placeholder={tags.length === 0 ? '태그 추가' : ''} value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} onCompositionStart={() => setComposing(true)} onCompositionEnd={() => setComposing(false)} style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', flex: 1, minWidth: '80px' }} />
                                 </div>
-                                <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>Enter 키로 태그 추가, Backspace로 마지막 태그 삭제</p>
+                            <div>
+                                <label style={labelStyle}>보드</label>
+                                <select
+                                    value={boardId}
+                                    onChange={(e) => setBoardId(e.target.value)}
+                                    style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
+                                >
+                                    <option value="">보드 선택 (선택사항)</option>
+                                    {boards.map(b => (
+                                        <option key={b.boardId} value={b.boardId}>{b.boardName}</option>
+                                    ))}
+                                </select>
+                            </div>
+                                <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>미선택 시 보드 없이 저장</p>
                             </div>
                         </div>
                     )}
