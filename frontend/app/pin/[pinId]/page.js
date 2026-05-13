@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart, Pencil } from 'lucide-react';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
 import CommentSection from '../../comment/page';
+import PinUpdatePanel from '../../../components/PinUpdatePanel';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -21,6 +22,7 @@ export default function PinDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('token')) {
@@ -195,6 +197,8 @@ export default function PinDetailPage() {
         boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
         border: '1px solid #e0e0e0',
         background: '#fff',
+        transform: isUpdateOpen ? 'scale(0.75) translateX(-15%)' : 'scale(1) translateX(0)',
+        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}>
 
         {/* 좌측: 이미지 */}
@@ -242,7 +246,7 @@ export default function PinDetailPage() {
 
             {/* 수정 (본인만) */}
             {isOwner && (
-              <button onClick={() => router.push(`/pin/update?pinId=${pinId}`)} title="핀 수정" style={iconBtnStyle}>
+              <button onClick={() => setIsUpdateOpen(true)} title="핀 수정" style={iconBtnStyle}>
                 <Pencil size={18} />
               </button>
             )}
@@ -332,6 +336,11 @@ export default function PinDetailPage() {
 
         </div>
       </div>
+
+      {/* 핀 수정 패널 */}
+      {isUpdateOpen && (
+        <PinUpdatePanel pinId={pinId} onClose={() => setIsUpdateOpen(false)} />
+      )}
     </div>
   );
 }
