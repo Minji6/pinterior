@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
@@ -73,8 +73,10 @@ export default function AppHeader() {
   return (
     <nav className="navbar px-4 py-2 d-flex align-items-center border-bottom bg-white" style={{ gap: '1rem', position: 'relative', zIndex: 200 }}>
 
-      {/* 검색창 컴포넌트 */}
-      <SearchBar />
+      {/* 검색창 컴포넌트 - useSearchParams 사용으로 Suspense로 감싸기 */}
+      <Suspense fallback={<div style={{ flex: 1 }} />}>
+        <SearchBar />
+      </Suspense>
 
       {/* 프로필 이미지 + 드롭다운 */}
       <div className="position-relative">
