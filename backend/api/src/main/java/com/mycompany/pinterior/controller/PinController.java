@@ -118,7 +118,8 @@ public class PinController {
 		PinDetailResponseDto data = pinService.getPinDetail(pinId);
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 상세 조회 성공", data));
 	}
-
+	
+	// 핀 수
 	@PutMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(@PathVariable("pinId") Long pinId,
 			@Valid @RequestBody PinUpdateRequestDto request) {

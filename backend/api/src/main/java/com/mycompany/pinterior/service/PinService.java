@@ -174,9 +174,6 @@ public class PinService {
 		// 태그 조회
 		List<String> tags = pinDao.selectTagsByPinId(pinId);
 		
-		// 보드id 조회
-		SavedPin savedPin = savedPinDao.selectByPinId(pinId);
-		
 		
 		// 수정된 핀 조회 후 DTO 반환
 		Pin updatedPin = pinDao.selectById(pinId);
@@ -188,10 +185,8 @@ public class PinService {
 		data.setLinkUrl(updatedPin.getLinkUrl());
 		data.setTags(tags);
 		data.setUpdatedAt(updatedPin.getUpdatedAt());
+		data.setBoardId(request.getBoardId());
 		
-		if (savedPin != null) {
-		    data.setBoardId(savedPin.getBoardId());
-		}
 		return data;
 	}
 
