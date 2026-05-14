@@ -97,7 +97,7 @@ function CreateCard({ onOpen }) {
 ////////////////////////////////////////
 // 보드 목록 컴포넌트
 ////////////////////////////////////////
-function BoardList({ newBoard, onOpenModal }) {
+function BoardList({ refreshKey, onOpenModal }) {
     const [boards, setBoards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editTarget, setEditTarget] = useState(null);
@@ -105,15 +105,10 @@ function BoardList({ newBoard, onOpenModal }) {
 
     const router = useRouter();
 
-    const displayBoards = (() => {
-        if (!newBoard) return boards;
-        const alreadyIn = boards.some(b => b.boardId === newBoard.boardId);
-        return alreadyIn ? boards : [...boards, newBoard];
-    })();
-
     useEffect(() => {
         const userId = localStorage.getItem('userId');
         if (!userId) { router.push('/login'); return; }
+        // setLoading(true) 제거
         const work = async () => {
             try {
                 const res = await axios.get(`/api/boards/user/${userId}`);
@@ -125,7 +120,7 @@ function BoardList({ newBoard, onOpenModal }) {
             }
         };
         work();
-    }, []);
+    }, [refreshKey]);
 
     // 수정 완료 시 목록 반영
     const handleEdited = (updated) => {
@@ -135,7 +130,7 @@ function BoardList({ newBoard, onOpenModal }) {
     // 삭제 완료 시 목록 반영
     const handleDeleted = (boardId) => {
         setBoards(prev => prev.filter(b => b.boardId !== boardId));
-        setDeleteTarget(null);  // ← 추가
+        setDeleteTarget(null);
         setEditTarget(null);
     };
 
@@ -144,7 +139,7 @@ function BoardList({ newBoard, onOpenModal }) {
     return (
         <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 270px)', gap: 14.7 }}>
-                {displayBoards.map((board) => (
+                {boards.map((board) => (
                     <BoardCard
                         key={board.boardId}
                         board={board}
