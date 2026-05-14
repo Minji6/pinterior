@@ -13,8 +13,6 @@ public class PinUpdateRequestDto {
     private String title;
     private String description;
     private String linkUrl;
-    private Long boardId;
-    
     @NotNull(message = "태그는 필수입니다.")
     @NotEmpty(message = "태그는 1개 이상이어야 합니다.")
     private List<@NotBlank(message = "태그에 빈 값을 포함할 수 없습니다.") String> tags;
