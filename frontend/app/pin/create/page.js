@@ -177,7 +177,7 @@ export default function PinCreatePage() {
                             placeholder="사람들에게 회원님의 핀에 대해 설명해 보세요"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            maxLength={100}
+                            maxLength={201}
                             style={inputStyle}
                             onFocus={e => e.target.style.borderColor = '#111'}
                             onBlur={e => e.target.style.borderColor = '#ddd'}
@@ -191,7 +191,7 @@ export default function PinCreatePage() {
                             placeholder="핀에 대해 설명하세요"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            maxLength={500}
+                            maxLength={1001}
                             rows={4}
                             style={{ ...inputStyle, resize: 'none', lineHeight: '1.6' }}
                             onFocus={e => e.target.style.borderColor = '#111'}
