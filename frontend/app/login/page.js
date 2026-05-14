@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import styles from './LoginPage.module.css';
@@ -30,6 +30,13 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      router.replace('/feed');
+    }
+  }, [router]);
+
   const handleLogin = async () => {
     if (!email || !password) return;
     setError('');
@@ -48,7 +55,7 @@ export default function LoginPage() {
       );
 
       window.dispatchEvent(new Event('auth:login'));
-      
+
       router.push('/feed');
     } catch (err) {
       setError(err.response?.data?.message || '이메일 또는 비밀번호를 확인해주세요.');
