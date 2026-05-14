@@ -124,7 +124,10 @@ function BoardList({ refreshKey, onOpenModal }) {
 
     // 수정 완료 시 목록 반영
     const handleEdited = (updated) => {
-        setBoards(prev => prev.map(b => b.boardId === updated.boardId ? { ...b, ...updated } : b));
+        setBoards(prev => prev.map(b => {
+            console.log(b.boardId, updated.boardId, b.boardId === updated.boardId);
+            return b.boardId === updated.boardId ? { ...b, ...updated } : b;
+        }));
     };
 
     // 삭제 완료 시 목록 반영
