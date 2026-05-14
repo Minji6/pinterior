@@ -11,10 +11,8 @@
 			order="BEFORE">
 			SELECT comment_seq.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO comments (comment_id, user_id, pin_id, comment_content,
-		created_at)
-		VALUES (#{commentId}, #{userId}, #{pinId},
-		#{commentContent}, SYSDATE)
+		INSERT INTO comments (comment_id, user_id, pin_id, comment_content, created_at)
+			VALUES (#{commentId}, #{userId}, #{pinId}, #{commentContent}, SYSTIMESTAMP AT TIME ZONE 'Asia/Seoul')
 	</insert>
 
 	<!-- 댓글 단건 조회 -->
@@ -41,9 +39,9 @@
 	<update id="update"
 		parameterType="com.mycompany.pinterior.entity.Comment">
 		UPDATE comments
-		SET comment_content = #{commentContent},
-		updated_at = SYSDATE
-		WHERE comment_id = #{commentId}
+			SET comment_content = #{commentContent},
+			    updated_at = SYSTIMESTAMP AT TIME ZONE 'Asia/Seoul'
+			WHERE comment_id = #{commentId}
 	</update>
 
 	<!-- 댓글 삭제 -->
