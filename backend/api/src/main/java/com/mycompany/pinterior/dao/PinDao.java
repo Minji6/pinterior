@@ -73,4 +73,7 @@ public interface PinDao {
 	// 핀 이미지 반환
 	Pin selectImageDataByPinId(Long pinId);
 	
+	// 내가 작성한 핀 조회
+	List<PinSummaryDto> selectByUserId(Long userId);
+	
 }

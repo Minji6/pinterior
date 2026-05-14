@@ -10,7 +10,6 @@ function getUserId() { return Number(localStorage.getItem('userId')); }
 export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardId = null, onClose, onSuccess }) {
     const router = useRouter();
 
-    // 상태 정의
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -26,13 +25,11 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
     const [pinImage, setPinImage] = useState('');
     const [boards, setBoards] = useState([]);
     const [boardId, setBoardId] = useState('');
-    const initialBoardKey = initialBoardId == null ? '' : String(initialBoardId);
 
     useEffect(() => {
         setTimeout(() => setSlideIn(true), 10);
     }, []);
 
-    // 핀 데이터 및 보드 목록 조회
     useEffect(() => {
         if (!pinId) return;
         const fetchPin = async () => {
@@ -48,20 +45,15 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                 setTags(pin.tags || []);
                 setPinImage(pin.imageUrl || '');
                 setBoards(boardRes.data.data || []);
-                // 저장된 핀 컨텍스트에서는 saved_pin 행의 boardId가 기준,
-                // 그 외에는 pin 상세에서 온 대표 boardId 사용
-                if (savedPinId != null) {
-                    setBoardId(initialBoardKey);
-                } else {
-                    setBoardId(pin.boardId ? String(pin.boardId) : '');
-                }
+                setBoardId(pin.boardId ? String(pin.boardId) : '');
             } catch (e) {
-                console.log(e);
+                console.error(e);
                 setError('핀 데이터를 불러오지 못했습니다.');
             } finally {
                 setLoading(false);
             }
         };
+
         fetchPin();
     }, [pinId]);
 
@@ -70,7 +62,6 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
         setTimeout(() => onClose(), 300);
     };
 
-    // 태그 추가/삭제
     const addTag = () => {
         const trimmed = tagInput.trim();
         if (trimmed && !tags.includes(trimmed) && tags.length < 10) {
@@ -85,51 +76,34 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
     };
     const removeTag = (tag) => setTags(tags.filter(t => t !== tag));
 
-    // 핀 수정
     const handleSubmit = async () => {
         if (!title.trim()) { setError('제목을 입력해주세요.'); return; }
         setError('');
         setSubmitting(true);
         try {
-            // 1. 핀 본문 수정
             await axios.put(`/api/pins/${pinId}`, {
                 userId: getUserId(),
                 title: title.trim(),
                 description: description.trim(),
                 linkUrl: linkUrl.trim(),
                 tags,
+                boardId: boardId ? Number(boardId) : null,
             }, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
                     'Content-Type': 'application/json',
                 },
             });
-
-            // 2. 저장된 핀 컨텍스트에서 보드가 바뀌었다면 saved_pin 행만 갱신
-            if (savedPinId != null && boardId !== initialBoardKey) {
-                await axios.put(`/api/saved-pins/${savedPinId}`, {
-                    boardId: boardId ? Number(boardId) : null,
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${getToken()}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-            }
-
             setSlideIn(false);
-            setTimeout(() => {
-                onSuccess ? onSuccess() : onClose();
-            }, 300);
+            setTimeout(() => onClose(), 300);
         } catch (e) {
-            console.log(e);
+            console.error(e);
             setError('수정 중 오류가 발생했습니다. 다시 시도해주세요.');
         } finally {
             setSubmitting(false);
         }
     };
 
-    // 핀 삭제
     const handleDelete = async () => {
         if (!window.confirm('핀을 삭제하시겠습니까?')) return;
         setDeleting(true);
@@ -137,14 +111,9 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
             await axios.delete(`/api/pins/${pinId}`, {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
-            if (onSuccess) {
-                setSlideIn(false);
-                setTimeout(() => onSuccess(), 300);
-            } else {
-                router.replace('/feed');
-            }
+            router.replace('/feed');
         } catch (e) {
-            console.log(e);
+            console.error(e);
             setError('삭제 중 오류가 발생했습니다.');
             setDeleting(false);
         }
@@ -164,7 +133,7 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                 }}
             />
 
-            {/* 슬라이드 패널 */}
+            {/* 슬라이드 패널 — 오른쪽에서 왼쪽으로 */}
             <div style={{
                 position: 'fixed',
                 top: 0, right: 0,
@@ -190,7 +159,6 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', color: '#767676' }}>불러오는 중...</div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            {/* 핀 이미지 미리보기 */}
                             {pinImage && (
                                 <img src={`/api/pins/${pinId}/image`} alt="핀 이미지" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '16px' }} />
                             )}
@@ -209,7 +177,6 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                                 <label style={labelStyle}>링크</label>
                                 <input type="url" placeholder="링크 추가" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} style={inputStyle} onFocus={e => e.target.style.borderColor = '#111'} onBlur={e => e.target.style.borderColor = '#ddd'} />
                             </div>
-                            {/* 태그 */}
                             <div>
                                 <label style={labelStyle}>태그 ({tags.length}/10)</label>
                                 <div style={{ ...inputStyle, display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', minHeight: '52px', padding: '8px 14px', cursor: 'text' }} onClick={() => document.getElementById('update-tag-input').focus()}>
@@ -239,6 +206,8 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                                     <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>프로필 선택 시 보드 없이 프로필에만 저장됩니다</p>
                                 </div>
                             )}
+                            </div>
+                                <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>미선택 시 보드 없이 저장</p>
                             </div>
                         </div>
                     )}
