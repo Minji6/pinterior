@@ -1,6 +1,7 @@
 package com.mycompany.pinterior.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +42,18 @@ public class SavedPinController {
 		return ResponseEntity.status(201)
 				.body(ApiResponse.of(201, "핀 저장 성공", data));
 		
+	}
+	
+	@PutMapping("/{savedPinId}")
+	public ResponseEntity<ApiResponse<Void>> updateBoard(@PathVariable("savedPinId") Long savedPinId,
+			@RequestBody Map<String, Object> body) {
+		Long userId = (Long) SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		Object raw = body.get("boardId");
+		Long boardId = raw == null ? null : Long.valueOf(raw.toString());
+		savedPinService.updateBoard(savedPinId, userId, boardId);
+		return ResponseEntity.ok(ApiResponse.of(200, "저장 보드 변경 성공", null));
 	}
 	
 	@DeleteMapping("/{savedPinId}")
