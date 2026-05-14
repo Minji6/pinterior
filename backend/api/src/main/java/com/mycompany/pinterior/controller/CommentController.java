@@ -3,14 +3,20 @@ package com.mycompany.pinterior.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
 
 import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.CommentCreateRequestDto;
 import com.mycompany.pinterior.dto.CommentCreateResponseDto;
+import com.mycompany.pinterior.dto.CommentListResponseDto;
 import com.mycompany.pinterior.dto.CommentUpdateRequestDto;
 import com.mycompany.pinterior.dto.CommentUpdateResponseDto;
 import com.mycompany.pinterior.service.CommentService;
@@ -71,4 +77,15 @@ public class CommentController {
 	    return ResponseEntity.ok(ApiResponse.of(200, "댓글 삭제 성공", null));
 	}
 	
+	// 댓글 조회
+	@GetMapping("/{pinId}/comments")
+	public ResponseEntity<ApiResponse<CommentListResponseDto>> getComments(
+	        @PathVariable("pinId") Long pinId,
+	        @RequestParam(name = "page", defaultValue = "1") int page,
+	        @RequestParam(name = "size", defaultValue = "20") int size) {
+
+	    CommentListResponseDto data = commentService.getComments(pinId, page, size);
+
+	    return ResponseEntity.ok(ApiResponse.of(200, "댓글 목록 조회 성공", data));
+	}
 }

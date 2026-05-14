@@ -72,4 +72,5 @@ public interface PinDao {
 	
 	// 핀 이미지 반환
 	Pin selectImageDataByPinId(Long pinId);
+	
 }

@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart } from 'lucide-react';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
+import CommentSection from '../../comment/page';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -22,13 +23,7 @@ export default function PinDetailPage() {
   const [likeCount, setLikeCount] = useState(0);
   const [toast, setToast] = useState('');
 
-  useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      router.replace('/login');
-      return;
-    }
-
-    const fetchDetail = async () => {
+  const fetchDetail = async () => {
       try {
         const res = await axios.get(`/api/pins/${pinId}`, {
           headers: { Authorization: `Bearer ${getToken()}` },
@@ -42,7 +37,13 @@ export default function PinDetailPage() {
       } finally {
         setLoading(false);
       }
-    };
+  };
+
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      router.replace('/login');
+      return;
+    }
 
     const fetchBoards = async () => {
       try {
@@ -171,13 +172,16 @@ export default function PinDetailPage() {
   const isOwner = pin.author?.userId === userId && userId !== 0;
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', minHeight: '100vh', padding: '32px 16px', backgroundColor: '#fff' }}>
+    // 카드 div 위치 조절(padding)
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '32px 16px 120px 16px', backgroundColor: '#fff', position: 'relative' }}>
 
       {/* 뒤로가기 */}
       <button
         onClick={() => router.back()}
         style={{
-          position: 'fixed', top: 80, left: 72,
+          position: 'absolute',
+          top: '16px',
+          left: '16px',
           border: 'none', backgroundColor: '#fff',
           borderRadius: '50%', width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -189,29 +193,38 @@ export default function PinDetailPage() {
 
       <div style={{
         display: 'flex',
-        maxWidth: '900px',
-        width: '100%',
-        gap: '24px',
-        alignItems: 'flex-start',
+        width: '1280px',
+        height: '800px',
+        gap: '0',
+        alignItems: 'stretch',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+        border: '1px solid #e0e0e0',
+        background: '#fff',
       }}>
 
         {/* 좌측: 이미지 */}
-        <div style={{ flex: '0 0 auto', maxWidth: '50%' }}>
+        <div style={{ flex: '0 0 50%', overflow: 'hidden', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {pin.imageUrl ? (
             <img
               src={pin.imageUrl}
               alt={pin.title || ''}
-              style={{ width: '100%', display: 'block', borderRadius: '16px' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
             />
           ) : (
-            <div style={{ width: '380px', height: '380px', borderRadius: '16px', backgroundColor: '#efefef', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>이미지 없음</div>
+            <div style={{ width: '100%', height: '100%', backgroundColor: '#efefef', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>이미지 없음</div>
           )}
         </div>
 
         {/* 우측: 상세 정보 */}
         <div style={{
-          flex: 1, padding: '8px 0',
-          display: 'flex', flexDirection: 'column',
+          flex: 1,
+          padding: '16px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          overflowY: 'auto',
         }}>
 
           {/* 액션바 */}
@@ -312,8 +325,14 @@ export default function PinDetailPage() {
             </div>
           )}
 
+          {/* 댓글 섹션 — 우측 하단 고정 */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', paddingTop: '8px' }}>
+            <CommentSection pinId={pinId} />
+          </div>
+
         </div>
       </div>
+
       {toast && (
         <div style={{
           position: 'fixed', bottom: 32, left: '50%',
@@ -337,5 +356,5 @@ const iconBtnStyle = {
   border: 'none', backgroundColor: '#efefef',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   cursor: 'pointer',
-};
+}
 

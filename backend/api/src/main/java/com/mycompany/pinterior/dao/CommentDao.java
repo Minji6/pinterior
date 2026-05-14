@@ -1,8 +1,11 @@
 package com.mycompany.pinterior.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.mycompany.pinterior.dto.CommentResponseDto;
 import com.mycompany.pinterior.entity.Comment;
 
 @Mapper
@@ -18,4 +21,10 @@ public interface CommentDao {
 	
 	// 댓글 삭제
 	int deleteById(@Param("commentId") Long commentId,@Param("userId") Long userId);
+
+	// 댓글 목록 조회
+	List<CommentResponseDto> selectByPinId(@Param("pinId") Long pinId, @Param("offset") int offset, @Param("size") int size);
+
+	// 댓글 총 개수 조회
+	int countByPinId(@Param("pinId") Long pinId);
 }
