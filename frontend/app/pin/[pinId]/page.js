@@ -20,6 +20,7 @@ export default function PinDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
     if (!localStorage.getItem('token')) {
@@ -125,9 +126,15 @@ export default function PinDetailPage() {
       });
       setSavedPinId(res.data.data.savedPinId);
       setShowBoardModal(false);
+      const board = boards.find(b => b.boardId === boardId);
+      const message = board ? `${board.boardName}에 저장되었습니다` : '저장되었습니다';
+      setToast(message);
+      setTimeout(() => setToast(''), 2500);
     } catch (error) {
-      console.error(error);
-      alert('저장 중 오류가 발생했습니다.');
+      console.log(error);
+      const message = error.response?.data?.message || '저장 중 오류가 발생했습니다';
+      setToast(message);
+      setTimeout(() => setToast(''), 2500);
     }
   };
 
@@ -307,6 +314,20 @@ export default function PinDetailPage() {
 
         </div>
       </div>
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#1a1a1a', color: '#fff',
+          padding: '12px 24px', borderRadius: '24px',
+          fontSize: '0.875rem', fontWeight: '600',
+          zIndex: 9999, pointerEvents: 'none',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          whiteSpace: 'nowrap',
+        }}>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
