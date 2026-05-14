@@ -15,6 +15,8 @@ public class SavedPinResponseDto {
 	private Long savedPinId;
     private Long userId;
     private Long pinId;
+    private Long pinOwnerId;  // pin 테이블의 user_id
     private Long boardId;
     private LocalDateTime createdAt;
+    private String imageUrl;
 }

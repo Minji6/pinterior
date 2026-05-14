@@ -26,5 +26,8 @@ public interface SavedPinDao {
 	SavedPin selectByPinId(Long pinId);
 	
 	int updateBoardId(@Param("pinId") Long pinId, @Param("userId") Long userId, @Param("boardId") Long boardId);
-	
+	int updateBoardBySavedPinId(@Param("savedPinId") Long savedPinId, @Param("boardId") Long boardId);
+
+	SavedPin selectBySavedPinId(@Param("savedPinId") Long savedPinId);
+
 }
