@@ -324,6 +324,11 @@ public class PinService {
 			}
 		}
 	}
+	
+	// 내가 작성한 핀 조회
+	public List<PinSummaryDto> getPinListByUserId(Long userId) {
+		return pinDao.selectByUserId(userId);
+	}
 }
 
 
