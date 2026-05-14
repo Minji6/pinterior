@@ -51,7 +51,7 @@ export default function FeedPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, [router]);
 
-  const fetchBoards = useCallback(async () => {
+  const fetchBoards = async () => {
     try {
       const res = await axios.get(`/api/boards/user/${getUserId()}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -60,7 +60,7 @@ export default function FeedPage() {
     } catch (error) {
       console.error(error);
     }
-  }, []);
+  };
 
   const [newPinIds, setNewPinIds] = useState(new Set());
 
@@ -105,7 +105,13 @@ export default function FeedPage() {
   };
 
 
+  const loadedRef = useRef(false);
+
   useEffect(() => {
+    if (loadedRef.current) return;
+
+    loadedRef.current = true;
+
     const loadData = async () => {
       await Promise.all([
         fetchPins(),
@@ -114,7 +120,7 @@ export default function FeedPage() {
     };
 
     loadData();
-  }, [fetchPins, fetchBoards]);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
