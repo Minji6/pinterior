@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 function getToken() { return localStorage.getItem('token'); }
 function getUserId() { return Number(localStorage.getItem('userId')); }
 
-export default function PinUpdatePanel({ pinId, onClose }) {
+export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardId = null, onClose, onSuccess }) {
     const router = useRouter();
 
     const [loading, setLoading] = useState(true);
@@ -190,18 +190,22 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                                     ))}
                                     <input id="update-tag-input" type="text" placeholder={tags.length === 0 ? '태그 추가' : ''} value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} onCompositionStart={() => setComposing(true)} onCompositionEnd={() => setComposing(false)} style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', flex: 1, minWidth: '80px' }} />
                                 </div>
-                            <div>
-                                <label style={labelStyle}>보드</label>
-                                <select
-                                    value={boardId}
-                                    onChange={(e) => setBoardId(e.target.value)}
-                                    style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
-                                >
-                                    <option value="">보드 선택 (선택사항)</option>
-                                    {boards.map(b => (
-                                        <option key={b.boardId} value={b.boardId}>{b.boardName}</option>
-                                    ))}
-                                </select>
+                            {savedPinId != null && (
+                                <div>
+                                    <label style={labelStyle}>보드</label>
+                                    <select
+                                        value={boardId}
+                                        onChange={(e) => setBoardId(e.target.value)}
+                                        style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
+                                    >
+                                        <option value="">프로필</option>
+                                        {boards.map(b => (
+                                            <option key={b.boardId} value={b.boardId}>{b.boardName}</option>
+                                        ))}
+                                    </select>
+                                    <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>프로필 선택 시 보드 없이 프로필에만 저장됩니다</p>
+                                </div>
+                            )}
                             </div>
                                 <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>미선택 시 보드 없이 저장</p>
                             </div>
@@ -222,7 +226,6 @@ export default function PinUpdatePanel({ pinId, onClose }) {
         </>
     );
 }
-
 const labelStyle = {
     display: 'block', fontSize: '14px', fontWeight: '600', color: '#111', marginBottom: '8px',
 };

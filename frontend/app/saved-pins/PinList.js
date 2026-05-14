@@ -24,8 +24,12 @@ function PinList() {
     const [loading, setLoading] = useState(true);
     const [colCount, setColCount] = useState(getColCount);
     const [boards, setBoards] = useState([]);
-    const [editTarget, setEditTarget] = useState(null);
-
+    const [editTargetId, setEditTargetId] = useState(null);    // 남이 만든 핀 → SavedPinEditModal
+    const [updateTargetId, setUpdateTargetId] = useState(null);// 내가 만든 핀 → PinUpdatePanel
+    const [loginUserId, setLoginUserId] = useState(() => {
+        const userId = localStorage.getItem('userId');
+        return userId ? Number(userId) : null;
+    });
 
     // 라우터 객체 얻기
     const router = useRouter();
@@ -39,27 +43,15 @@ function PinList() {
 
     // 저장 핀 목록 조회
     useEffect(() => {
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
+        if (!loginUserId) {
             router.push('/login');
             return;
         }
-        const work = async () => {
-            try {
-                const [resBoards, res] = await Promise.all([
-                    axios.get(`/api/boards/user/${userId}`),
-                    axios.get(`/api/saved-pins/users/${userId}`)
-                ]);
-                setBoards(resBoards.data.data);
-                setPins(res.data.data);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        work();
-    }, []);
+        (async () => {
+            await fetchAll(loginUserId);
+            setLoading(false);
+        })();
+    }, [fetchAll, router, loginUserId]);
 
     // 저장
     const handleSave = async (pinId, boardId) => {
@@ -112,7 +104,7 @@ function PinList() {
                 )
             }
 
-            {/* 수정 모달 */}
+            {/* 남이 만든 핀 수정 모달 (보드 변경/삭제) */}
             <SavedPinEditModal
                 key={editTarget?.savedPinId}
                 show={!!editTarget}
@@ -122,6 +114,18 @@ function PinList() {
                 onSaved={handleSaved}
                 onDeleted={handleDeleted}
             />
+
+            {/* 내가 만든 핀 수정 패널 */}
+            {updateTarget && (
+                <PinUpdatePanel
+                    key={`${updateTarget.savedPinId}-${updateTarget.boardId ?? 'null'}`}
+                    pinId={updateTarget.pinId}
+                    savedPinId={updateTarget.savedPinId}
+                    initialBoardId={updateTarget.boardId ?? null}
+                    onClose={() => setUpdateTargetId(null)}
+                    onSuccess={async () => { await refetch(); setUpdateTargetId(null); }}
+                />
+            )}
         </>
     );
 }
