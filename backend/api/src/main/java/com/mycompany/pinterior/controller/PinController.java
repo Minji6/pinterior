@@ -1,6 +1,7 @@
 package com.mycompany.pinterior.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import com.mycompany.pinterior.dto.PinDetailResponseDto;
 import com.mycompany.pinterior.dto.PinDownloadResponseDto;
 import com.mycompany.pinterior.dto.PinListResponseDto;
 import com.mycompany.pinterior.dto.PinSearchListResponseDto;
+import com.mycompany.pinterior.dto.PinSummaryDto;
 import com.mycompany.pinterior.dto.PinUpdateRequestDto;
 import com.mycompany.pinterior.dto.PinUpdateResponseDto;
 import com.mycompany.pinterior.entity.Pin;
@@ -41,20 +43,17 @@ import lombok.extern.slf4j.Slf4j;
 public class PinController {
 	@Autowired
 	private PinService pinService;
-	
+
 	@Autowired
 	private PinDao pinDao;
-	
+
 	@PostMapping("")
 	public ResponseEntity<ApiResponse<PinCreateResponseDto>> create(@Valid @ModelAttribute PinCreateRequestDto request,
 			@RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
 		Pin pin = new Pin();
-		
-		Long userId = (Long) SecurityContextHolder
-	            .getContext()
-	            .getAuthentication()
-	            .getPrincipal();
+
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		pin.setUserId(userId);
 		pin.setTitle(request.getTitle());
 		pin.setDescription(request.getDescription());
@@ -90,14 +89,12 @@ public class PinController {
 
 	// 핀 태그 검색
 	@GetMapping("/search")
-	public ResponseEntity<ApiResponse<PinSearchListResponseDto>> searchByKeyword(
-			@RequestParam("tag") String tag,
+	public ResponseEntity<ApiResponse<PinSearchListResponseDto>> searchByKeyword(@RequestParam("tag") String tag,
 			@RequestParam(value = "cursor", required = false) String cursor,
 			@RequestParam(value = "size", defaultValue = "20") int size) {
 
 		if (tag == null || tag.isBlank()) {
-			return ResponseEntity.badRequest()
-					.body(ApiResponse.of(400, "검색어를 입력해주세요.", null));
+			return ResponseEntity.badRequest().body(ApiResponse.of(400, "검색어를 입력해주세요.", null));
 		}
 
 		PinSearchListResponseDto data = pinService.searchPins(tag.trim(), cursor, size);
@@ -118,17 +115,14 @@ public class PinController {
 		PinDetailResponseDto data = pinService.getPinDetail(pinId);
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 상세 조회 성공", data));
 	}
-	
+
 	// 핀 수
 	@PutMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<PinUpdateResponseDto>> update(@PathVariable("pinId") Long pinId,
 			@Valid @RequestBody PinUpdateRequestDto request) {
-		
-		Long userId = (Long) SecurityContextHolder
-	            .getContext()
-	            .getAuthentication()
-	            .getPrincipal();
-		
+
+		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
 		PinUpdateResponseDto data = pinService.updatePin(pinId, userId, request);
 
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
@@ -149,17 +143,22 @@ public class PinController {
 
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));
 	}
-	
+
 	// 핀 이미지 반환
 	@GetMapping("/{pinId}/image")
 	public ResponseEntity<byte[]> getImage(@PathVariable("pinId") Long pinId) {
-	    Pin pin = pinDao.selectImageDataByPinId(pinId);
-	    if (pin == null || pin.getImageData() == null) {
-	        return ResponseEntity.notFound().build();
-	    }
-	    return ResponseEntity.ok()
-	            .contentType(MediaType.IMAGE_JPEG)
-	            .body(pin.getImageData());
+		Pin pin = pinDao.selectImageDataByPinId(pinId);
+		if (pin == null || pin.getImageData() == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(pin.getImageData());
 	}
-	
+
+	// 내가 작성한 핀 조회
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<ApiResponse<List<PinSummaryDto>>> getPinsByUser(@PathVariable("userId") Long userId) {
+		List<PinSummaryDto> data = pinService.getPinListByUserId(userId);
+		return ResponseEntity.ok(ApiResponse.of(200, "내 핀 목록 조회 성공", data));
+	}
+
 }
