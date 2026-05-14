@@ -27,7 +27,7 @@ export default function FeedPage() {
   const [saveModal, setSaveModal] = useState(null);
   const [boards, setBoards] = useState([]);
   const [savedMap, setSavedMap] = useState({});
-  const [colCount, setColCount] = useState(() => getColCount());
+  const [colCount, setColCount] = useState(6);
   const [toast, setToast] = useState('');
 
   const bottomRef = useRef(null);
@@ -43,8 +43,6 @@ export default function FeedPage() {
     const handleResize = () => {
       setColCount(getColCount());
     };
-
-    handleResize();
 
     window.addEventListener('resize', handleResize);
 
@@ -63,20 +61,39 @@ export default function FeedPage() {
   };
 
   const [newPinIds, setNewPinIds] = useState(new Set());
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPins = async () => {
     if (fetchingRef.current || !hasNextRef.current) return;
+
     fetchingRef.current = true;
     setLoading(true);
+
+    let next = [];
+    let more = false;
+
     try {
       const params = { size: 20 };
-      if (cursorRef.current) params.cursor = cursorRef.current;
+
+      if (cursorRef.current) {
+        params.cursor = cursorRef.current;
+      }
+
       const res = await axios.get('/api/pins', {
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        },
         params,
       });
-      const { pins: next, nextCursor, hasNext: more } = res.data.data;
+
+      const {
+        pins,
+        nextCursor,
+        hasNext
+      } = res.data.data;
+
+      next = pins;
+      more = hasNext;
+
       setNewPinIds(prev => {
         const updated = new Set(prev);
 
@@ -84,22 +101,37 @@ export default function FeedPage() {
 
         return updated;
       });
+
       requestAnimationFrame(() => {
         setPins(prev => [...prev, ...next]);
       });
+
       cursorRef.current = nextCursor;
       hasNextRef.current = more;
       setHasNext(more);
+
     } catch (error) {
       console.error(error);
+
       setToast('핀 목록을 불러오는 중 오류가 발생했습니다.');
-      setTimeout(() => setToast(''), 2500);
+
+      setTimeout(() => {
+        setToast('');
+      }, 2500);
+
     } finally {
       fetchingRef.current = false;
       setLoading(false);
-      // 페이지가 짧으면 자동으로 한 번 더 로드
-      if (hasNextRef.current && document.body.scrollHeight <= window.innerHeight + 600) {
-        setTimeout(() => fetchPins(), 100);
+
+      // 페이지가 짧으면 자동 추가 로드
+      if (
+        more &&
+        next.length > 0 &&
+        document.body.scrollHeight <= window.innerHeight + 600
+      ) {
+        setTimeout(() => {
+          fetchPins();
+        }, 100);
       }
     }
   };
@@ -129,7 +161,7 @@ export default function FeedPage() {
     );
     if (bottomRef.current) observer.observe(bottomRef.current);
     return () => observer.disconnect();
-  }, [fetchPins]);
+  }, []);
 
   const handleSave = async (e, pinId, boardId) => {
     e.stopPropagation();
@@ -171,7 +203,6 @@ export default function FeedPage() {
 
   const columns = Array.from({ length: colCount }, () => []);
   pins.forEach((pin, i) => columns[i % colCount].push(pin));
-  const newPinSet = new Set(newPinIds.current);
 
   return (
     <div style={{ padding: '4px 4px 0', backgroundColor: '#fff' }}>
@@ -182,7 +213,7 @@ export default function FeedPage() {
               <PinCard
                 key={pin.pinId}
                 pin={pin}
-                isNew={newPinSet.has(pin.pinId)}
+                isNew={newPinIds.has(pin.pinId)}
                 hovered={hoveredPin === pin.pinId}
                 saveModalOpen={saveModal === pin.pinId}
                 saved={!!savedMap[pin.pinId]}
