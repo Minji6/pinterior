@@ -69,28 +69,6 @@ public class SavedPinService {
 		
 	}
 
-	public void updateBoard(Long savedPinId, Long userId, Long boardId) {
-		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
-		if (ownerId == null) {
-			throw new ApiException(404, "존재하지 않는 저장입니다.");
-		}
-		if (!ownerId.equals(userId)) {
-			throw new ApiException(403, "본인 저장만 수정할 수 있습니다.");
-		}
-
-		if (boardId != null) {
-			Long boardOwnerId = savedPinDao.selectBoardOwnerByBoardId(boardId);
-			if (boardOwnerId == null) {
-				throw new ApiException(404, "존재하지 않는 보드입니다.");
-			}
-			if (!boardOwnerId.equals(userId)) {
-				throw new ApiException(403, "본인 보드가 아닙니다.");
-			}
-		}
-
-		savedPinDao.updateBoardBySavedPinId(savedPinId, boardId);
-	}
-	
 	public void unsave(Long savedPinId, Long userId) {
 		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
 		if (ownerId == null) {

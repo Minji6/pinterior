@@ -18,5 +18,6 @@ public class PinUpdateResponseDto {
 	private String description;
 	private String linkUrl;
 	private List<String> tags;
+	private Long boardId;
 	private Date updatedAt;
 }

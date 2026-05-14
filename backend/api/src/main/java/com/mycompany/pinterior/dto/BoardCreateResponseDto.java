@@ -2,6 +2,8 @@ package com.mycompany.pinterior.dto;
 
 import java.util.Date;
 
+import com.mycompany.pinterior.entity.Board;
+
 import lombok.Data;
 
 @Data
