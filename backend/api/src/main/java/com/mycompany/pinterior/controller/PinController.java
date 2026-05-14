@@ -157,6 +157,15 @@ public class PinController {
 	// 내가 작성한 핀 조회
 	@GetMapping("/user/{userId}")
 	public ResponseEntity<ApiResponse<List<PinSummaryDto>>> getPinsByUser(@PathVariable("userId") Long userId) {
+		Long loginUserId = (Long) SecurityContextHolder
+				.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		
+		if (!loginUserId.equals(userId)) {
+			return ResponseEntity.status(403).body(ApiResponse.of(403, "본인 핀만 조회할 수 있습니다.", null));
+		}
+		
 		List<PinSummaryDto> data = pinService.getPinListByUserId(userId);
 		return ResponseEntity.ok(ApiResponse.of(200, "내 핀 목록 조회 성공", data));
 	}
