@@ -101,7 +101,7 @@ function PinList() {
                                         pin={pin}
                                         saved={false}
                                         boards={boards}
-                                        showTitle={true}
+                                        showTitle={false}
                                         onSave={(boardId) => handleSave(pin.pinId, boardId)}
                                         onEditClick={() => setEditTarget(pin)}  // ← 추가
                                     />
