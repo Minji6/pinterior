@@ -34,16 +34,18 @@ export default function PinUpdatePanel({ pinId, onClose }) {
         if (!pinId) return;
         const fetchPin = async () => {
             try {
-                const res = await axios.get(`/api/pins/${pinId}`, {
-                    headers: { Authorization: `Bearer ${getToken()}` },
-                });
-                const pin = res.data.data;
+                const [pinRes, boardRes] = await Promise.all([
+                    axios.get(`/api/pins/${pinId}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
+                    axios.get(`/api/boards/user/${getUserId()}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
+                ]);
+                const pin = pinRes.data.data;
                 setTitle(pin.title || '');
                 setDescription(pin.description || '');
                 setLinkUrl(pin.linkUrl || '');
                 setTags(pin.tags || []);
                 setPinImage(pin.imageUrl || '');
-                setBoardId(pin.boardId || '');
+                setBoards(boardRes.data.data || []);
+                setBoardId(pin.boardId ? String(pin.boardId) : '');
             } catch (e) {
                 console.error(e);
                 setError('핀 데이터를 불러오지 못했습니다.');
@@ -52,19 +54,7 @@ export default function PinUpdatePanel({ pinId, onClose }) {
             }
         };
 
-        const fetchBoards = async () => {
-            try {
-                const res = await axios.get(`/api/boards/user/${getUserId()}`, {
-                    headers: { Authorization: `Bearer ${getToken()}` },
-                });
-                setBoards(res.data.data || []);
-            } catch (e) {
-                console.error(e);
-            }
-        };
-
         fetchPin();
-        fetchBoards();
     }, [pinId]);
 
     const handleClose = () => {
@@ -137,7 +127,7 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                 style={{
                     position: 'fixed', inset: 0,
                     background: 'rgba(0,0,0,0.5)',
-                    zIndex: 100,
+                    zIndex: 300,
                     opacity: slideIn ? 1 : 0,
                     transition: 'opacity 0.3s ease',
                 }}
@@ -149,7 +139,7 @@ export default function PinUpdatePanel({ pinId, onClose }) {
                 top: 0, right: 0,
                 width: '400px', height: '100vh',
                 background: '#fff',
-                zIndex: 101,
+                zIndex: 301,
                 display: 'flex', flexDirection: 'column',
                 transform: slideIn ? 'translateX(0)' : 'translateX(100%)',
                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

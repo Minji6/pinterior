@@ -24,13 +24,7 @@ export default function PinDetailPage() {
   const [likeCount, setLikeCount] = useState(0);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
-  useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      router.replace('/login');
-      return;
-    }
-
-    const fetchDetail = async () => {
+  const fetchDetail = async () => {
       try {
         const res = await axios.get(`/api/pins/${pinId}`, {
           headers: { Authorization: `Bearer ${getToken()}` },
@@ -44,7 +38,13 @@ export default function PinDetailPage() {
       } finally {
         setLoading(false);
       }
-    };
+  };
+
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      router.replace('/login');
+      return;
+    }
 
     const fetchBoards = async () => {
       try {
@@ -339,7 +339,7 @@ export default function PinDetailPage() {
 
       {/* 핀 수정 패널 */}
       {isUpdateOpen && (
-        <PinUpdatePanel pinId={pinId} onClose={() => setIsUpdateOpen(false)} />
+        <PinUpdatePanel pinId={pinId} onClose={() => { setIsUpdateOpen(false); fetchDetail(); }} />
       )}
     </div>
   );

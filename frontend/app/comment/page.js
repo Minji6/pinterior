@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
 function getToken() { return localStorage.getItem('token'); }
@@ -11,6 +11,7 @@ export default function CommentSection({ pinId }) {
     const [content, setContent] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
+    const scrollRef = useRef(null);
 
     // 댓글 목록 조회
     const fetchComments = async () => {
@@ -41,7 +42,13 @@ export default function CommentSection({ pinId }) {
                 { headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' } }
             );
             setContent('');
-            fetchComments(); // 등록 후 목록 갱신
+            await fetchComments();
+            // 댓글 목록 맨 아래로 스크롤
+            setTimeout(() => {
+                if (scrollRef.current) {
+                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                }
+            }, 100);
         } catch (e) {
             console.error(e);
             alert('댓글 등록 중 오류가 발생했습니다.');
@@ -84,7 +91,7 @@ export default function CommentSection({ pinId }) {
         <div style={{ marginTop: '24px', borderTop: '1px solid #efefef', paddingTop: '16px', padding: '16px' }}>
 
             {/* 댓글 목록 — 스크롤 가능 */}
-            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
+            <div ref={scrollRef} style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
 
             {/* 댓글 목록 */}
             {loading ? (
@@ -138,20 +145,6 @@ export default function CommentSection({ pinId }) {
                             background: 'transparent', fontSize: '14px', color: '#111',
                         }}
                     />
-                    {content.trim() && (
-                        <button
-                            onClick={handleSubmit}
-                            disabled={submitting}
-                            style={{
-                                border: 'none', background: 'none',
-                                color: '#E60023', fontWeight: '700',
-                                fontSize: '14px', cursor: submitting ? 'not-allowed' : 'pointer',
-                                padding: '0 4px', flexShrink: 0,
-                            }}
-                        >
-                            {submitting ? '...' : '게시'}
-                        </button>
-                    )}
                 </div>
             </div>
         </div>
