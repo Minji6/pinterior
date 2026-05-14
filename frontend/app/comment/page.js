@@ -29,13 +29,13 @@ export default function CommentSection({ pinId }) {
     const [editingId, setEditingId] = useState(null);   // 수정 중인 댓글 ID
     const [editContent, setEditContent] = useState(''); // 수정 내용
     const scrollRef = useRef(null);
-    const menuRef = useRef(null);
     const currentUserId = getUserId();
+    const [toast, setToast] = useState("")
 
     // 메뉴 외부 클릭 시 닫기
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
+            if (!e.target.closest('[data-menu]')) {
                 setOpenMenuId(null);
             }
         };
@@ -79,8 +79,9 @@ export default function CommentSection({ pinId }) {
                 }
             }, 100);
         } catch (e) {
-            console.error(e);
-            alert('댓글 등록 중 오류가 발생했습니다.');
+            console.log(e);
+            setToast('댓글 등록 중 오류가 발생했습니다.');
+            setTimeout(() => setToast(''), 2500);
         } finally {
             setSubmitting(false);
         }
@@ -105,8 +106,9 @@ export default function CommentSection({ pinId }) {
             setEditContent('');
             await fetchComments();
         } catch (e) {
-            console.error(e);
-            alert('댓글 수정 중 오류가 발생했습니다.');
+            console.log(e);
+            setToast('댓글 수정 중 오류가 발생했습니다.');
+            setTimeout(() => setToast(''), 2500);
         }
     };
 
@@ -119,8 +121,9 @@ export default function CommentSection({ pinId }) {
             setOpenMenuId(null);
             await fetchComments();
         } catch (e) {
-            console.error(e);
-            alert('댓글 삭제 중 오류가 발생했습니다.');
+            console.log(e);
+            setToast('댓글 삭제 중 오류가 발생했습니다.');
+            setTimeout(() => setToast(''), 2500);
         }
     };
 
@@ -165,7 +168,7 @@ export default function CommentSection({ pinId }) {
                                         </span>
                                         {/* 본인 댓글만 ... 버튼 표시 */}
                                         {comment.userId === currentUserId && (
-                                            <div style={{ position: 'relative' }} ref={menuRef}>
+                                            <div style={{ position: 'relative' }} data-menu>
                                                 <button
                                                     onClick={(e) => {
                                                         const rect = e.currentTarget.getBoundingClientRect();
@@ -251,6 +254,22 @@ export default function CommentSection({ pinId }) {
                     />
                 </div>
             </div>
+
+            {/* Toast */}
+            {toast && (
+                <div style={{
+                    position: 'fixed', bottom: 32, left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: '#1a1a1a', color: '#fff',
+                    padding: '12px 24px', borderRadius: '24px',
+                    fontSize: '0.875rem', fontWeight: '600',
+                    zIndex: 9999, pointerEvents: 'none',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    whiteSpace: 'nowrap',
+                }}>
+                    {toast}
+                </div>
+            )}
         </div>
     );
 }

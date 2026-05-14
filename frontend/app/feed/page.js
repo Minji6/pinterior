@@ -74,9 +74,10 @@ export default function FeedPage() {
       cursorRef.current = nextCursor;
       hasNextRef.current = more;
       setHasNext(more);
-    } catch (error) {
-      console.error(error);
-      alert('핀 목록을 불러오는 중 오류가 발생했습니다.');
+    } catch (e) {
+    console.log(e);
+    setToast('댓글 등록 중 오류가 발생했습니다.');
+   
     } finally {
       fetchingRef.current = false;
       setLoading(false);
