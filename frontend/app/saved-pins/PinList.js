@@ -27,7 +27,11 @@ function PinList() {
     const [boards, setBoards] = useState([]);
     const [editTargetId, setEditTargetId] = useState(null);    // 남이 만든 핀 → SavedPinEditModal
     const [updateTargetId, setUpdateTargetId] = useState(null);// 내가 만든 핀 → PinUpdatePanel
-    const [loginUserId] = useState(() => Number(localStorage.getItem('userId')));
+    const [loginUserId, setLoginUserId] = useState(() => {
+        const userId = localStorage.getItem('userId');
+        return userId ? Number(userId) : null;
+    });
+
     // 라우터 객체 얻기
     const router = useRouter();
 
@@ -54,7 +58,6 @@ function PinList() {
 
     // 초기 로드
     useEffect(() => {
-        const userId = localStorage.getItem('userId');
         if (!userId) {
             router.push('/login');
             return;
@@ -63,7 +66,7 @@ function PinList() {
             await fetchAll(userId);
             setLoading(false);
         })();
-    }, [fetchAll, router]);
+    }, [fetchAll, router, loginUserId]);
 
     // 저장
     const handleSave = async (pinId, boardId) => {
@@ -125,7 +128,7 @@ function PinList() {
                 )
             }
 
-            {/* 타인 핀 — 보드 이동 모달 */}
+            {/* 남이 만든 핀 수정 모달 (보드 변경/삭제) */}
             <SavedPinEditModal
                 key={editTarget?.savedPinId}
                 show={!!editTarget}
@@ -136,7 +139,7 @@ function PinList() {
                 onDeleted={async () => { await refetch(); setEditTargetId(null); }}
             />
 
-            {/* 내 핀 — 핀 수정 패널 */}
+            {/* 내가 만든 핀 수정 패널 */}
             {updateTarget && (
                 <PinUpdatePanel
                     key={`${updateTarget.savedPinId}-${updateTarget.boardId ?? 'null'}`}
