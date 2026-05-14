@@ -50,7 +50,7 @@ const CreatePanel = ({ isOpen, onClose }) => {
         }}>
             {/* 헤더 */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <span style={{ fontSize: '20px', fontWeight: '700' }}>만들기</span>
+                <span style={{ fontSize: '20px', fontWeight: '700', color: '#111' }}>만들기</span>
                 <button
                     onClick={onClose}
                     className="d-flex align-items-center justify-content-center border-0 bg-transparent"
@@ -88,7 +88,7 @@ const CreatePanel = ({ isOpen, onClose }) => {
                             {item.icon}
                         </div>
                         <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '2px' }}>
+                            <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '2px', color: '#111' }}>
                                 {item.label} &rsaquo;
                             </div>
                             <div style={{ fontSize: '12px', color: '#767676', lineHeight: '1.5' }}>
