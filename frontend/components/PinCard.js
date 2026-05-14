@@ -14,7 +14,7 @@ import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from './PinStyle
  * - onUnsave: () => void
  * - showTitle: boolean (제목 표시 여부, 기본 false)
  */
-function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false }) {
+function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false, onEditClick }) {
   const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
@@ -70,6 +70,20 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false 
         )}
         {hovered && (
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }}>
+            {/* 수정 버튼 — onEditClick 있을 때만 표시 */}
+            {onEditClick && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onEditClick(); }}
+                style={{
+                  position: 'absolute', top: 8, left: 8,
+                  padding: '6px 12px', borderRadius: 20, border: 'none',
+                  backgroundColor: '#fff', fontWeight: 600,
+                  fontSize: '0.8rem', cursor: 'pointer',
+                }}
+              >
+                수정
+              </button>
+            )}
             {saved ? (
               <button
                 onClick={handleUnsave}

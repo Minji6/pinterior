@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import PinCard from '@/components/PinCard';
+import SavedPinEditModal from '@/components/SavedPinEditModal';
 
 function getColCount() {
     const w = window.innerWidth;
@@ -23,6 +24,7 @@ function PinList() {
     const [loading, setLoading] = useState(true);
     const [colCount, setColCount] = useState(getColCount);
     const [boards, setBoards] = useState([]);
+    const [editTarget, setEditTarget] = useState(null);
 
 
     // 라우터 객체 얻기
@@ -67,6 +69,17 @@ function PinList() {
             console.log(err);
         }
     };
+    // 수정 완료 시 목록 반영
+    const handleSaved = (oldSavedPinId, newSavedPin) => {
+        setPins(prev => prev.map(p =>
+            p.savedPinId === oldSavedPinId ? { ...p, ...newSavedPin } : p
+        ));
+    };
+
+    // 삭제 완료 시 목록 반영
+    const handleDeleted = (savedPinId) => {
+        setPins(prev => prev.filter(p => p.savedPinId !== savedPinId));
+    };
 
     // 로딩 가드
     if (loading) return <div>로딩 중...</div>;
@@ -86,9 +99,11 @@ function PinList() {
                                     <PinCard
                                         key={pin.savedPinId}
                                         pin={pin}
-                                        saved={true}
+                                        saved={false}
+                                        boards={boards}
                                         showTitle={true}
-                                        onUnsave={(boardId) => handleSave(pin.pinId, boardId)}
+                                        onSave={(boardId) => handleSave(pin.pinId, boardId)}
+                                        onEditClick={() => setEditTarget(pin)}  // ← 추가
                                     />
                                 ))}
                             </div>
@@ -96,6 +111,17 @@ function PinList() {
                     </div>
                 )
             }
+
+            {/* 수정 모달 */}
+            <SavedPinEditModal
+                key={editTarget?.savedPinId}
+                show={!!editTarget}
+                savedPin={editTarget}
+                boards={boards}
+                onClose={() => setEditTarget(null)}
+                onSaved={handleSaved}
+                onDeleted={handleDeleted}
+            />
         </>
     );
 }
