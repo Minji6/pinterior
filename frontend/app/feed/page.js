@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from '../../components/PinStyles';
+import Image from 'next/image';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -35,11 +36,20 @@ export default function FeedPage() {
   const cursorRef = useRef(null);
 
   useEffect(() => {
-    if (!localStorage.getItem('token')) router.replace('/login');
-    const handleResize = () => setColCount(getColCount());
+    if (!localStorage.getItem('token')) {
+      router.replace('/login');
+    }
+
+    const handleResize = () => {
+      setColCount(getColCount());
+    };
+
+    handleResize();
+
     window.addEventListener('resize', handleResize);
+
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [router]);
 
   const fetchBoards = useCallback(async () => {
     try {
@@ -52,7 +62,7 @@ export default function FeedPage() {
     }
   }, []);
 
-  const newPinIds = useRef(new Set());
+  const [newPinIds, setNewPinIds] = useState(new Set());
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPins = async () => {
@@ -67,7 +77,13 @@ export default function FeedPage() {
         params,
       });
       const { pins: next, nextCursor, hasNext: more } = res.data.data;
-      next.forEach(p => newPinIds.current.add(p.pinId));
+      setNewPinIds(prev => {
+        const updated = new Set(prev);
+
+        next.forEach(p => updated.add(p.pinId));
+
+        return updated;
+      });
       requestAnimationFrame(() => {
         setPins(prev => [...prev, ...next]);
       });
@@ -88,11 +104,18 @@ export default function FeedPage() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+
   useEffect(() => {
-    fetchPins();
-    fetchBoards();
-  }, []);
+    const loadData = async () => {
+      await Promise.all([
+        fetchPins(),
+        fetchBoards()
+      ]);
+    };
+
+    loadData();
+  }, [fetchPins, fetchBoards]);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) fetchPins(); },
