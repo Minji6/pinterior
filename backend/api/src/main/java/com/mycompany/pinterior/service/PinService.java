@@ -59,13 +59,13 @@ public class PinService {
 		log.info("boardId: {}", boardId);
 		// 이미지 저장
 		if (image != null && !image.isEmpty()) {
-		    byte[] imageBytes;
-		    try {
-		        imageBytes = image.getBytes();
-		    } catch (IOException e) {
-		        throw new ApiException(500, "서버 에러가 발생했습니다.");
-		    }
-		    pin.setImageData(imageBytes);
+			byte[] imageBytes;
+			try {
+				imageBytes = image.getBytes();
+			} catch (IOException e) {
+				throw new ApiException(500, "서버 에러가 발생했습니다.");
+			}
+			pin.setImageData(imageBytes);
 		}
 
 		// 핀 등록 (여기서 pinId가 채워짐)
@@ -73,9 +73,9 @@ public class PinService {
 
 		// insert 후에 pinId로 URL 세팅
 		if (pin.getImageData() != null) {
-		    String imageUrl = "/api/pins/" + pin.getPinId() + "/image";
-		    pin.setImageUrl(imageUrl);
-		    pinDao.updateImageUrl(pin.getPinId(), imageUrl);
+			String imageUrl = "/api/pins/" + pin.getPinId() + "/image";
+			pin.setImageUrl(imageUrl);
+			pinDao.updateImageUrl(pin.getPinId(), imageUrl);
 		}
 		log.info("날짜 조회: ", pin.getCreatedAt());
 
@@ -90,24 +90,22 @@ public class PinService {
 			if (boardOwner == null || !boardOwner.equals(pin.getUserId())) {
 				throw new ApiException(403, "본인 보드에만 저장할 수 있습니다.");
 			}
-
-			// 중복 저장 확인
-			int duplicate = savedPinDao.countDuplicate(pin.getUserId(), pin.getPinId(), boardId);
-			if (duplicate > 0) {
-				throw new ApiException(409, "이미 해당 보드에 저장된 핀입니다.");
-			}
-
-			SavedPin newSavedPin = new SavedPin();
-			newSavedPin.setPinId(pin.getPinId());
-			newSavedPin.setBoardId(boardId);
-			newSavedPin.setUserId(pin.getUserId());
-			savedPinDao.insert(newSavedPin);
-
-			// 다시 조회해서 boardId 채우기
-			SavedPin saved = savedPinDao.selectByPinId(pin.getPinId());
-			pin.setBoardId(saved.getBoardId());
 		}
 
+		// 중복 저장 확인
+		int duplicate = savedPinDao.countDuplicate(pin.getUserId(), pin.getPinId(), boardId);
+		if (duplicate > 0) {
+			throw new ApiException(409, "이미 해당 보드에 저장된 핀입니다.");
+		}
+
+		SavedPin newSavedPin = new SavedPin();
+		newSavedPin.setPinId(pin.getPinId());
+		newSavedPin.setBoardId(boardId);
+		newSavedPin.setUserId(pin.getUserId());
+		savedPinDao.insert(newSavedPin);
+
+		pin.setBoardId(boardId);
+		
 		// 태그 등록
 		if (pin.getTags() != null && !pin.getTags().isEmpty()) {
 			for (String tagName : pin.getTags()) {
@@ -145,6 +143,15 @@ public class PinService {
 
 	@Transactional
 	public PinUpdateResponseDto updatePin(Long pinId, Long userId, PinUpdateRequestDto request) {
+		// 본인 핀 검증
+		Long authorId = pinDao.selectUserIdByPinId(pinId);
+		if (authorId == null) {
+			throw new ApiException(404, "존재하지 않는 핀입니다.");
+		}
+		if (!authorId.equals(userId)) {
+			throw new ApiException(403, "본인 핀만 수정할 수 있습니다.");
+		}
+		
 		Pin pin = new Pin();
 		pin.setPinId(pinId);
 		pin.setUserId(userId);
@@ -152,14 +159,8 @@ public class PinService {
 		pin.setDescription(request.getDescription());
 		pin.setLinkUrl(request.getLinkUrl());
 		pin.setTags(request.getTags());
-		pin.setBoardId(request.getBoardId());
 		pinDao.update(pin);
-		
-		// 보드 변경
-		if (request.getBoardId() != null) {
-		    savedPinDao.updateBoardId(pinId, userId, request.getBoardId());
-		}
-		
+
 		// 기존 태그 연결 삭제
 		pinTagDao.deleteByPinId(pinId);
 
@@ -175,11 +176,10 @@ public class PinService {
 				pinTagDao.insert(pin.getPinId(), tag.getTagId());
 			}
 		}
-		
+
 		// 태그 조회
 		List<String> tags = pinDao.selectTagsByPinId(pinId);
-		
-		
+
 		// 수정된 핀 조회 후 DTO 반환
 		Pin updatedPin = pinDao.selectById(pinId);
 		PinUpdateResponseDto data = new PinUpdateResponseDto();
@@ -190,9 +190,7 @@ public class PinService {
 		data.setLinkUrl(updatedPin.getLinkUrl());
 		data.setTags(tags);
 		data.setUpdatedAt(updatedPin.getUpdatedAt());
-		SavedPin savedPin = savedPinDao.selectByPinId(pinId);
-		data.setBoardId(savedPin != null ? savedPin.getBoardId() : null);
-	
+
 		return data;
 	}
 
@@ -259,7 +257,6 @@ public class PinService {
 		pinDao.deletePin(pinId);
 
 	}
-
 
 	// 핀 태그 검색
 	public PinSearchListResponseDto searchPins(String keyword, String cursor, int size) {
@@ -330,5 +327,3 @@ public class PinService {
 		return pinDao.selectByUserId(userId);
 	}
 }
-
-
