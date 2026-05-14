@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import PinCard from '@/components/PinCard';
 import SavedPinEditModal from '@/components/SavedPinEditModal';
+import PinUpdatePanel from '@/components/PinUpdatePanel';
 
 function getColCount() {
     const w = window.innerWidth;
@@ -19,19 +20,14 @@ function getColCount() {
 // 핀 목록 컴포넌트
 ////////////////////////////////////////
 function PinList() {
-    // 상태 정의
     const [pins, setPins] = useState([]);
     const [loading, setLoading] = useState(true);
     const [colCount, setColCount] = useState(getColCount);
     const [boards, setBoards] = useState([]);
-    const [editTargetId, setEditTargetId] = useState(null);    // 남이 만든 핀 → SavedPinEditModal
-    const [updateTargetId, setUpdateTargetId] = useState(null);// 내가 만든 핀 → PinUpdatePanel
-    const [loginUserId, setLoginUserId] = useState(() => {
-        const userId = localStorage.getItem('userId');
-        return userId ? Number(userId) : null;
-    });
+    const [editTargetId, setEditTargetId] = useState(null);
+    const [updateTargetId, setUpdateTargetId] = useState(null);
+    const [loginUserId, setLoginUserId] = useState(null);
 
-    // 라우터 객체 얻기
     const router = useRouter();
 
     // 화면 크기에 따른 컬럼 수 설정
@@ -41,17 +37,33 @@ function PinList() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // 저장 핀 목록 조회
+    // 저장 핀 + 보드 재조회
+    const fetchAll = useCallback(async (userId) => {
+        try {
+            const [resBoards, res] = await Promise.all([
+                axios.get(`/api/boards/user/${userId}`),
+                axios.get(`/api/saved-pins/users/${userId}`)
+            ]);
+            setBoards(resBoards.data.data);
+            setPins(res.data.data);
+        } catch (err) {
+            console.log(err);
+        }
+    }, []);
+
+    // 초기 로드 — setLoginUserId를 IIFE 안으로 이동하여 동기 setState 경고 해결
     useEffect(() => {
-        if (!loginUserId) {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
             router.push('/login');
             return;
         }
         (async () => {
-            await fetchAll(loginUserId);
+            setLoginUserId(Number(userId)); // ✅ IIFE 내부에서 호출
+            await fetchAll(userId);
             setLoading(false);
         })();
-    }, [fetchAll, router, loginUserId]);
+    }, [fetchAll, router]);
 
     // 저장
     const handleSave = async (pinId, boardId) => {
@@ -61,24 +73,30 @@ function PinList() {
             console.log(err);
         }
     };
-    // 수정 완료 시 목록 반영
-    const handleSaved = (oldSavedPinId, newSavedPin) => {
-        setPins(prev => prev.map(p =>
-            p.savedPinId === oldSavedPinId ? { ...p, ...newSavedPin } : p
-        ));
+
+    // 수정/삭제 완료 → 전체 재조회
+    const refetch = useCallback(async () => {
+        const userId = localStorage.getItem('userId');
+        if (userId) await fetchAll(userId);
+    }, [fetchAll]);
+
+    // 수정 클릭: 내 핀이면 PinUpdatePanel, 아니면 SavedPinEditModal
+    const handleEditClick = (pin) => {
+        if (pin.pinUserId === loginUserId) {
+            setUpdateTargetId(pin.savedPinId);
+        } else {
+            setEditTargetId(pin.savedPinId);
+        }
     };
 
-    // 삭제 완료 시 목록 반영
-    const handleDeleted = (savedPinId) => {
-        setPins(prev => prev.filter(p => p.savedPinId !== savedPinId));
-    };
+    const editTarget = editTargetId != null ? pins.find(p => p.savedPinId === editTargetId) : null;
+    const updateTarget = updateTargetId != null ? pins.find(p => p.savedPinId === updateTargetId) : null;
 
-    // 로딩 가드
     if (loading) return <div>로딩 중...</div>;
 
-    // 컬럼 분배
     const columns = Array.from({ length: colCount }, () => []);
     pins.forEach((pin, i) => columns[i % colCount].push(pin));
+
     return (
         <>
             {pins.length === 0
@@ -95,7 +113,7 @@ function PinList() {
                                         boards={boards}
                                         showTitle={false}
                                         onSave={(boardId) => handleSave(pin.pinId, boardId)}
-                                        onEditClick={() => setEditTarget(pin)}  // ← 추가
+                                        onEditClick={() => handleEditClick(pin)}
                                     />
                                 ))}
                             </div>
@@ -110,9 +128,9 @@ function PinList() {
                 show={!!editTarget}
                 savedPin={editTarget}
                 boards={boards}
-                onClose={() => setEditTarget(null)}
-                onSaved={handleSaved}
-                onDeleted={handleDeleted}
+                onClose={() => setEditTargetId(null)}
+                onSaved={async () => { await refetch(); setEditTargetId(null); }}
+                onDeleted={async () => { await refetch(); setEditTargetId(null); }}
             />
 
             {/* 내가 만든 핀 수정 패널 */}

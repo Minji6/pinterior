@@ -11,5 +11,6 @@ public class SavedPinListResponseDto {
 	Long boardId;
 	String imageUrl;
 	String title;
+	Long pinUserId;
 	LocalDateTime createdAt;
 }

@@ -25,6 +25,7 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
     const [pinImage, setPinImage] = useState('');
     const [boards, setBoards] = useState([]);
     const [boardId, setBoardId] = useState('');
+    const initialBoardKey = initialBoardId == null ? '' : String(initialBoardId);
 
     useEffect(() => {
         setTimeout(() => setSlideIn(true), 10);
@@ -45,7 +46,13 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                 setTags(pin.tags || []);
                 setPinImage(pin.imageUrl || '');
                 setBoards(boardRes.data.data || []);
-                setBoardId(pin.boardId ? String(pin.boardId) : '');
+                // 저장된 핀 컨텍스트에서는 saved_pin 행의 boardId가 기준,
+                // 그 외에는 pin 상세에서 온 대표 boardId 사용
+                if (savedPinId != null) {
+                    setBoardId(initialBoardKey);
+                } else {
+                    setBoardId(pin.boardId ? String(pin.boardId) : '');
+                }
             } catch (e) {
                 console.error(e);
                 setError('핀 데이터를 불러오지 못했습니다.');
@@ -81,21 +88,36 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
         setError('');
         setSubmitting(true);
         try {
+            // 1. 핀 본문 수정
             await axios.put(`/api/pins/${pinId}`, {
                 userId: getUserId(),
                 title: title.trim(),
                 description: description.trim(),
                 linkUrl: linkUrl.trim(),
                 tags,
-                boardId: boardId ? Number(boardId) : null,
             }, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
                     'Content-Type': 'application/json',
                 },
             });
+
+            // 2. 저장된 핀 컨텍스트에서 보드가 바뀌었다면 saved_pin 행만 갱신
+            if (savedPinId != null && boardId !== initialBoardKey) {
+                await axios.put(`/api/saved-pins/${savedPinId}`, {
+                    boardId: boardId ? Number(boardId) : null,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+            }
+
             setSlideIn(false);
-            setTimeout(() => onClose(), 300);
+            setTimeout(() => {
+                onSuccess ? onSuccess() : onClose();
+            }, 300);
         } catch (e) {
             console.error(e);
             setError('수정 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -111,7 +133,12 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
             await axios.delete(`/api/pins/${pinId}`, {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
-            router.replace('/feed');
+            if (onSuccess) {
+                setSlideIn(false);
+                setTimeout(() => onSuccess(), 300);
+            } else {
+                router.replace('/feed');
+            }
         } catch (e) {
             console.error(e);
             setError('삭제 중 오류가 발생했습니다.');
@@ -207,8 +234,6 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                                 </div>
                             )}
                             </div>
-                                <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>미선택 시 보드 없이 저장</p>
-                            </div>
                         </div>
                     )}
                 </div>
@@ -226,6 +251,7 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
         </>
     );
 }
+
 const labelStyle = {
     display: 'block', fontSize: '14px', fontWeight: '600', color: '#111', marginBottom: '8px',
 };
