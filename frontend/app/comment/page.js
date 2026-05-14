@@ -24,7 +24,8 @@ export default function CommentSection({ pinId }) {
     const [content, setContent] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [openMenuId, setOpenMenuId] = useState(null); // ... 메뉴 열린 댓글 ID
+    const [openMenuId, setOpenMenuId] = useState(null);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const [editingId, setEditingId] = useState(null);   // 수정 중인 댓글 ID
     const [editContent, setEditContent] = useState(''); // 수정 내용
     const scrollRef = useRef(null);
@@ -141,7 +142,7 @@ export default function CommentSection({ pinId }) {
         <div style={{ marginTop: '24px', borderTop: '1px solid #efefef', padding: '16px' }}>
 
             {/* 댓글 목록 */}
-            <div ref={scrollRef} style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
+            <div ref={scrollRef} style={{ maxHeight: '200px', overflowY: 'auto', overflowX: 'visible', marginBottom: '12px' }}>
                 {loading ? (
                     <p style={{ color: '#767676', fontSize: '14px', textAlign: 'center', padding: '16px 0' }}>불러오는 중...</p>
                 ) : comments.length === 0 ? (
@@ -166,17 +167,23 @@ export default function CommentSection({ pinId }) {
                                         {comment.userId === currentUserId && (
                                             <div style={{ position: 'relative' }} ref={menuRef}>
                                                 <button
-                                                    onClick={() => setOpenMenuId(openMenuId === comment.commentId ? null : comment.commentId)}
+                                                    onClick={(e) => {
+                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                        setMenuPosition({ top: rect.bottom + 4, left: rect.left });
+                                                        setOpenMenuId(openMenuId === comment.commentId ? null : comment.commentId);
+                                                    }}
                                                     style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '16px', color: '#767676', padding: '0 4px', lineHeight: 1 }}
                                                 >
                                                     •••
                                                 </button>
                                                 {openMenuId === comment.commentId && (
                                                     <div style={{
-                                                        position: 'absolute', right: 0, top: '24px',
+                                                        position: 'fixed',
+                                                        top: menuPosition.top,
+                                                        left: menuPosition.left,
                                                         background: '#fff', borderRadius: '12px',
                                                         boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-                                                        zIndex: 10, minWidth: '80px', overflow: 'hidden',
+                                                        zIndex: 9999, minWidth: '80px', overflow: 'hidden',
                                                     }}>
                                                         <button
                                                             onClick={() => {
