@@ -223,7 +223,7 @@
 	
 	<!-- 내가 작성한 핀 조회 -->
 	<select id="selectByUserId" resultType="com.mycompany.pinterior.dto.PinSummaryDto">
-	    SELECT pin_id, image_url, title, board_id, created_at
+	    SELECT pin_id, image_url, title, NULL AS board_id, created_at
 	    FROM pin
 	    WHERE user_id = #{userId}
 	    ORDER BY created_at DESC
