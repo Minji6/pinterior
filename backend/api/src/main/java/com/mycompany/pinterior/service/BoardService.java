@@ -13,6 +13,7 @@ import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.dto.BoardUpdateRequestDto;
 import com.mycompany.pinterior.dto.BoardUpdateResponseDto;
 import com.mycompany.pinterior.entity.Board;
+import com.mycompany.pinterior.entity.SavedPin;
 import com.mycompany.pinterior.exception.ApiException;
 
 
@@ -113,22 +114,36 @@ public class BoardService {
 	}
 	
 	// 보드 삭제
-	public void deleteBoard (Long boardId, Long userId) {
-		// BoardId로 보드 조회
-		Board dbBoard = boardDao.selectByBoardId(boardId);
-		
-		// 보드 존재 여부 확인 (존재하지 않을 경우 404)
-		if (dbBoard == null) {
-			throw new ApiException(404, "존재하지 않는 보드입니다.");
-		}
-		
-		// 보드 소유자 여부 확인 (로그인 사용자와 수정하려는 보드 작성자가 다를 경우 403)
-		if (!dbBoard.getUserId().equals(userId)) {
-			throw new ApiException(403, "해당 보드를 삭제할 권한이 없습니다.");
-		}
-		
-		boardDao.deleteBoard(boardId);
-		
+	public void deleteBoard(Long boardId, Long userId) {
+	    // BoardId로 보드 조회
+	    Board dbBoard = boardDao.selectByBoardId(boardId);
+
+	    // 보드 존재 여부 확인
+	    if (dbBoard == null) {
+	        throw new ApiException(404, "존재하지 않는 보드입니다.");
+	    }
+
+	    // 보드 소유자 여부 확인
+	    if (!dbBoard.getUserId().equals(userId)) {
+	        throw new ApiException(403, "해당 보드를 삭제할 권한이 없습니다.");
+	    }
+
+	    // 해당 보드의 saved_pin 목록 조회
+	    List<SavedPin> savedPins = boardDao.selectSavedPinsByBoardId(boardId);
+
+	    for (SavedPin sp : savedPins) {
+	        // 동일 user_id + pin_id + board_id IS NULL 인 행이 이미 있으면 삭제
+	        int count = boardDao.countNullBoardSavedPin(sp.getUserId(), sp.getPinId());
+	        if (count > 0) {
+	            boardDao.deleteSavedPinById(sp.getSavedPinId());
+	        }
+	    }
+
+	    // 나머지 saved_pin의 board_id를 null로 업데이트
+	    boardDao.updateBoardIdToNull(boardId);
+
+	    // 보드 삭제
+	    boardDao.deleteBoard(boardId);
 	}
 	
 }
