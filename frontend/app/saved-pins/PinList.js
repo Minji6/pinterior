@@ -58,12 +58,12 @@ function PinList() {
 
     // 초기 로드
     useEffect(() => {
-        if (!userId) {
+        if (!loginUserId) {
             router.push('/login');
             return;
         }
         (async () => {
-            await fetchAll(userId);
+            await fetchAll(loginUserId);
             setLoading(false);
         })();
     }, [fetchAll, router, loginUserId]);
