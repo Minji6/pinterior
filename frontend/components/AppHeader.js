@@ -9,19 +9,37 @@ export default function AppHeader() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [authState, setAuthState] = useState({
+    token: null,
+    nickname: '',
+    profileImg: '',
+  });
 
-  // 컴포넌트 마운트 확인 (localStorage 접근을 위해 클라이언트 환경 보장)
+  const syncAuth = () => {
+    setAuthState({
+      token: localStorage.getItem('token'),
+      nickname: localStorage.getItem('nickname') || '',
+      profileImg: localStorage.getItem('profileImg') || '',
+    });
+  };
+
   useEffect(() => {
     setMounted(true);
+    syncAuth();
+
+    window.addEventListener('auth:login', syncAuth);
+    window.addEventListener('storage', syncAuth);
+
+    return () => {
+      window.removeEventListener('auth:login', syncAuth);
+      window.removeEventListener('storage', syncAuth);
+    };
   }, []);
 
   if (!mounted) return null;
 
-  const token = localStorage.getItem('token');
-  const nickname = localStorage.getItem('nickname') || '';
-  const rawProfileImg = localStorage.getItem('profileImg') || '';
+  const { token, nickname, profileImg: rawProfileImg } = authState;
 
-  // 프로필 이미지 URL 변환 (view 엔드포인트로 교체)
   const profileImg = rawProfileImg
     ? rawProfileImg.replace(
         /\/api\/users\/(\d+)\/image$/,
@@ -29,27 +47,25 @@ export default function AppHeader() {
       )
     : '';
 
-  // 로그아웃 처리
   const handleLogout = async () => {
     try {
       await axios.post('/api/users/logout', {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
     } catch (e) {
     } finally {
       localStorage.clear();
+      syncAuth();
       setShowDropdown(false);
       router.push('/');
     }
   };
 
-  // 프로필 편집 페이지 이동
   const handleProfileEdit = () => {
     setShowDropdown(false);
     router.push('/mypage');
   };
 
-  // 비로그인 상태 헤더
   if (!token) {
     return (
       <nav className="navbar px-4 py-3 d-flex justify-content-between align-items-center border-bottom bg-white">
@@ -69,23 +85,19 @@ export default function AppHeader() {
     );
   }
 
-  // 로그인 상태 헤더
   return (
     <nav className="navbar px-4 py-2 d-flex align-items-center border-bottom bg-white" style={{ gap: '1rem', position: 'relative', zIndex: 200 }}>
 
-      {/* 검색창 컴포넌트 - useSearchParams 사용으로 Suspense로 감싸기 */}
       <Suspense fallback={<div style={{ flex: 1 }} />}>
         <SearchBar />
       </Suspense>
 
-      {/* 프로필 이미지 + 드롭다운 */}
       <div className="position-relative">
         <button
           className="btn d-flex align-items-center gap-2"
           onClick={() => setShowDropdown(!showDropdown)}
           style={{ border: 'none', background: 'transparent' }}
         >
-          {/* 프로필 이미지가 있으면 이미지, 없으면 닉네임 첫 글자 */}
           {profileImg ? (
             <img
               src={profileImg}
@@ -103,7 +115,6 @@ export default function AppHeader() {
           <span style={{ fontSize: '0.8rem' }}>▼</span>
         </button>
 
-        {/* 프로필 드롭다운 메뉴 */}
         {showDropdown && (
           <div
             className="position-absolute end-0 mt-2 bg-white shadow rounded-3 p-2"
