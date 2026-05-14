@@ -105,7 +105,11 @@ function BoardList({ newBoard, onOpenModal }) {
 
     const router = useRouter();
 
-    const displayBoards = newBoard ? [...boards, newBoard] : boards;
+    const displayBoards = (() => {
+        if (!newBoard) return boards;
+        const alreadyIn = boards.some(b => b.boardId === newBoard.boardId);
+        return alreadyIn ? boards : [...boards, newBoard];
+    })();
 
     useEffect(() => {
         const userId = localStorage.getItem('userId');
@@ -131,6 +135,8 @@ function BoardList({ newBoard, onOpenModal }) {
     // 삭제 완료 시 목록 반영
     const handleDeleted = (boardId) => {
         setBoards(prev => prev.filter(b => b.boardId !== boardId));
+        setDeleteTarget(null);  // ← 추가
+        setEditTarget(null);
     };
 
     if (loading) return <div>로딩 중...</div>;
@@ -157,7 +163,7 @@ function BoardList({ newBoard, onOpenModal }) {
                 onEdited={handleEdited}
                 onDeleteClick={() => setDeleteTarget(editTarget)}
             />
-            
+
             <BoardDeleteModal
                 show={!!deleteTarget}
                 board={deleteTarget}
