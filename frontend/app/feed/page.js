@@ -26,7 +26,7 @@ export default function FeedPage() {
   const [saveModal, setSaveModal] = useState(null);
   const [boards, setBoards] = useState([]);
   const [savedMap, setSavedMap] = useState({});
-  const [colCount, setColCount] = useState(6);
+  const [colCount, setColCount] = useState(() => getColCount());
   const [toast, setToast] = useState('');
 
   const bottomRef = useRef(null);
@@ -36,7 +36,6 @@ export default function FeedPage() {
 
   useEffect(() => {
     if (!localStorage.getItem('token')) router.replace('/login');
-    setColCount(getColCount());
     const handleResize = () => setColCount(getColCount());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -55,7 +54,8 @@ export default function FeedPage() {
 
   const newPinIds = useRef(new Set());
 
-  const fetchPins = useCallback(async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchPins = async () => {
     if (fetchingRef.current || !hasNextRef.current) return;
     fetchingRef.current = true;
     setLoading(true);
@@ -76,7 +76,8 @@ export default function FeedPage() {
       setHasNext(more);
     } catch (error) {
       console.error(error);
-      alert('핀 목록을 불러오는 중 오류가 발생했습니다.');
+      setToast('핀 목록을 불러오는 중 오류가 발생했습니다.');
+      setTimeout(() => setToast(''), 2500);
     } finally {
       fetchingRef.current = false;
       setLoading(false);
@@ -85,13 +86,13 @@ export default function FeedPage() {
         setTimeout(() => fetchPins(), 100);
       }
     }
-  }, []);
+  };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchPins();
     fetchBoards();
-  }, [fetchPins, fetchBoards]);
-
+  }, []);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) fetchPins(); },
@@ -116,7 +117,7 @@ export default function FeedPage() {
       setToast(message);
       setTimeout(() => setToast(''), 2500);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       const message = error.response?.data?.message || '저장 중 오류가 발생했습니다';
       setToast(message);
       setTimeout(() => setToast(''), 2500);
@@ -134,12 +135,14 @@ export default function FeedPage() {
       setSavedMap(prev => { const n = { ...prev }; delete n[pinId]; return n; });
     } catch (error) {
       console.error(error);
-      alert('저장 해제 중 오류가 발생했습니다.');
+      setToast('저장 해제 중 오류가 발생했습니다.');
+      setTimeout(() => setToast(''), 2500);
     }
   };
 
   const columns = Array.from({ length: colCount }, () => []);
   pins.forEach((pin, i) => columns[i % colCount].push(pin));
+  const newPinSet = new Set(newPinIds.current);
 
   return (
     <div style={{ padding: '4px 4px 0', backgroundColor: '#fff' }}>
@@ -150,7 +153,7 @@ export default function FeedPage() {
               <PinCard
                 key={pin.pinId}
                 pin={pin}
-                isNew={newPinIds.current.has(pin.pinId)}
+                isNew={newPinSet.has(pin.pinId)}
                 hovered={hoveredPin === pin.pinId}
                 saveModalOpen={saveModal === pin.pinId}
                 saved={!!savedMap[pin.pinId]}
