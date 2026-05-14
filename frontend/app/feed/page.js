@@ -240,13 +240,10 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
                 {saveModalOpen && (
                   <div onClick={(e) => e.stopPropagation()} style={dropdownStyle}>
                     <p style={{ fontSize: '0.8rem', color: '#767676', margin: '0 0 6px', fontWeight: '600' }}>보드에 저장</p>
-                    {boards.length === 0 ? (
-                      <BoardBtn label="보드 없이 저장" onClick={(e) => onBoardSelect(e, null)} />
-                    ) : (
-                      boards.map(b => (
-                        <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => onBoardSelect(e, b.boardId)} />
-                      ))
-                    )}
+                    {boards.map(b => (
+                      <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => onBoardSelect(e, b.boardId)} />
+                    ))}
+                    <BoardBtn label="보드 없이 저장" onClick={(e) => onBoardSelect(e, null)} />
                   </div>
                 )}
               </>
