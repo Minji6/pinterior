@@ -63,6 +63,7 @@ function MyPinList() {
       await axios.post('/api/saved-pins', { pinId, boardId });
     } catch (err) {
       console.log(err);
+      throw err; 
     }
   };
 
@@ -87,7 +88,7 @@ function MyPinList() {
                   saved={false}
                   boards={boards}
                   showTitle={false}
-                  onSave={(boardId) => handleSave(pin.pinId, boardId)}
+                  onSave={(boardId, boardName) => handleSave(pin.pinId, boardId, boardName)}
                   onEditClick={() => setUpdateTargetId(pin.pinId)}
                 />
               ))}

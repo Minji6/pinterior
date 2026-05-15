@@ -28,6 +28,7 @@ export default function BoardDetailPage() {
     const [showEdit, setShowEdit] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
     const [updateTargetId, setUpdateTargetId] = useState(null);
+    const [isOwner, setIsOwner] = useState(false);
 
     // 화면 크기에 따른 컬럼 수 설정
     useEffect(() => {
@@ -47,12 +48,21 @@ export default function BoardDetailPage() {
                     axios.get(`/api/boards/${boardId}`),
                     axios.get(`/api/boards/user/${userId}`),
                 ]);
-                setPins(resBoard.data.data ?? []);
-                setBoards(resBoards.data.data ?? []);
 
-                // 보드 목록에서 현재 보드 정보 추출
-                const current = (resBoards.data.data ?? []).find(b => b.boardId === Number(boardId));
-                setBoardInfo(current ?? null);
+                const detail = resBoard.data.data;
+                // 보드 정보 세팅 (남의 보드도 정상 출력)
+                setBoardInfo({
+                    boardId: detail.boardId,
+                    boardName: detail.boardName,
+                    boardInfo: detail.boardInfo,
+                    pinCount: detail.pins?.length ?? 0,
+                });
+                // 핀 목록 세팅
+                setPins(detail.pins ?? []);
+                // 소유자 여부 확인
+                setIsOwner(detail.ownerId === Number(userId));
+                // 저장 시 보드 선택용 목록
+                setBoards(resBoards.data.data ?? []);
             } catch (err) {
                 console.log(err);
             } finally {
@@ -62,12 +72,12 @@ export default function BoardDetailPage() {
         work();
     }, [boardId]);
 
-    // 저장
     const handleSave = async (pinId, targetBoardId) => {
         try {
-            await axios.post('/api/saved-pins', { pinId, boardId: targetBoardId });
+            await axios.post('/api/saved-pins', { pinId, targetBoardId });
         } catch (err) {
             console.log(err);
+            throw err;
         }
     };
 
@@ -103,13 +113,16 @@ export default function BoardDetailPage() {
                     )}
                     <p className="text-muted mb-0" style={{ fontSize: 14 }}>핀 {pins.length}개</p>
                 </div>
-                <button
-                    className="btn btn-light rounded-pill"
-                    style={{ width: 48, height: 48 }}
-                    onClick={() => setShowEdit(true)}
-                >
-                    <Pencil size={24} />
-                </button>
+                {/* 소유자만 수정 버튼 표시 */}
+                {isOwner && (
+                    <button
+                        className="btn btn-light rounded-pill"
+                        style={{ width: 48, height: 48 }}
+                        onClick={() => setShowEdit(true)}
+                    >
+                        <Pencil size={24} />
+                    </button>
+                )}
             </div>
 
             {/* 핀 목록 */}
@@ -126,8 +139,8 @@ export default function BoardDetailPage() {
                                         saved={false}
                                         boards={boards}
                                         showTitle={false}
-                                        onSave={(targetBoardId) => handleSave(pin.pinId, targetBoardId)}
-                                        onEditClick={() => setUpdateTargetId(pin.pinId)}
+                                        onSave={(targetBoardId, boardName) => handleSave(pin.pinId, targetBoardId, boardName)}
+                                        onEditClick={isOwner ? () => setUpdateTargetId(pin.pinId) : null}
                                     />
                                 ))}
                             </div>
@@ -136,26 +149,32 @@ export default function BoardDetailPage() {
                 )
             }
 
-            {/* 수정 모달 */}
-            <BoardEditModal
-                key={showEdit ? boardId : null}
-                show={showEdit}
-                board={boardInfo}
-                onClose={() => setShowEdit(false)}
-                onEdited={handleEdited}
-                onDeleteClick={() => { setShowEdit(false); setShowDelete(true); }}
-            />
+            {/* 수정/삭제 모달은 소유자만 */}
+            {isOwner && (
+                <>
 
-            {/* 삭제 모달 */}
-            <BoardDeleteModal
-                show={showDelete}
-                board={boardInfo}
-                onClose={() => setShowDelete(false)}
-                onDeleted={handleDeleted}
-            />
+                    {/* 수정 모달 */}
+                    <BoardEditModal
+                        key={showEdit ? boardId : null}
+                        show={showEdit}
+                        board={boardInfo}
+                        onClose={() => setShowEdit(false)}
+                        onEdited={handleEdited}
+                        onDeleteClick={() => { setShowEdit(false); setShowDelete(true); }}
+                    />
+
+                    {/* 삭제 모달 */}
+                    <BoardDeleteModal
+                        show={showDelete}
+                        board={boardInfo}
+                        onClose={() => setShowDelete(false)}
+                        onDeleted={handleDeleted}
+                    />
+                </>
+            )}
 
             {/* 핀 수정 패널 */}
-            {updateTargetId && (
+            {isOwner && updateTargetId && (
                 <PinUpdatePanel
                     key={updateTargetId}
                     pinId={updateTargetId}

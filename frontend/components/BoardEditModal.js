@@ -1,8 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { ToastContext } from '@/contexts/ToastContext';
 import axios from 'axios';
+import { useContext, useState } from 'react';
 
 function BoardEditModal({ show, board, onClose, onEdited, onDeleteClick }) {
+    const { showToast } = useContext(ToastContext);
     // 보드 정보로 초기값 세팅
     const [form, setForm] = useState({
         boardName: board?.boardName ?? '',
@@ -23,8 +25,10 @@ function BoardEditModal({ show, board, onClose, onEdited, onDeleteClick }) {
             });
             onEdited?.(res.data.data);
             onClose();
+            showToast('보드가 수정되었습니다.');
         } catch (err) {
             console.log(err);
+            showToast('수정 중 오류가 발생했습니다.', 'error');
         }
     };
 

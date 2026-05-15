@@ -1,7 +1,8 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { BoardBtn, saveBtnStyle, savedBtnStyle } from './PinStyles';
+import { ToastContext } from '@/contexts/ToastContext';
 
 /**
  * 공통 PinCard 컴포넌트
@@ -22,6 +23,7 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false,
   const [imgLoaded, setImgLoaded] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const cardRef = useRef(null);
+  const { showToast } = useContext(ToastContext);
 
   const minHeight = pin.imageUrl ? 'auto' : `${120 + (pin.pinId % 5) * 40}px`;
 
@@ -50,10 +52,17 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false,
     onUnsave?.();
   };
 
-  const handleBoardSelect = (e, boardId) => {
+  const handleBoardSelect = async (e, boardId, boardName) => {
     e.stopPropagation();
-    onSave?.(boardId);
+    try {
+        await onSave?.(boardId, boardName);
+        const message = boardName ? `${boardName}에 저장되었습니다` : '저장되었습니다';
+        showToast(message);
+    } catch (err) {
+        showToast(err.response?.data?.message || '저장 중 오류가 발생했습니다.', 'error');
+    }
     setSaveModalOpen(false);
+
   };
 
   return (
@@ -128,9 +137,9 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false,
                   >
                     <p style={{ fontSize: '0.8rem', color: '#767676', margin: '0 0 6px', fontWeight: '600' }}>보드에 저장</p>
                     {boards.map(b => (
-                      <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => handleBoardSelect(e, b.boardId)} />
+                      <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => handleBoardSelect(e, b.boardId, b.boardName)} />
                     ))}
-                    <BoardBtn label="보드 없이 저장" onClick={(e) => handleBoardSelect(e, null)} />
+                    <BoardBtn label="보드 없이 저장" onClick={(e) => handleBoardSelect(e, null, null)} />
                   </div>
                 )}
               </>

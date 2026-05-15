@@ -1,15 +1,20 @@
 'use client';
 import axios from 'axios';
+import { useContext } from 'react';
+import { ToastContext } from '@/contexts/ToastContext';
 
 function BoardDeleteModal({ show, board, onClose, onDeleted }) {
+    const { showToast } = useContext(ToastContext);
 
     const handleDelete = async () => {
         try {
             await axios.delete(`/api/boards/${board.boardId}`);
             onDeleted?.(board.boardId);
             onClose();
+            showToast('보드가 삭제되었습니다.');
         } catch (err) {
             console.log(err);
+            showToast('삭제 중 오류가 발생했습니다.', 'error');
         }
     };
 
