@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.mycompany.pinterior.dao.BoardDao;
 import com.mycompany.pinterior.dao.UserDao;
+import com.mycompany.pinterior.dto.BoardDetailResponseDto;
 import com.mycompany.pinterior.dto.BoardItemResponseDto;
 import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.dto.BoardUpdateRequestDto;
@@ -68,16 +69,25 @@ public class BoardService {
 	}
 	
 	// 보드 내 핀 목록 조회 (보드 ID 기준)
-	public List<BoardItemResponseDto> getBoardItem (Long boardId) {
+	public BoardDetailResponseDto getBoardItem (Long boardId) {
 		// 보드 존재 여부 확인 (존재하지 않을 경우 404)
-		if (boardDao.selectByBoardId(boardId) == null) {
+	    Board dbBoard = boardDao.selectByBoardId(boardId);
+		if (dbBoard== null) {
 			throw new ApiException(404, "존재하지 않는 보드입니다.");
 		}
 		
 		// 보드 아이디에 일치하는 보드의 핀 목록 불러오기
-		List<BoardItemResponseDto> boardItems = boardDao.selectPinsByBoardId(boardId);
+		List<BoardItemResponseDto> pins = boardDao.selectPinsByBoardId(boardId);
 		
-		return boardItems;
+	    // 응답 생성
+	    BoardDetailResponseDto response = new BoardDetailResponseDto();
+	    response.setBoardId(dbBoard.getBoardId());
+	    response.setBoardName(dbBoard.getBoardName());
+	    response.setBoardInfo(dbBoard.getBoardInfo());
+	    response.setOwnerId(dbBoard.getUserId());
+	    response.setPins(pins);
+
+	    return response;
 	}
 	
 	// 보드 수정
