@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Home, LayoutGrid, PlusCircle, Settings } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AppSidebar({ onCreateClick }) {
   const pathname = usePathname();
@@ -30,7 +31,13 @@ export default function AppSidebar({ onCreateClick }) {
       style={{ width: '80px', minHeight: '100vh', flexShrink: 0 }}
     >
       <Link href="/feed" className="text-decoration-none mb-4">
-        <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#E60023' }}>P</span>
+        <Image
+          src="/round_square_red.png"
+          alt="Pinterior"
+          width={48}
+          height={48}
+          style={{ objectFit: 'contain' }}
+        />
       </Link>
       {menuItems.map((item) => (
         <Link

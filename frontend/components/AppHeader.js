@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 import SearchBar from './SearchBar';
+import Image from 'next/image';
 
 export default function AppHeader() {
   const router = useRouter();
@@ -42,9 +43,9 @@ export default function AppHeader() {
 
   const profileImg = rawProfileImg
     ? rawProfileImg.replace(
-        /\/api\/users\/(\d+)\/image$/,
-        '/api/users/$1/image/view'
-      )
+      /\/api\/users\/(\d+)\/image$/,
+      '/api/users/$1/image/view'
+    )
     : '';
 
   const handleLogout = async () => {
@@ -70,9 +71,13 @@ export default function AppHeader() {
     return (
       <nav className="navbar px-4 py-3 d-flex justify-content-between align-items-center border-bottom bg-white">
         <Link href="/" className="text-decoration-none">
-          <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#E60023' }}>
-            Pinterior
-          </span>
+          <Image
+            src="/logo.png"
+            alt="Pinterior"
+            width={120}
+            height={32}
+            style={{ height: '32px', objectFit: 'contain' }}
+          />
         </Link>
         <button
           className="btn fw-bold px-4 py-2"
