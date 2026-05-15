@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-function SavedContentHeader({ activeTab, onCreateBoard }) {
+function SavedContentHeader({ activeTab, onCreateBoard, onTabChange }) {
     const router = useRouter();
     const [profile, setProfile] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -82,7 +82,7 @@ function SavedContentHeader({ activeTab, onCreateBoard }) {
                                     color: key === activeTab ? "#111" : "#767676",
                                     borderBottom: key === activeTab ? "2px solid #111" : "2px solid transparent",
                                 }}
-                                onClick={() => router.push(href)}
+                                onClick={() => onTabChange ? onTabChange(key) : router.push(href)}
                             >
                                 {label}
                             </button>

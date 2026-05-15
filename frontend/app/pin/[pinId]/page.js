@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart } from 'lucide-react';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
 import CommentSection from '../../comment/page';
+import PinDeleteModal from '../../../components/PinDeleteModal';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -22,21 +23,22 @@ export default function PinDetailPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [toast, setToast] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchDetail = async () => {
-      try {
-        const res = await axios.get(`/api/pins/${pinId}`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        setPin(res.data.data);
-        setLiked(res.data.data.liked);
-        setLikeCount(res.data.data.likeCount ?? 0);
-      } catch (error) {
-        console.error(error);
-        router.push('/feed');
-      } finally {
-        setLoading(false);
-      }
+    try {
+      const res = await axios.get(`/api/pins/${pinId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      setPin(res.data.data);
+      setLiked(res.data.data.liked);
+      setLikeCount(res.data.data.likeCount ?? 0);
+    } catch (error) {
+      console.error(error);
+      router.push('/feed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -103,8 +105,11 @@ export default function PinDetailPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm('이 핀을 삭제하시겠습니까?')) return;
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+};
+
+  const handleDeleteConfirm = async () => {
     setDeleting(true);
     try {
       await axios.delete(`/api/pins/${pinId}`, {
@@ -329,6 +334,12 @@ export default function PinDetailPage() {
 
         </div>
       </div>
+
+      <PinDeleteModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDeleted={handleDeleteConfirm}
+      />
 
       {toast && (
         <div style={{
