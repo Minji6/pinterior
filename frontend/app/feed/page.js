@@ -34,15 +34,26 @@ export default function FeedPage() {
   const hasNextRef = useRef(true);
   const cursorRef = useRef(null);
 
+  // 로그인이 필요한 액션에 사용하는 가드 함수
+  const requireLogin = useCallback(() => {
+    if (!getToken()) {
+      router.push('/login');
+      return false;
+    }
+    return true;
+  }, [router]);
+
   useEffect(() => {
-    if (!localStorage.getItem('token')) router.replace('/login');
-    setColCount(getColCount());
-    const handleResize = () => setColCount(getColCount());
+    const handleResize = () => {
+      setColCount(getColCount());
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const fetchBoards = useCallback(async () => {
+  const fetchBoards = async () => {
+    // 비로그인 상태면 보드 조회 스킵
+    if (!getToken()) return;
     try {
       const res = await axios.get(`/api/boards/user/${getUserId()}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -51,46 +62,80 @@ export default function FeedPage() {
     } catch (error) {
       console.error(error);
     }
-  }, []);
+  };
 
-  const newPinIds = useRef(new Set());
-
-  const fetchPins = useCallback(async () => {
+  const [newPinIds, setNewPinIds] = useState(new Set());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchPins = async () => {
     if (fetchingRef.current || !hasNextRef.current) return;
+
     fetchingRef.current = true;
     setLoading(true);
+
+    let next = [];
+    let more = false;
+
     try {
       const params = { size: 20 };
-      if (cursorRef.current) params.cursor = cursorRef.current;
-      const res = await axios.get('/api/pins', {
-        headers: { Authorization: `Bearer ${getToken()}` },
-        params,
+      if (cursorRef.current) {
+        params.cursor = cursorRef.current;
+      }
+
+      // 토큰이 있을 때만 Authorization 헤더 포함
+      const headers = getToken()
+        ? { Authorization: `Bearer ${getToken()}` }
+        : {};
+
+      const res = await axios.get('/api/pins', { headers, params });
+
+      const { pins, nextCursor, hasNext } = res.data.data;
+
+      next = pins;
+      more = hasNext;
+
+      setNewPinIds(prev => {
+        const updated = new Set(prev);
+        next.forEach(p => updated.add(p.pinId));
+        return updated;
       });
-      const { pins: next, nextCursor, hasNext: more } = res.data.data;
-      next.forEach(p => newPinIds.current.add(p.pinId));
+
       requestAnimationFrame(() => {
         setPins(prev => [...prev, ...next]);
       });
+
       cursorRef.current = nextCursor;
       hasNextRef.current = more;
       setHasNext(more);
+
     } catch (error) {
       console.error(error);
-      alert('핀 목록을 불러오는 중 오류가 발생했습니다.');
+      setToast('핀 목록을 불러오는 중 오류가 발생했습니다.');
+      setTimeout(() => setToast(''), 2500);
     } finally {
       fetchingRef.current = false;
       setLoading(false);
-      // 페이지가 짧으면 자동으로 한 번 더 로드
-      if (hasNextRef.current && document.body.scrollHeight <= window.innerHeight + 600) {
+
+      if (
+        more &&
+        next.length > 0 &&
+        document.body.scrollHeight <= window.innerHeight + 600
+      ) {
         setTimeout(() => fetchPins(), 100);
       }
     }
-  }, []);
+  };
+
+  const loadedRef = useRef(false);
 
   useEffect(() => {
-    fetchPins();
-    fetchBoards();
-  }, [fetchPins, fetchBoards]);
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+
+    const loadData = async () => {
+      await Promise.all([fetchPins(), fetchBoards()]);
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -99,7 +144,7 @@ export default function FeedPage() {
     );
     if (bottomRef.current) observer.observe(bottomRef.current);
     return () => observer.disconnect();
-  }, [fetchPins]);
+  }, []);
 
   const handleSave = async (e, pinId, boardId) => {
     e.stopPropagation();
@@ -116,7 +161,7 @@ export default function FeedPage() {
       setToast(message);
       setTimeout(() => setToast(''), 2500);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       const message = error.response?.data?.message || '저장 중 오류가 발생했습니다';
       setToast(message);
       setTimeout(() => setToast(''), 2500);
@@ -134,7 +179,8 @@ export default function FeedPage() {
       setSavedMap(prev => { const n = { ...prev }; delete n[pinId]; return n; });
     } catch (error) {
       console.error(error);
-      alert('저장 해제 중 오류가 발생했습니다.');
+      setToast('저장 해제 중 오류가 발생했습니다.');
+      setTimeout(() => setToast(''), 2500);
     }
   };
 
@@ -150,15 +196,21 @@ export default function FeedPage() {
               <PinCard
                 key={pin.pinId}
                 pin={pin}
-                isNew={newPinIds.current.has(pin.pinId)}
+                isNew={newPinIds.has(pin.pinId)}
                 hovered={hoveredPin === pin.pinId}
                 saveModalOpen={saveModal === pin.pinId}
                 saved={!!savedMap[pin.pinId]}
                 boards={boards}
                 onMouseEnter={() => setHoveredPin(pin.pinId)}
                 onMouseLeave={() => { setHoveredPin(null); setSaveModal(null); }}
-                onClick={() => router.push(`/pin/${pin.pinId}`)}
-                onSaveClick={(e) => { e.stopPropagation(); setSaveModal(saveModal === pin.pinId ? null : pin.pinId); }}
+                onClick={() => {
+                  if (requireLogin()) router.push(`/pin/${pin.pinId}`);
+                }}
+                onSaveClick={(e) => {
+                  e.stopPropagation();
+                  if (!requireLogin()) return;
+                  setSaveModal(saveModal === pin.pinId ? null : pin.pinId);
+                }}
                 onUnsave={(e) => handleUnsave(e, pin.pinId)}
                 onBoardSelect={(e, boardId) => handleSave(e, pin.pinId, boardId)}
               />
@@ -254,4 +306,3 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
     </div>
   );
 }
-

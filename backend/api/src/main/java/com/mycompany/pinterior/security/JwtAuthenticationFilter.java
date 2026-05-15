@@ -50,6 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        
+        // 전체 핀 목록 조회 GET 요청은 비로그인 허용
+        if ("GET".equals(method) && "/api/pins".equals(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 토큰 없거나 유효하지 않으면 401
         if (token == null || !jwtTokenProvider.validateToken(token)) {

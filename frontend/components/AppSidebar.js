@@ -54,16 +54,6 @@ export default function AppSidebar({ onCreateClick }) {
         <PlusCircle size={24} />
       </button>
 
-      <div className="mt-auto">
-        <Link
-          href="/feed"
-          title="설정"
-          className="d-flex align-items-center justify-content-center text-decoration-none text-dark rounded-3"
-          style={{ width: '48px', height: '48px' }}
-        >
-          <Settings size={24} />
-        </Link>
-      </div>
     </aside>
   );
 }

@@ -9,6 +9,7 @@ import PinList from '../saved-pins/PinList';
 import BoardCreateModal from '@/components/BoardCreateModal';
 import PinCard from '@/components/PinCard';
 import styles from './page.module.css';
+import PinUpdatePanel from '@/components/PinUpdatePanel';
 
 function getColCount() {
   const w = window.innerWidth;
@@ -24,6 +25,7 @@ function MyPinList() {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [colCount, setColCount] = useState(getColCount);
+  const [updateTargetId, setUpdateTargetId] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -64,6 +66,8 @@ function MyPinList() {
     }
   };
 
+  const updateTarget = updateTargetId != null ? pins.find(p => p.pinId === updateTargetId) : null;  // 추가
+
   if (loading) return <div>로딩 중...</div>;
 
   const columns = Array.from({ length: colCount }, () => []);
@@ -72,22 +76,45 @@ function MyPinList() {
   return pins.length === 0
     ? <p style={{ color: '#767676' }}>등록한 핀이 없습니다.</p>
     : (
-      <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-        {columns.map((col, colIdx) => (
-          <div key={colIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {col.map(pin => (
-              <PinCard
-                key={pin.pinId}
-                pin={pin}
-                saved={false}
-                boards={boards}
-                showTitle={false}
-                onSave={(boardId) => handleSave(pin.pinId, boardId)}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
+      <>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+          {columns.map((col, colIdx) => (
+            <div key={colIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {col.map(pin => (
+                <PinCard
+                  key={pin.pinId}
+                  pin={pin}
+                  saved={false}
+                  boards={boards}
+                  showTitle={false}
+                  onSave={(boardId) => handleSave(pin.pinId, boardId)}
+                  onEditClick={() => setUpdateTargetId(pin.pinId)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* 핀 수정 패널 */}
+        {updateTarget && (
+          <PinUpdatePanel
+            key={updateTarget.pinId}
+            pinId={updateTarget.pinId}
+            onClose={() => setUpdateTargetId(null)}
+            onSuccess={async () => {
+              const userId = localStorage.getItem('userId');
+              // 수정 완료 후 핀 목록 재조회
+              const resPins = await axios.get(`/api/pins/user/${userId}`);
+              const rawPins = resPins.data.data ?? [];
+              setPins(rawPins.map(pin => ({
+                ...pin,
+                imageUrl: pin.imageUrl ? `http://localhost:8080${pin.imageUrl}` : null,
+              })));
+              setUpdateTargetId(null);
+            }}
+          />
+        )}
+      </>
     );
 }
 

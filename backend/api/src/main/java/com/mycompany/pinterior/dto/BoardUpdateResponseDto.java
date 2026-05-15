@@ -9,5 +9,6 @@ public class BoardUpdateResponseDto {
 
 	private Long boardId;
 	private String boardName;
+	private String boardInfo;
 	private Date updatedAt;
 }

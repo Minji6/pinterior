@@ -13,5 +13,5 @@ public class BoardListResponseDto {
 	private Date updatedAt;
 	private List<String> thumbnails;
 	private String thumbnailStr;
-	
+	private String boardInfo;
 }

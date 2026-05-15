@@ -34,6 +34,7 @@
 		<![CDATA[
 		SELECT b.board_id,
 		       b.board_name,
+			   b.board_info,
 		       b.updated_at,
        	COUNT(sp.pin_id) AS pin_count,
 	       (
@@ -50,7 +51,8 @@
 		FROM board b
 		LEFT JOIN saved_pin sp ON b.board_id = sp.board_id
 		WHERE b.user_id = #{userId}
-		GROUP BY b.board_id, b.board_name, b.updated_at
+		GROUP BY b.board_id, b.board_name, b.board_info, b.updated_at
+		ORDER BY b.updated_at DESC
 		]]>
 	</select>
 	
@@ -67,7 +69,7 @@
 		UPDATE board
 		SET board_name = #{boardName},
 		    board_info = #{boardInfo},
-		    updated_at = SYSTIMESTAMP
+		    updated_at = SYSTIMESTAMP AT TIME ZONE 'Asia/Seoul'
 		WHERE board_id = #{boardId}
 	</update>
 	

@@ -107,6 +107,7 @@ public class BoardService {
 		Board updatedBoard = boardDao.selectByBoardId(boardId);
 		response.setBoardId(updatedBoard.getBoardId());
 		response.setBoardName(updatedBoard.getBoardName());
+		response.setBoardInfo(updatedBoard.getBoardInfo()); 
 		response.setUpdatedAt(updatedBoard.getUpdatedAt());
 		
 		return response;
