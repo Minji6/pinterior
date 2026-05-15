@@ -3,7 +3,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from '../../components/PinStyles';
-import Image from 'next/image';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -35,21 +34,26 @@ export default function FeedPage() {
   const hasNextRef = useRef(true);
   const cursorRef = useRef(null);
 
-  useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      router.replace('/login');
+  // 로그인이 필요한 액션에 사용하는 가드 함수
+  const requireLogin = useCallback(() => {
+    if (!getToken()) {
+      router.push('/login');
+      return false;
     }
+    return true;
+  }, [router]);
 
+  useEffect(() => {
     const handleResize = () => {
       setColCount(getColCount());
     };
-
     window.addEventListener('resize', handleResize);
-
     return () => window.removeEventListener('resize', handleResize);
-  }, [router]);
+  }, []);
 
   const fetchBoards = async () => {
+    // 비로그인 상태면 보드 조회 스킵
+    if (!getToken()) return;
     try {
       const res = await axios.get(`/api/boards/user/${getUserId()}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -73,32 +77,25 @@ export default function FeedPage() {
 
     try {
       const params = { size: 20 };
-
       if (cursorRef.current) {
         params.cursor = cursorRef.current;
       }
 
-      const res = await axios.get('/api/pins', {
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        },
-        params,
-      });
+      // 토큰이 있을 때만 Authorization 헤더 포함
+      const headers = getToken()
+        ? { Authorization: `Bearer ${getToken()}` }
+        : {};
 
-      const {
-        pins,
-        nextCursor,
-        hasNext
-      } = res.data.data;
+      const res = await axios.get('/api/pins', { headers, params });
+
+      const { pins, nextCursor, hasNext } = res.data.data;
 
       next = pins;
       more = hasNext;
 
       setNewPinIds(prev => {
         const updated = new Set(prev);
-
         next.forEach(p => updated.add(p.pinId));
-
         return updated;
       });
 
@@ -112,45 +109,31 @@ export default function FeedPage() {
 
     } catch (error) {
       console.error(error);
-
       setToast('핀 목록을 불러오는 중 오류가 발생했습니다.');
-
-      setTimeout(() => {
-        setToast('');
-      }, 2500);
-
+      setTimeout(() => setToast(''), 2500);
     } finally {
       fetchingRef.current = false;
       setLoading(false);
 
-      // 페이지가 짧으면 자동 추가 로드
       if (
         more &&
         next.length > 0 &&
         document.body.scrollHeight <= window.innerHeight + 600
       ) {
-        setTimeout(() => {
-          fetchPins();
-        }, 100);
+        setTimeout(() => fetchPins(), 100);
       }
     }
   };
-
 
   const loadedRef = useRef(false);
 
   useEffect(() => {
     if (loadedRef.current) return;
-
     loadedRef.current = true;
 
     const loadData = async () => {
-      await Promise.all([
-        fetchPins(),
-        fetchBoards()
-      ]);
+      await Promise.all([fetchPins(), fetchBoards()]);
     };
-
     loadData();
   }, []);
 
@@ -220,8 +203,14 @@ export default function FeedPage() {
                 boards={boards}
                 onMouseEnter={() => setHoveredPin(pin.pinId)}
                 onMouseLeave={() => { setHoveredPin(null); setSaveModal(null); }}
-                onClick={() => router.push(`/pin/${pin.pinId}`)}
-                onSaveClick={(e) => { e.stopPropagation(); setSaveModal(saveModal === pin.pinId ? null : pin.pinId); }}
+                onClick={() => {
+                  if (requireLogin()) router.push(`/pin/${pin.pinId}`);
+                }}
+                onSaveClick={(e) => {
+                  e.stopPropagation();
+                  if (!requireLogin()) return;
+                  setSaveModal(saveModal === pin.pinId ? null : pin.pinId);
+                }}
                 onUnsave={(e) => handleUnsave(e, pin.pinId)}
                 onBoardSelect={(e, boardId) => handleSave(e, pin.pinId, boardId)}
               />
@@ -317,4 +306,3 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
     </div>
   );
 }
-
