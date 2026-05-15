@@ -73,4 +73,10 @@
 	<select id="countByPinId" parameterType="long" resultType="int">
 		SELECT COUNT(*) FROM comments WHERE pin_id = #{pinId}
 	</select>
+	
+	<delete id="deleteByPinId">
+    DELETE FROM comments
+    WHERE pin_id = #{pinId}
+    
+</delete>
 </mapper>

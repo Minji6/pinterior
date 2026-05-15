@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mycompany.pinterior.dao.CommentDao;
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.PinLikeDao;
 import com.mycompany.pinterior.dao.PinTagDao;
@@ -47,6 +48,8 @@ public class PinService {
 	private SavedPinDao savedPinDao;
 	@Autowired
 	private PinLikeDao pinLikeDao;
+	@Autowired
+	private CommentDao commentDao;
 
 	@Value("${file.upload.path}")
 	private String uploadPath;
@@ -232,6 +235,7 @@ public class PinService {
 	}
 
 	// 핀 삭제
+	@Transactional
 	public void deletePin(Long pinId, Long userId) {
 		Long authorId = pinDao.selectUserIdByPinId(pinId);
 		if (authorId == null) {
@@ -242,7 +246,10 @@ public class PinService {
 		if (!authorId.equals(userId)) {
 			throw new ApiException(403, "본인 핀만 삭제할 수 있습니다.");
 		}
-
+		
+		//댓글 삭제 
+		commentDao.deleteByPinId(pinId);
+		
 		// 핀 좋아요 삭제
 		pinLikeDao.deleteByPinId(pinId);
 
