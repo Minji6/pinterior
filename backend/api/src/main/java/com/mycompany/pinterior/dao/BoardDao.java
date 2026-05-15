@@ -24,4 +24,5 @@ public interface BoardDao {
     public int deleteSavedPinById(Long savedPinId);
     public int updateBoardIdToNull(Long boardId);
     public int countBoardByUserIdAndName(@Param("userId") Long userId, @Param("boardName") String boardName);
+    public int updateBoardUpdatedAt(Long boardId);
 }

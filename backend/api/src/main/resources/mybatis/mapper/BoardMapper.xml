@@ -75,6 +75,7 @@
 		JOIN pin p ON sp.pin_id = p.pin_id
 		WHERE sp.board_id =
 		#{boardId}
+		ORDER BY sp.created_at DESC
 	</select>
 
 	<!-- 보드 수정 -->
@@ -132,9 +133,17 @@
 	</update>
 
 	<select id="countBoardByUserIdAndName" resultType="int">
-		SELECT COUNT(*)
+		SELECT
+		COUNT(*)
 		FROM board
 		WHERE user_id = #{userId}
-		AND board_name = #{boardName}
+		AND board_name =
+		#{boardName}
 	</select>
+
+	<update id="updateBoardUpdatedAt">
+		UPDATE board
+		SET updated_at = SYSTIMESTAMP AT TIME ZONE 'Asia/Seoul'
+		WHERE board_id = #{boardId}
+	</update>
 </mapper>

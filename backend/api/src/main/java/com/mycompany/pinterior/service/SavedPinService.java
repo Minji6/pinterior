@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mycompany.pinterior.dao.BoardDao;
 import com.mycompany.pinterior.dao.PinDao;
 import com.mycompany.pinterior.dao.SavedPinDao;
 import com.mycompany.pinterior.dao.UserDao;
@@ -22,6 +23,8 @@ public class SavedPinService {
 	private PinDao pinDao;
 	@Autowired
 	private UserDao userDao;
+	@Autowired
+	private BoardDao boardDao;
 
 	public SavedPinResponseDto save(Long userId, SavedPinCreateRequestDto request) {
 		Long pinId = request.getPinId();
@@ -57,6 +60,11 @@ public class SavedPinService {
 		savedPin.setBoardId(boardId);
 		savedPinDao.insert(savedPin);
 
+		// 보드 updated_at 갱신
+		if (boardId != null) {
+			boardDao.updateBoardUpdatedAt(boardId);
+		}
+
 		//
 		SavedPinResponseDto response = new SavedPinResponseDto();
 		response.setSavedPinId(savedPin.getSavedPinId());
@@ -66,7 +74,7 @@ public class SavedPinService {
 		response.setCreatedAt(java.time.LocalDateTime.now());
 
 		return response;
-		
+
 	}
 
 	public void updateBoard(Long savedPinId, Long userId, Long boardId) {
@@ -89,8 +97,12 @@ public class SavedPinService {
 		}
 
 		savedPinDao.updateBoardBySavedPinId(savedPinId, boardId);
+		// 보드 updated_at 갱신
+		if (boardId != null) {
+			boardDao.updateBoardUpdatedAt(boardId);
+		}
 	}
-	
+
 	public void unsave(Long savedPinId, Long userId) {
 		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
 		if (ownerId == null) {
@@ -103,7 +115,7 @@ public class SavedPinService {
 
 		savedPinDao.deleteSavedPin(savedPinId);
 	}
-	
+
 	// 저장된 핀 조회
 	public List<SavedPinListResponseDto> getSavedPinList(Long userId, Long loginUserId) {
 
@@ -115,9 +127,7 @@ public class SavedPinService {
 		if (!loginUserId.equals(userId)) {
 			throw new ApiException(403, "해당 유저의 저장 핀을 조회할 권한이 없습니다.");
 		}
-	
-		
-		
+
 		// 조회
 		List<SavedPinListResponseDto> result = savedPinDao.selectSavedPinsByUserId(userId);
 
