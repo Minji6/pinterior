@@ -6,6 +6,7 @@ import PinCard from '@/components/PinCard';
 import BoardEditModal from '@/components/BoardEditModal';
 import BoardDeleteModal from '@/components/BoardDeleteModal';
 import { Pencil } from 'lucide-react';
+import PinUpdatePanel from '@/components/PinUpdatePanel';
 
 function getColCount() {
     const w = window.innerWidth;
@@ -26,6 +27,7 @@ export default function BoardDetailPage() {
     const [colCount, setColCount] = useState(getColCount);
     const [showEdit, setShowEdit] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
+    const [updateTargetId, setUpdateTargetId] = useState(null);
 
     // 화면 크기에 따른 컬럼 수 설정
     useEffect(() => {
@@ -90,12 +92,15 @@ export default function BoardDetailPage() {
 
             {/* 보드 헤더 */}
             <div className="d-flex justify-content-between align-items-start mb-4"
-            style={{margin: 30}}>
+                style={{ margin: 30 }}>
                 <div>
-                    <h2 className="fw-bold mb-1" 
-                    style={{ fontSize: 28 }}>
+                    <h2 className="fw-bold mb-1"
+                        style={{ fontSize: 28 }}>
                         {boardInfo?.boardName ?? ''}
                     </h2>
+                    {boardInfo?.boardInfo && (
+                        <p className="text-muted mb-1" style={{ fontSize: 14 }}>{boardInfo.boardInfo}</p>
+                    )}
                     <p className="text-muted mb-0" style={{ fontSize: 14 }}>핀 {pins.length}개</p>
                 </div>
                 <button
@@ -122,6 +127,7 @@ export default function BoardDetailPage() {
                                         boards={boards}
                                         showTitle={false}
                                         onSave={(targetBoardId) => handleSave(pin.pinId, targetBoardId)}
+                                        onEditClick={() => setUpdateTargetId(pin.pinId)}
                                     />
                                 ))}
                             </div>
@@ -147,6 +153,20 @@ export default function BoardDetailPage() {
                 onClose={() => setShowDelete(false)}
                 onDeleted={handleDeleted}
             />
+
+            {/* 핀 수정 패널 */}
+            {updateTargetId && (
+                <PinUpdatePanel
+                    key={updateTargetId}
+                    pinId={updateTargetId}
+                    onClose={() => setUpdateTargetId(null)}
+                    onSuccess={async () => {
+                        const resBoard = await axios.get(`/api/boards/${boardId}`);
+                        setPins(resBoard.data.data ?? []);
+                        setUpdateTargetId(null);
+                    }}
+                />
+            )}
         </div>
     );
 }
