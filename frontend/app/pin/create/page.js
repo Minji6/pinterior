@@ -21,7 +21,7 @@ export default function PinCreatePage() {
     const [boards, setBoards] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
+    const [toast, setToast] = useState('');
 
     const fileInputRef = useRef(null);
     const [mounted, setMounted] = useState(false);
@@ -66,9 +66,8 @@ export default function PinCreatePage() {
     const removeTag = (tag) => setTags(tags.filter(t => t !== tag));
 
     const handleSubmit = async () => {
-        if (!imageFile) { setError('이미지를 업로드해주세요.'); return; }
-        if (!title.trim()) { setError('제목을 입력해주세요.'); return; }
-        setError('');
+        if (!imageFile) { setToast('이미지를 업로드해주세요.'); setTimeout(() => setToast(''), 2500); return; }
+        if (!title.trim()) { setToast('제목을 입력해주세요.'); setTimeout(() => setToast(''), 2500); return; }
         setSubmitting(true);
         try {
             const formData = new FormData();
@@ -86,10 +85,15 @@ export default function PinCreatePage() {
                 },
             });
             const newPinId = res.data.data?.pinId;
-            router.push(newPinId ? `/pin/${newPinId}` : '/feed');
+            setToast('핀이 등록되었습니다!');
+            setTimeout(() => {
+                router.push(newPinId ? `/pin/${newPinId}` : '/feed');
+            }, 1500);
         } catch (e) {
-            console.error(e);
-            setError('핀 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+            console.log(e);
+            const msg = e.response?.data?.message || '핀 등록 중 오류가 발생했습니다. 다시 시도해주세요.';
+            setToast(msg);
+            setTimeout(() => setToast(''), 2500);
         } finally {
             setSubmitting(false);
         }
@@ -109,10 +113,19 @@ export default function PinCreatePage() {
                 </div>
             </div>
 
-            {/* 에러 */}
-            {error && (
-                <div style={{ maxWidth: '1000px', margin: '0 auto 16px', padding: '12px 16px', background: '#fff0f0', border: '1px solid #fcc', borderRadius: '12px', color: '#E60023', fontSize: '14px', fontWeight: '500' }}>
-                    {error}
+            {/* Toast */}
+            {toast && (
+                <div style={{
+                    position: 'fixed', bottom: 32, left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: '#1a1a1a', color: '#fff',
+                    padding: '12px 24px', borderRadius: '24px',
+                    fontSize: '0.875rem', fontWeight: '600',
+                    zIndex: 9999, pointerEvents: 'none',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    whiteSpace: 'nowrap',
+                }}>
+                    {toast}
                 </div>
             )}
 
