@@ -13,6 +13,9 @@ import lombok.Data;
 
 public class PinCreateRequestDto {
 	private Long boardId;
+	
+	@NotEmpty(message = "제목은 필수입니다.")
+    @NotNull(message = "제목은 필수입니다.")
 	private String title;
     private String description;
     private String imageUrl;

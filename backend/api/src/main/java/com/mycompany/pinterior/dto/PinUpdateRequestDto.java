@@ -12,6 +12,8 @@ import lombok.Data;
 
 @Data
 public class PinUpdateRequestDto {
+	@NotEmpty(message = "제목은 필수입니다.")
+    @NotNull(message = "제목은 필수입니다.")
     private String title;
     private String description;
     
