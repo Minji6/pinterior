@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from '../../components/PinStyles';
+import { ToastContext } from '@/contexts/ToastContext';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -27,7 +28,8 @@ export default function FeedPage() {
   const [boards, setBoards] = useState([]);
   const [savedMap, setSavedMap] = useState({});
   const [colCount, setColCount] = useState(6);
-  const [toast, setToast] = useState('');
+
+  const { showToast } = useContext(ToastContext);
 
   const bottomRef = useRef(null);
   const fetchingRef = useRef(false);
@@ -158,13 +160,11 @@ export default function FeedPage() {
       setSaveModal(null);
       const board = boards.find(b => b.boardId === boardId);
       const message = board ? `${board.boardName}에 저장되었습니다` : '저장되었습니다';
-      setToast(message);
-      setTimeout(() => setToast(''), 2500);
+      showToast(message);
     } catch (error) {
       console.error(error);
       const message = error.response?.data?.message || '저장 중 오류가 발생했습니다';
-      setToast(message);
-      setTimeout(() => setToast(''), 2500);
+      showToast(message, 'error');
     }
   };
 
@@ -179,8 +179,7 @@ export default function FeedPage() {
       setSavedMap(prev => { const n = { ...prev }; delete n[pinId]; return n; });
     } catch (error) {
       console.error(error);
-      setToast('저장 해제 중 오류가 발생했습니다.');
-      setTimeout(() => setToast(''), 2500);
+      showToast('저장 해제 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -236,20 +235,7 @@ export default function FeedPage() {
         </p>
       )}
       <div ref={bottomRef} style={{ height: '20px' }} />
-      {toast && (
-        <div style={{
-          position: 'fixed', bottom: 32, left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#1a1a1a', color: '#fff',
-          padding: '12px 24px', borderRadius: '24px',
-          fontSize: '0.875rem', fontWeight: '600',
-          zIndex: 9999, pointerEvents: 'none',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-          whiteSpace: 'nowrap',
-        }}>
-          {toast}
-        </div>
-      )}
+      
     </div>
   );
 }

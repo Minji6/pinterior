@@ -4,6 +4,7 @@ import AppHeader from '../components/AppHeader';
 import ClientLayout from '../components/ClientLayout';
 import AuthContextProvider from '@/contexts/AuthContext';
 import AxiosConfig from '@/apis/AxiosConfig';
+import { ToastContextProvider } from '@/contexts/ToastContext';
 
 export const metadata = {
   title: 'Pinterior',
@@ -15,18 +16,19 @@ export default function RootLayout({ children }) {
     <html lang="ko">
       <body>
         <AuthContextProvider>
+          <ToastContextProvider>
 
-          {/* Axios 설정 컴포넌트 */}
-          <AxiosConfig />
+            {/* Axios 설정 컴포넌트 */}
+            <AxiosConfig />
 
-          <BootstrapClient />
-          <ClientLayout>
-            <AppHeader />
-            <main className="flex-grow-1" style={{ backgroundColor: '#f8f8f8' }}>
-              {children}
-            </main>
-          </ClientLayout>
-
+            <BootstrapClient />
+            <ClientLayout>
+              <AppHeader />
+              <main className="flex-grow-1" style={{ backgroundColor: '#f8f8f8' }}>
+                {children}
+              </main>
+            </ClientLayout>
+          </ToastContextProvider>
         </AuthContextProvider>
       </body>
     </html>

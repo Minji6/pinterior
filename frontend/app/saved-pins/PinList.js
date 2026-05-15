@@ -59,7 +59,7 @@ function PinList() {
             return;
         }
         (async () => {
-            setLoginUserId(Number(userId)); // ✅ IIFE 내부에서 호출
+            setLoginUserId(Number(userId));
             await fetchAll(userId);
             setLoading(false);
         })();
@@ -71,6 +71,7 @@ function PinList() {
             await axios.post('/api/saved-pins', { pinId, boardId });
         } catch (err) {
             console.log(err);
+            throw err;
         }
     };
 
@@ -112,7 +113,7 @@ function PinList() {
                                         saved={false}
                                         boards={boards}
                                         showTitle={false}
-                                        onSave={(boardId) => handleSave(pin.pinId, boardId)}
+                                        onSave={(boardId, boardName) => handleSave(pin.pinId, boardId, boardName)}
                                         onEditClick={() => handleEditClick(pin)}
                                     />
                                 ))}
