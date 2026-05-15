@@ -27,4 +27,6 @@ public interface CommentDao {
 
 	// 댓글 총 개수 조회
 	int countByPinId(@Param("pinId") Long pinId);
+	
+	int deleteByPinId(@Param("pinId") Long pinId);
 }
