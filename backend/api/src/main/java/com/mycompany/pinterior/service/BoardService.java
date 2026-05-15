@@ -109,6 +109,12 @@ public class BoardService {
 			throw new ApiException(403, "해당 보드를 수정할 권한이 없습니다.");
 		}
 
+		// 보드 이름 중복 확인 (본인의 다른 보드와 중복 시 409)
+		if (!dbBoard.getBoardName().equals(request.getBoardName()) &&
+		    boardDao.countBoardByUserIdAndName(userId, request.getBoardName()) > 0) {
+		    throw new ApiException(409, "이미 존재하는 보드 이름입니다.");
+		}
+		
 		// 수정 데이터로 세팅
 		dbBoard.setBoardName(request.getBoardName());
 		dbBoard.setBoardInfo(request.getBoardInfo());
