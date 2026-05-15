@@ -93,7 +93,8 @@ export default function PinCreatePage() {
             }, 1500);
         } catch (e) {
             console.log(e);
-            setToast('핀 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+            const msg = e.response?.data?.message || '핀 등록 중 오류가 발생했습니다. 다시 시도해주세요.';
+            setToast(msg);
             setTimeout(() => setToast(''), 2500);
         } finally {
             setSubmitting(false);
