@@ -21,7 +21,6 @@ export default function PinCreatePage() {
     const [boards, setBoards] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
     const [toast, setToast] = useState('');
 
     const fileInputRef = useRef(null);
@@ -69,7 +68,6 @@ export default function PinCreatePage() {
     const handleSubmit = async () => {
         if (!imageFile) { setToast('이미지를 업로드해주세요.'); setTimeout(() => setToast(''), 2500); return; }
         if (!title.trim()) { setToast('제목을 입력해주세요.'); setTimeout(() => setToast(''), 2500); return; }
-        setError('');
         setSubmitting(true);
         try {
             const formData = new FormData();
@@ -114,13 +112,6 @@ export default function PinCreatePage() {
                     </button>
                 </div>
             </div>
-
-            {/* 에러 */}
-            {error && (
-                <div style={{ maxWidth: '1000px', margin: '0 auto 16px', padding: '12px 16px', background: '#fff0f0', border: '1px solid #fcc', borderRadius: '12px', color: '#E60023', fontSize: '14px', fontWeight: '500' }}>
-                    {error}
-                </div>
-            )}
 
             {/* Toast */}
             {toast && (
