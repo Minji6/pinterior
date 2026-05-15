@@ -2,10 +2,15 @@
 
 function PinDeleteModal({ show, onClose, onDeleted }) {
 
-    const handleDelete = () => {
-        onDeleted?.();
-        onClose();
-    };
+    const handleDelete = async () => {
+    try {
+        await onDeleted?.();
+        onClose(); // 성공했을 때만 닫힘
+    } catch (err) {
+        // 실패 시 모달 유지
+        console.log(err);
+    }
+};
 
     if (!show) return null;
 

@@ -112,16 +112,19 @@ export default function PinDetailPage() {
   const handleDeleteConfirm = async () => {
     setDeleting(true);
     try {
-      await axios.delete(`/api/pins/${pinId}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      router.push('/feed');
+        await axios.delete(`/api/pins/${pinId}`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        setToast('핀이 삭제되었습니다.');
+        setTimeout(() => router.back(), 1500); // 토스트 보여주고 이동
     } catch (error) {
-      console.error(error);
-      alert('삭제 중 오류가 발생했습니다.');
-      setDeleting(false);
+        console.error(error);
+        setToast('삭제 중 오류가 발생했습니다.');
+        setTimeout(() => setToast(''), 2500);
+        setDeleting(false);
+        throw error;
     }
-  };
+};
 
   const handleSave = async (boardId) => {
     try {
