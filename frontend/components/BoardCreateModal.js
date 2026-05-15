@@ -1,8 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import axios from 'axios';
+import { ToastContext } from '@/contexts/ToastContext';
 
 function BoardCreateModal({ show, onClose, onCreated }) {
+    const { showToast } = useContext(ToastContext);
     const [form, setForm] = useState({ name: '', description: '' });
     const isInvalid = form.name.trim() === '' || form.name.length > 50;
 
@@ -20,8 +22,10 @@ function BoardCreateModal({ show, onClose, onCreated }) {
             onCreated?.(res.data.data);
             onClose();
             setForm({ name: '', description: '' });
+            showToast('보드가 생성되었습니다.');
         } catch (err) {
             console.log(err);
+            showToast('생성 중 오류가 발생했습니다.', 'error');
         }
     };
 

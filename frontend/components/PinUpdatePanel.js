@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { X } from 'lucide-react';
+import { ToastContext } from '@/contexts/ToastContext';
 
 function getToken() { return localStorage.getItem('token'); }
 function getUserId() { return Number(localStorage.getItem('userId')); }
@@ -26,6 +27,7 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
     const [boards, setBoards] = useState([]);
     const [boardId, setBoardId] = useState('');
     const initialBoardKey = initialBoardId == null ? '' : String(initialBoardId);
+    const { showToast } = useContext(ToastContext);
 
     useEffect(() => {
         setTimeout(() => setSlideIn(true), 10);
@@ -118,9 +120,11 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
             setTimeout(() => {
                 onSuccess ? onSuccess() : onClose();
             }, 300);
+            showToast('핀이 수정되었습니다.');
         } catch (e) {
             console.error(e);
             setError('수정 중 오류가 발생했습니다. 다시 시도해주세요.');
+            showToast('오류가 발생했습니다.', 'error');
         } finally {
             setSubmitting(false);
         }
@@ -139,9 +143,11 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
             } else {
                 router.replace('/feed');
             }
+            showToast('핀이 삭제되었습니다.');
         } catch (e) {
             console.error(e);
             setError('삭제 중 오류가 발생했습니다.');
+            showToast('오류가 발생했습니다.', 'error');
             setDeleting(false);
         }
     };
@@ -217,6 +223,7 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                                     ))}
                                     <input id="update-tag-input" type="text" placeholder={tags.length === 0 ? '태그 추가' : ''} value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} onCompositionStart={() => setComposing(true)} onCompositionEnd={() => setComposing(false)} style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', flex: 1, minWidth: '80px' }} />
                                 </div>
+                            </div>
                             {savedPinId != null && (
                                 <div>
                                     <label style={labelStyle}>보드</label>
@@ -233,7 +240,6 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
                                     <p style={{ fontSize: '12px', color: '#767676', marginTop: '6px' }}>프로필 선택 시 보드 없이 프로필에만 저장됩니다</p>
                                 </div>
                             )}
-                            </div>
                         </div>
                     )}
                 </div>
