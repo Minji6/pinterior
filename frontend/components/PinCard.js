@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from './PinStyles';
+import { BoardBtn, saveBtnStyle, savedBtnStyle } from './PinStyles';
 
 /**
  * 공통 PinCard 컴포넌트
@@ -13,14 +13,27 @@ import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from './PinStyle
  * - onSave: (boardId) => void
  * - onUnsave: () => void
  * - showTitle: boolean (제목 표시 여부, 기본 false)
+ * - onEditClick: () => void (수정 버튼 클릭 핸들러)
  */
 function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false, onEditClick }) {
   const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const cardRef = useRef(null);
 
   const minHeight = pin.imageUrl ? 'auto' : `${120 + (pin.pinId % 5) * 40}px`;
+
+  const calcDropdownPos = () => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const btnRight = rect.right - 8;
+    const btnTop = rect.top + 8 + 36;
+    const spaceBelow = window.innerHeight - btnTop;
+    const top = spaceBelow < 200 ? btnTop - 200 : btnTop;
+    setDropdownPos({ top, left: btnRight - 160 });
+  };
 
   const handleCardClick = () => {
     router.push(`/pin/${pin.pinId}`);
@@ -28,6 +41,7 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false,
 
   const handleSaveClick = (e) => {
     e.stopPropagation();
+    calcDropdownPos();
     setSaveModalOpen(prev => !prev);
   };
 
@@ -44,6 +58,7 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false,
 
   return (
     <div
+      ref={cardRef}
       style={{ position: 'relative', cursor: 'pointer' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setSaveModalOpen(false); }}
@@ -100,15 +115,22 @@ function PinCard({ pin, saved, boards = [], onSave, onUnsave, showTitle = false,
                   저장
                 </button>
                 {saveModalOpen && (
-                  <div onClick={(e) => e.stopPropagation()} style={dropdownStyle}>
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      position: 'fixed',
+                      top: dropdownPos.top,
+                      left: dropdownPos.left,
+                      backgroundColor: '#fff', borderRadius: '16px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                      padding: '12px', minWidth: '160px', zIndex: 9999,
+                    }}
+                  >
                     <p style={{ fontSize: '0.8rem', color: '#767676', margin: '0 0 6px', fontWeight: '600' }}>보드에 저장</p>
-                    {boards.length === 0 ? (
-                      <BoardBtn label="보드 없이 저장" onClick={(e) => handleBoardSelect(e, null)} />
-                    ) : (
-                      boards.map(b => (
-                        <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => handleBoardSelect(e, b.boardId)} />
-                      ))
-                    )}
+                    {boards.map(b => (
+                      <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => handleBoardSelect(e, b.boardId)} />
+                    ))}
+                    <BoardBtn label="보드 없이 저장" onClick={(e) => handleBoardSelect(e, null)} />
                   </div>
                 )}
               </>

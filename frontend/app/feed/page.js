@@ -258,6 +258,18 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
   const minHeight = pin.imageUrl ? 'auto' : `${120 + (pin.pinId % 5) * 40}px`;
   const [visible, setVisible] = useState(!isNew);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const cardRef = useRef(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+
+  const calcDropdownPos = () => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const btnRight = rect.right - 8;
+    const btnTop = rect.top + 8 + 36; // 저장버튼 아래
+    const spaceBelow = window.innerHeight - btnTop;
+    const top = spaceBelow < 200 ? rect.top + 8 + 36 - 200 : btnTop;
+    setDropdownPos({ top, left: btnRight - 160 });
+  };
 
   useEffect(() => {
     if (isNew) {
@@ -269,6 +281,7 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
   return (
     <div
       style={{ marginBottom: '0', position: 'relative', cursor: 'pointer', opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}
+      ref={cardRef}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
@@ -288,9 +301,16 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
               <button onClick={onUnsave} style={{ ...savedBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장됨</button>
             ) : (
               <>
-                <button onClick={onSaveClick} style={{ ...saveBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장</button>
+                <button onClick={(e) => { onSaveClick(e); calcDropdownPos(); }} style={{ ...saveBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장</button>
                 {saveModalOpen && (
-                  <div onClick={(e) => e.stopPropagation()} style={dropdownStyle}>
+                  <div onClick={(e) => e.stopPropagation()} style={{
+                    position: 'fixed',
+                    top: dropdownPos.top,
+                    left: dropdownPos.left,
+                    backgroundColor: '#fff', borderRadius: '16px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                    padding: '12px', minWidth: '160px', zIndex: 9999,
+                  }}>
                     <p style={{ fontSize: '0.8rem', color: '#767676', margin: '0 0 6px', fontWeight: '600' }}>보드에 저장</p>
                     {boards.map(b => (
                       <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => onBoardSelect(e, b.boardId)} />
