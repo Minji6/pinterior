@@ -55,6 +55,7 @@ export default function BoardDetailPage() {
                     boardId: detail.boardId,
                     boardName: detail.boardName,
                     boardInfo: detail.boardInfo,
+                    pinCount: detail.pins?.length ?? 0,
                 });
                 // 핀 목록 세팅
                 setPins(detail.pins ?? []);
@@ -71,12 +72,12 @@ export default function BoardDetailPage() {
         work();
     }, [boardId]);
 
-    // 저장
     const handleSave = async (pinId, targetBoardId) => {
         try {
-            await axios.post('/api/saved-pins', { pinId, boardId: targetBoardId });
+            await axios.post('/api/saved-pins', { pinId, targetBoardId });
         } catch (err) {
             console.log(err);
+            throw err;
         }
     };
 
@@ -138,7 +139,7 @@ export default function BoardDetailPage() {
                                         saved={false}
                                         boards={boards}
                                         showTitle={false}
-                                        onSave={(targetBoardId) => handleSave(pin.pinId, targetBoardId)}
+                                        onSave={(targetBoardId, boardName) => handleSave(pin.pinId, targetBoardId, boardName)}
                                         onEditClick={isOwner ? () => setUpdateTargetId(pin.pinId) : null}
                                     />
                                 ))}

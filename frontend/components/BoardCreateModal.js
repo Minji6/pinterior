@@ -25,7 +25,7 @@ function BoardCreateModal({ show, onClose, onCreated }) {
             showToast('보드가 생성되었습니다.');
         } catch (err) {
             console.log(err);
-            showToast('생성 중 오류가 발생했습니다.', 'error');
+            showToast(err.response?.data?.message || '생성 중 오류가 발생했습니다.', 'error');
         }
     };
 

@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, dropdownStyle } from '../../components/PinStyles';
+import { ToastContext } from '@/contexts/ToastContext';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -27,7 +28,8 @@ export default function FeedPage() {
   const [boards, setBoards] = useState([]);
   const [savedMap, setSavedMap] = useState({});
   const [colCount, setColCount] = useState(6);
-  const [toast, setToast] = useState('');
+
+  const { showToast } = useContext(ToastContext);
 
   const bottomRef = useRef(null);
   const fetchingRef = useRef(false);
@@ -158,13 +160,11 @@ export default function FeedPage() {
       setSaveModal(null);
       const board = boards.find(b => b.boardId === boardId);
       const message = board ? `${board.boardName}에 저장되었습니다` : '저장되었습니다';
-      setToast(message);
-      setTimeout(() => setToast(''), 2500);
+      showToast(message);
     } catch (error) {
       console.error(error);
       const message = error.response?.data?.message || '저장 중 오류가 발생했습니다';
-      setToast(message);
-      setTimeout(() => setToast(''), 2500);
+      showToast(message, 'error');
     }
   };
 
@@ -179,8 +179,7 @@ export default function FeedPage() {
       setSavedMap(prev => { const n = { ...prev }; delete n[pinId]; return n; });
     } catch (error) {
       console.error(error);
-      setToast('저장 해제 중 오류가 발생했습니다.');
-      setTimeout(() => setToast(''), 2500);
+      showToast('저장 해제 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -236,20 +235,7 @@ export default function FeedPage() {
         </p>
       )}
       <div ref={bottomRef} style={{ height: '20px' }} />
-      {toast && (
-        <div style={{
-          position: 'fixed', bottom: 32, left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#1a1a1a', color: '#fff',
-          padding: '12px 24px', borderRadius: '24px',
-          fontSize: '0.875rem', fontWeight: '600',
-          zIndex: 9999, pointerEvents: 'none',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-          whiteSpace: 'nowrap',
-        }}>
-          {toast}
-        </div>
-      )}
+      
     </div>
   );
 }
@@ -258,6 +244,18 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
   const minHeight = pin.imageUrl ? 'auto' : `${120 + (pin.pinId % 5) * 40}px`;
   const [visible, setVisible] = useState(!isNew);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const cardRef = useRef(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+
+  const calcDropdownPos = () => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const btnRight = rect.right - 8;
+    const btnTop = rect.top + 8 + 36; // 저장버튼 아래
+    const spaceBelow = window.innerHeight - btnTop;
+    const top = spaceBelow < 200 ? rect.top + 8 + 36 - 200 : btnTop;
+    setDropdownPos({ top, left: btnRight - 160 });
+  };
 
   useEffect(() => {
     if (isNew) {
@@ -269,6 +267,7 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
   return (
     <div
       style={{ marginBottom: '0', position: 'relative', cursor: 'pointer', opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}
+      ref={cardRef}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
@@ -288,9 +287,16 @@ function PinCard({ pin, isNew, hovered, saveModalOpen, saved, boards, onMouseEnt
               <button onClick={onUnsave} style={{ ...savedBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장됨</button>
             ) : (
               <>
-                <button onClick={onSaveClick} style={{ ...saveBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장</button>
+                <button onClick={(e) => { onSaveClick(e); calcDropdownPos(); }} style={{ ...saveBtnStyle, position: 'absolute', top: 8, right: 8, padding: '8px 16px', fontSize: '0.875rem' }}>저장</button>
                 {saveModalOpen && (
-                  <div onClick={(e) => e.stopPropagation()} style={dropdownStyle}>
+                  <div onClick={(e) => e.stopPropagation()} style={{
+                    position: 'fixed',
+                    top: dropdownPos.top,
+                    left: dropdownPos.left,
+                    backgroundColor: '#fff', borderRadius: '16px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                    padding: '12px', minWidth: '160px', zIndex: 9999,
+                  }}>
                     <p style={{ fontSize: '0.8rem', color: '#767676', margin: '0 0 6px', fontWeight: '600' }}>보드에 저장</p>
                     {boards.map(b => (
                       <BoardBtn key={b.boardId} label={b.boardName} onClick={(e) => onBoardSelect(e, b.boardId)} />
