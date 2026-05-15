@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,12 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mycompany.pinterior.dto.ApiResponse;
 import com.mycompany.pinterior.dto.BoardCreateRequestDto;
 import com.mycompany.pinterior.dto.BoardCreateResponseDto;
-import com.mycompany.pinterior.dto.BoardItemResponseDto;
+import com.mycompany.pinterior.dto.BoardDetailResponseDto;
 import com.mycompany.pinterior.dto.BoardListResponseDto;
 import com.mycompany.pinterior.dto.BoardUpdateRequestDto;
 import com.mycompany.pinterior.dto.BoardUpdateResponseDto;
 import com.mycompany.pinterior.entity.Board;
-import com.mycompany.pinterior.security.JwtTokenProvider;
 import com.mycompany.pinterior.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -73,10 +72,10 @@ public class BoardController {
 
 	// 보드 내 핀 목록 조회
 	@GetMapping("/{boardId}")
-	public ResponseEntity<ApiResponse<List<BoardItemResponseDto>>> readBoardItem(
+	public ResponseEntity<ApiResponse<BoardDetailResponseDto>> readBoardItem(
 			@PathVariable("boardId") Long boardId) {
 		// 서비스를 이용해서 보드의 핀 목록 가져오기
-		List<BoardItemResponseDto> data = boardService.getBoardItem(boardId);
+		BoardDetailResponseDto data = boardService.getBoardItem(boardId);
 		return ResponseEntity.ok(ApiResponse.of(200, "보드 내 핀 목록 조회 성공", data));
 	}
 
