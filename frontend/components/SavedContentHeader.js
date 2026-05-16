@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-function SavedContentHeader({ activeTab, onCreateBoard, onTabChange }) {
+function SavedContentHeader({ activeTab, onCreateBoard }) {
     const router = useRouter();
     const [profile, setProfile] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -48,7 +48,7 @@ function SavedContentHeader({ activeTab, onCreateBoard, onTabChange }) {
 
                     {profile && (
                         <div
-                            className="d-flex align-items-start gap-3"
+                            className="d-flex align-items-center gap-3"
                             onClick={() => router.push('/mypage')}
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -64,16 +64,7 @@ function SavedContentHeader({ activeTab, onCreateBoard, onTabChange }) {
                             )}
                             <div>
                                 <p className="fw-bold mb-0" style={{ fontSize: 14 }}>{profile.nickname}</p>
-                                {profile.bio && (
-                                    <p className="text-muted mb-0" style={{
-                                        fontSize: 12,
-                                        maxWidth: 500,
-                                        wordBreak: 'break-word',
-                                        whiteSpace: 'normal',
-                                    }}>
-                                        {profile.bio}
-                                    </p>
-                                )}
+                                {profile.bio && <p className="text-muted mb-0" style={{ fontSize: 12 }}>{profile.bio}</p>}
                             </div>
                         </div>
                     )}
@@ -91,7 +82,7 @@ function SavedContentHeader({ activeTab, onCreateBoard, onTabChange }) {
                                     color: key === activeTab ? "#111" : "#767676",
                                     borderBottom: key === activeTab ? "2px solid #111" : "2px solid transparent",
                                 }}
-                                onClick={() => onTabChange ? onTabChange(key) : router.push(href)}
+                                onClick={() => router.push(href)}
                             >
                                 {label}
                             </button>
