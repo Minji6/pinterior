@@ -123,20 +123,25 @@ public class PinService {
 		}
 	}
 
-	// ===== 전체 핀 조회 =====
+	// 전체핀목록 조회 - 김효 기능1
 	public PinListResponseDto getPinList(String cursor, int size) {
+		//커서 디코딩값 호출 base64-> pinid
 		Long cursorId = CursorUtil.decode(cursor);
-
+		// size+1만큼 조회
 		List<PinSummaryDto> pins = pinDao.selectList(cursorId, size + 1);
-
+		
+		//존재시 hasnext를 true로 변경
 		boolean hasNext = pins.size() > size;
 
 		if (hasNext) {
 			pins = pins.subList(0, size);
 		}
-
+		
+		// 기본커서 null로 설정
 		String nextCursor = null;
+		// 핀목록존재와 hasnexttur인지 확인
 		if (hasNext && !pins.isEmpty()) {
+			//마지막 핀id를 가져오기
 			Long lastPinId = pins.get(pins.size() - 1).getPinId();
 			nextCursor = CursorUtil.encode(lastPinId);
 		}
@@ -193,39 +198,39 @@ public class PinService {
 		return data;
 	}
 
-	//
-	//
+	//핀 상세조회 김효-기능2
 	public PinDetailResponseDto getPinDetail(Long pinId) {
-
+		// pin 기본정보 가져오기
 		PinDetailResponseDto detail = pinDao.selectDetail(pinId);
 		if (detail == null) {
 			throw new ApiException(404, "존재하지 않는 핀입니다.");
 		}
-
+		// 작성자 정보 조회
 		AuthorDto author = pinDao.selectAuthorByPinId(pinId);
 		detail.setAuthor(author);
-
+		// 태그 목록 가져오기
 		List<String> tags = pinDao.selectTagsByPinId(pinId);
 		detail.setTags(tags);
-
+		
 		// 좋아요 수, 좋아요 여부
 		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		int likeCount = pinLikeDao.countByPinId(pinId);
+		//현재 사용자가 좋아요를 눌렀는지
 		boolean isLiked = pinLikeDao.countByUserIdAndPinId(userId, pinId) > 0;
 
 		detail.setLikeCount(likeCount);
 		detail.setLiked(isLiked);
 
-		// 댓글 허용 여부는 추후 구현 예정
 		detail.setCommentEnabled(1);
 
 		return detail;
 
 	}
 
-	// 이미지 다운로드
+	// 이미지 다운로드-김효 기능3
 	public PinDownloadResponseDto getDownloadUrl(Long pinId) {
+		//이미지 url을 조회
 		String imageUrl = pinDao.selectImageUrlByPinId(pinId);
 		if (imageUrl == null) {
 			throw new ApiException(404, "이미지를 찾을 수 없습니다.");
@@ -234,10 +239,12 @@ public class PinService {
 		return new PinDownloadResponseDto(imageUrl);
 	}
 
-	// 핀 삭제
+	// 핀 삭제- 김효 기능4
 	@Transactional
 	public void deletePin(Long pinId, Long userId) {
+		//작성자 id를 db에서 조회
 		Long authorId = pinDao.selectUserIdByPinId(pinId);
+		// null 이면  예외
 		if (authorId == null) {
 			throw new ApiException(404, "존재하지 않는 핀입니다.");
 		}

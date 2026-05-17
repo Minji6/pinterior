@@ -77,12 +77,16 @@ public class PinController {
 
 		return ResponseEntity.status(201).body(ApiResponse.of(201, "핀 등록 성공", data));
 	}
-
+	
+	// 전체핀목록 조회-기능1 김효
 	@GetMapping
 	public ResponseEntity<ApiResponse<PinListResponseDto>> getPinList(
+			//다음 페이지 조회값 CURSOR
 			@RequestParam(value = "cursor", required = false) String cursor,
+			// 핀 몇개 가져올지 지정
 			@RequestParam(value = "size", defaultValue = "20") int size) {
-
+		
+		//pinservice로 넘기기
 		PinListResponseDto data = pinService.getPinList(cursor, size);
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 목록 조회 성공", data));
 	}
@@ -108,7 +112,7 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 검색 성공", data));
 	}
 
-	// 상세 조회
+	// 핀 상세 조회 - 김효 기능2
 	@GetMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<PinDetailResponseDto>> getPinDetail(@PathVariable("pinId") Long pinId) {
 
@@ -128,7 +132,7 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 수정 성공", data));
 	}
 
-	// 이미지 다운로드
+	// 이미지 다운로드-김효 기능3
 	@GetMapping("/{pinId}/download")
 	public ResponseEntity<ApiResponse<PinDownloadResponseDto>> downdloadPin(@PathVariable("pinId") Long pinId) {
 		PinDownloadResponseDto data = pinService.getDownloadUrl(pinId);
@@ -144,10 +148,13 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));
 	}
 
-	// 핀 이미지 반환
+	// 핀 이미지 반환 - 김효 기능 3
 	@GetMapping("/{pinId}/image")
+	//db에서 image_data를 조회,byte배열로 응답
 	public ResponseEntity<byte[]> getImage(@PathVariable("pinId") Long pinId) {
+		//이미지 데이터를 조회
 		Pin pin = pinDao.selectImageDataByPinId(pinId);
+		//미존재시 예외 처리
 		if (pin == null || pin.getImageData() == null) {
 			return ResponseEntity.notFound().build();
 		}
