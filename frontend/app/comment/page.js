@@ -56,7 +56,7 @@ export default function CommentSection({ pinId }) {
             setLoading(false);
         }
     };
-
+    // 핀 id 변경시 댓글 새로 불러오기 
     useEffect(() => {
         if (!pinId) return;
         fetchComments();
@@ -147,12 +147,15 @@ export default function CommentSection({ pinId }) {
             {/* 댓글 목록 */}
             <div ref={scrollRef} style={{ maxHeight: '200px', overflowY: 'auto', overflowX: 'visible', marginBottom: '12px' }}>
                 {loading ? (
+                    // 로딩중
                     <p style={{ color: '#767676', fontSize: '14px', textAlign: 'center', padding: '16px 0' }}>불러오는 중...</p>
                 ) : comments.length === 0 ? (
+                    // 댓글 없음
                     <p style={{ color: '#767676', fontSize: '14px', textAlign: 'center', padding: '16px 0' }}>
                         아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!
                     </p>
                 ) : (
+                    // 댓글 았음
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '8px' }}>
                         {comments.map((comment) => (
                             <div key={comment.commentId} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
