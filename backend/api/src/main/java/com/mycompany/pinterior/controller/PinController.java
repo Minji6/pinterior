@@ -139,10 +139,12 @@ public class PinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 이미지 다운로드 성공", data));
 	}
 
-	// 핀 삭제
+	// 핀 삭제 - 김효 기능 4
 	@DeleteMapping("/{pinId}")
 	public ResponseEntity<ApiResponse<Void>> deletePin(@PathVariable("pinId") Long pinId) {
+		// user id를 꺼냄
 		Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		//service로 넘김
 		pinService.deletePin(pinId, userId);
 
 		return ResponseEntity.ok(ApiResponse.of(200, "핀 삭제 성공", null));

@@ -70,6 +70,7 @@ export default function FeedPage() {
   const [newPinIds, setNewPinIds] = useState(new Set());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPins = async () => {
+    // 김효 기능1 
     if (fetchingRef.current || !hasNextRef.current) return;
 
     fetchingRef.current = true;
@@ -79,7 +80,7 @@ export default function FeedPage() {
     let more = false;
 
     //무한 스크롤 로직 - 김효 기능1
-          // 백엔드의 nextcursor값을 받아 cursor ref에 저장.
+          // 백엔드의 nextcursor값을 받아 cursor ref current에 저장.
     try {
       
       const params = { size: 20 };

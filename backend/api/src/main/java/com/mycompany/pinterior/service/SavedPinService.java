@@ -103,8 +103,10 @@ public class SavedPinService {
 			boardDao.updateBoardUpdatedAt(boardId);
 		}
 	}
-
+	
+	// 저장해제 김효 - 기능 6
 	public void unsave(Long savedPinId, Long userId) {
+		// 저장관계 ownerid를 조회
 		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
 		if (ownerId == null) {
 			throw new ApiException(404, " 존재하지 않는 저장입니다.");
