@@ -31,6 +31,7 @@ export default function FeedPage() {
 
   const { showToast } = useContext(ToastContext);
 
+  //백엔드에서 받은 nextcursor 저장 - 효 기능1
   const bottomRef = useRef(null);
   const fetchingRef = useRef(false);
   const hasNextRef = useRef(true);
@@ -72,6 +73,7 @@ export default function FeedPage() {
   const [newPinIds, setNewPinIds] = useState(new Set());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPins = async () => {
+    // 김효 기능1 
     if (fetchingRef.current || !hasNextRef.current) return;
 
     fetchingRef.current = true;
@@ -80,7 +82,10 @@ export default function FeedPage() {
     let next = [];
     let more = false;
 
+    //무한 스크롤 로직 - 김효 기능1
+          // 백엔드의 nextcursor값을 받아 cursor ref current에 저장.
     try {
+      
       const params = { size: 20 };
       if (cursorRef.current) {
         params.cursor = cursorRef.current;
@@ -143,10 +148,13 @@ export default function FeedPage() {
   }, []);
 
   useEffect(() => {
+    // 스크롤내릴시 코드실행 
     const observer = new IntersectionObserver(
+      //화면 아래쪽에 닿을시 fetchpins실행
       ([entry]) => { if (entry.isIntersecting) fetchPins(); },
       { threshold: 0.1, rootMargin: '0px 0px 500px 0px' }
     );
+    //화면 아래쪽에 닿으면 true가되어서 요청 실행
     if (bottomRef.current) observer.observe(bottomRef.current);
     return () => observer.disconnect();
   }, []);
