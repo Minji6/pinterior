@@ -71,10 +71,9 @@ public class PinService {
 			pin.setImageData(imageBytes);
 		}
 
-		// 핀 등록 (여기서 pinId가 채워짐)
 		pinDao.insert(pin);
 
-		// insert 후에 pinId로 URL 세팅
+		// insert 후에 pinId로 URL 세팅(그 전에는 pinId를 모름)
 		if (pin.getImageData() != null) {
 			String imageUrl = "/api/pins/" + pin.getPinId() + "/image";
 			pin.setImageUrl(imageUrl);
@@ -107,20 +106,20 @@ public class PinService {
 			savedPinDao.insert(newSavedPin);
 
 			pin.setBoardId(boardId);
-
-			// 태그 등록
-			if (pin.getTags() != null && !pin.getTags().isEmpty()) {
-				for (String tagName : pin.getTags()) {
-					Tag tag = tagDao.selectByTagName(tagName);
-					if (tag == null) {
-						tag = new Tag();
-						tag.setTagName(tagName);
-						tagDao.insert(tag);
-					}
-					pinTagDao.insert(pin.getPinId(), tag.getTagId());
+		}
+		// 태그 등록
+		if (pin.getTags() != null && !pin.getTags().isEmpty()) {
+			for (String tagName : pin.getTags()) {
+				Tag tag = tagDao.selectByTagName(tagName);
+				if (tag == null) {
+					tag = new Tag();
+					tag.setTagName(tagName);
+					tagDao.insert(tag);
 				}
+				pinTagDao.insert(pin.getPinId(), tag.getTagId());
 			}
 		}
+
 	}
 
 	// 전체핀목록 조회 - 김효 기능1
@@ -253,10 +252,10 @@ public class PinService {
 		if (!authorId.equals(userId)) {
 			throw new ApiException(403, "본인 핀만 삭제할 수 있습니다.");
 		}
-		
-		//댓글 삭제 
+
+		// 댓글 삭제
 		commentDao.deleteByPinId(pinId);
-		
+
 		// 핀 좋아요 삭제
 		pinLikeDao.deleteByPinId(pinId);
 

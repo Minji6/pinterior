@@ -70,6 +70,7 @@ export default function PinCreatePage() {
         if (!title.trim()) { setToast('제목을 입력해주세요.'); setTimeout(() => setToast(''), 2500); return; }
         setSubmitting(true);
         try {
+            // 이미지 파일이랑 텍스트 데이터 FormData로 붂어서 백엔드에 전송
             const formData = new FormData();
             formData.append('image', imageFile);
             formData.append('title', title.trim());
@@ -79,6 +80,7 @@ export default function PinCreatePage() {
             if (boardId) formData.append('boardId', boardId);
 
             const res = await axios.post('/api/pins', formData, {
+                // 헤더에 multipart/form-data 형식으로 보내줌
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
                     'Content-Type': 'multipart/form-data',
