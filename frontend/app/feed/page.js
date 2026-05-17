@@ -57,9 +57,12 @@ export default function FeedPage() {
     // 비로그인 상태면 보드 조회 스킵
     if (!getToken()) return;
     try {
+      console.log('userId:', getUserId());
+      console.log('token:', getToken());
       const res = await axios.get(`/api/boards/user/${getUserId()}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+      console.log('boards res:', res.data);
       setBoards(res.data.data || []);
     } catch (error) {
       console.error(error);

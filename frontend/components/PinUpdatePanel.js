@@ -37,6 +37,7 @@ export default function PinUpdatePanel({ pinId, savedPinId = null, initialBoardI
         if (!pinId) return;
         const fetchPin = async () => {
             try {
+                // 병렬 호출로 핀정보 보드목록 동시 요청
                 const [pinRes, boardRes] = await Promise.all([
                     axios.get(`/api/pins/${pinId}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
                     axios.get(`/api/boards/user/${getUserId()}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
