@@ -60,7 +60,10 @@ public class BoardService {
 		// 유저 아이디에 일치하는 보드의 목록 불러오기
 		List<BoardListResponseDto> boardList = boardDao.selectBoardListByUserId(userId);
 
-		// (썸네일용) 핀 이미지 링크 파싱
+		// ---------------- 썸네일 부분 -----------------
+		// 핀마다 쿼리를 사용하여 링크를 받아오면 N+1 문제가 발생할 수 있으므로,
+		// 보드 목록을 불러올 때 saved_pin 테이블에서 해당 보드에 저장된 핀의 이미지 링크를 한 번에 불러오는 쿼리를 작성하여
+		// BoardListResponseDto의 thumbnailStr 필드에 쉼표로 구분된 문자열로 저장
 		// 문자열로 불러와서 배열로 반환 (프론트용)
 		for (BoardListResponseDto board : boardList) {
 			String thumbnailStr = board.getThumbnailStr();
@@ -152,6 +155,9 @@ public class BoardService {
 		// 해당 보드의 saved_pin 목록 조회
 		List<SavedPin> savedPins = boardDao.selectSavedPinsByBoardId(boardId);
 
+		// 같은 유저가 같은 핀을 여러 보드에 저장한 경우를 고려
+		// 만약 기본 저장함에 이미 저장된 경우 or 다른 보드에 저장된 경우, 해당 행을 삭제
+		// 하나의 보드에만 저장된 경우 ON DELETE SET NULL조건에 의해 보드 삭제 시 기본 저장함으로 이동
 		for (SavedPin sp : savedPins) {
 			// 동일 user_id + pin_id + board_id IS NULL 인 행이 이미 있으면 삭제
 			int count = boardDao.countNullBoardSavedPin(sp.getUserId(), sp.getPinId());

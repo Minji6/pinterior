@@ -10,20 +10,27 @@ function BoardEditModal({ show, board, onClose, onEdited, onDeleteClick }) {
         boardName: board?.boardName ?? '',
         boardInfo: board?.boardInfo ?? '',
     });
+
+    // 실시간 유효성 검증 -> 글자수
     const isInvalid = form.boardName.trim() === '' || form.boardName.length > 50;
 
     const handleChange = (e) => {
         setForm(f => ({ ...f, [e.target.name]: e.target.value }));
     };
 
+    // 자식의 콜백 함수 요청 (부모에게 함수 실행 요청)
     const handleEdit = async () => {
         if (isInvalid) return;
         try {
+            // 자식은 부모의 상태에 직접 접근할 수 없음
+            // 사용자가 수정한 내용은 결과를 따로 담아 서버에 수정 요청을 보냄
             const res = await axios.put(`/api/boards/${board.boardId}`, {
                 boardName: form.boardName,
                 boardInfo: form.boardInfo,
             });
+            // 자기 상태만 책임지고, 결과는 콜백으로 부모에 전달
             onEdited?.(res.data.data);
+            // 모달 닫기
             onClose();
             showToast('보드가 수정되었습니다.');
         } catch (err) {
@@ -77,6 +84,8 @@ function BoardEditModal({ show, board, onClose, onEdited, onDeleteClick }) {
                         </div>
                     </div>
                     <div className="modal-footer border-0 justify-content-center">
+
+                        {/* 유효성 여부에 따라서 버튼 활성화 */}
                         <button
                             className="btn rounded-pill px-5 fw-bold"
                             style={{ backgroundColor: '#E60023', color: '#fff', fontSize: 15 }}

@@ -47,7 +47,8 @@ public class SavedPinService {
 			}
 		}
 
-		// 중복
+		// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+		// 보드 내에 해당 핀이 저장되었는지 검사 (중복 저장 검사)
 		int duplicateCount = savedPinDao.countDuplicate(userId, pinId, boardId);
 		if (duplicateCount > 0) {
 			throw new ApiException(409, "이미 해당 보드에 저장된 핀입니다.");
@@ -60,12 +61,12 @@ public class SavedPinService {
 		savedPin.setBoardId(boardId);
 		savedPinDao.insert(savedPin);
 
-		// 보드 updated_at 갱신
+		// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+		// 핀을 저장할때 보드 업데이트 시간도 갱신
 		if (boardId != null) {
 			boardDao.updateBoardUpdatedAt(boardId);
 		}
 
-		//
 		SavedPinResponseDto response = new SavedPinResponseDto();
 		response.setSavedPinId(savedPin.getSavedPinId());
 		response.setUserId(userId);
@@ -97,7 +98,9 @@ public class SavedPinService {
 		}
 
 		savedPinDao.updateBoardBySavedPinId(savedPinId, boardId);
-		// 보드 updated_at 갱신
+
+		// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+		// 보드를 수정할 때 보드 업데이트 시간도 갱신
 		if (boardId != null) {
 			boardDao.updateBoardUpdatedAt(boardId);
 		}
