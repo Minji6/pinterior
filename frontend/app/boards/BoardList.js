@@ -122,7 +122,8 @@ function BoardList({ refreshKey, onOpenModal }) {
         work();
     }, [refreshKey]);
 
-    // 수정 완료 시 목록 반영
+    // ================ 수정 =============
+    // 수정 후 API를 다시 호출하지 않고 로컬 상태만 업데이트해서 성능을 최적화
     const handleEdited = (updated) => {
         setBoards(prev => prev.map(b => {
             console.log(b.boardId, updated.boardId, b.boardId === updated.boardId);
@@ -153,6 +154,8 @@ function BoardList({ refreshKey, onOpenModal }) {
                 <CreateCard onOpen={onOpenModal} />
             </div>
 
+                {/* 'key' prop을 보드 ID로 설정해서 보드를 열 때마다 모달이 새로 마운트 */}
+                {/* 이전 보드에 수정한 값이 남아있지 않도록 함 */}
             <BoardEditModal
                 key={editTarget?.boardId}
                 show={!!editTarget}

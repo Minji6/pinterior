@@ -38,8 +38,10 @@ function PinList() {
     }, []);
 
     // 저장 핀 + 보드 재조회
+    // usecallback에 빈배열 마운트 > 리렌더링 함수재호출 방지
     const fetchAll = useCallback(async (userId) => {
         try {
+            // 보드목록, 저장핀목록을 동시에 호출 (응답시간 절감)
             const [resBoards, res] = await Promise.all([
                 axios.get(`/api/boards/user/${userId}`),
                 axios.get(`/api/saved-pins/users/${userId}`)
