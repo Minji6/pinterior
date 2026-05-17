@@ -34,11 +34,15 @@ public class SavedPinController {
 	@Autowired
 	private PinService pinService;
 	
+	//핀 저장기능 - 김효 기능5
 	@PostMapping
+	// requestbody는 savedpincreaterequestdto
 	public ResponseEntity<ApiResponse<SavedPinResponseDto>> save(@Valid @RequestBody SavedPinCreateRequestDto request) {
+		// user id꺼내기
 		Long userId = (Long) SecurityContextHolder.getContext()
 				.getAuthentication()
 				.getPrincipal();
+		//서비스로 전송하기
 		SavedPinResponseDto data = savedPinService.save(userId, request);
 		return ResponseEntity.status(201)
 				.body(ApiResponse.of(201, "핀 저장 성공", data));
@@ -57,11 +61,14 @@ public class SavedPinController {
 		return ResponseEntity.ok(ApiResponse.of(200, "저장 보드 변경 성공", null));
 	}
 	
+	// 핀 저장해제 김효 - 기능 6
 	@DeleteMapping("/{savedPinId}")
 	public ResponseEntity<ApiResponse<Void>> unsave(@PathVariable("savedPinId") Long savedPinId) {
+		//user id 꺼내기
 		Long userId = (Long) SecurityContextHolder.getContext()
 				.getAuthentication()
 				.getPrincipal();
+		//서비스로 전송
 		savedPinService.unsave(savedPinId, userId);
 		return ResponseEntity.ok(ApiResponse.of(200, "저장 해제 성공", null));
 	}

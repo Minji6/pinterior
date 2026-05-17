@@ -48,7 +48,7 @@ function SavedContentHeader({ activeTab, onCreateBoard }) {
 
                     {profile && (
                         <div
-                            className="d-flex align-items-center gap-3"
+                            className="d-flex align-items-start gap-3"
                             onClick={() => router.push('/mypage')}
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -64,7 +64,16 @@ function SavedContentHeader({ activeTab, onCreateBoard }) {
                             )}
                             <div>
                                 <p className="fw-bold mb-0" style={{ fontSize: 14 }}>{profile.nickname}</p>
-                                {profile.bio && <p className="text-muted mb-0" style={{ fontSize: 12 }}>{profile.bio}</p>}
+                                {profile.bio && (
+                                    <p className="text-muted mb-0" style={{
+                                        fontSize: 12,
+                                        maxWidth: 500,
+                                        wordBreak: 'break-word',
+                                        whiteSpace: 'normal',
+                                    }}>
+                                        {profile.bio}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}

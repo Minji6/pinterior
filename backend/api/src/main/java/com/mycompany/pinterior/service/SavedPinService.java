@@ -25,7 +25,8 @@ public class SavedPinService {
 	private UserDao userDao;
 	@Autowired
 	private BoardDao boardDao;
-
+	
+	//핀저장 - 김효 기능5
 	public SavedPinResponseDto save(Long userId, SavedPinCreateRequestDto request) {
 		Long pinId = request.getPinId();
 		Long boardId = request.getBoardId();
@@ -36,7 +37,7 @@ public class SavedPinService {
 			throw new ApiException(404, "존재하지 않는 핀입니다.");
 		}
 
-		// 보드 확인
+		// 보드 확인 본인것인지 검증
 		if (boardId != null) {
 			Long boardOwnerId = savedPinDao.selectBoardOwnerByBoardId(boardId);
 			if (boardOwnerId == null) {
@@ -49,12 +50,14 @@ public class SavedPinService {
 
 		// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
 		// 보드 내에 해당 핀이 저장되었는지 검사 (중복 저장 검사)
+		
+		// 중복 같은보드 저장 방지
 		int duplicateCount = savedPinDao.countDuplicate(userId, pinId, boardId);
 		if (duplicateCount > 0) {
 			throw new ApiException(409, "이미 해당 보드에 저장된 핀입니다.");
 		}
 
-		// 추가
+		// 저장관계 추가
 		SavedPin savedPin = new SavedPin();
 		savedPin.setUserId(userId);
 		savedPin.setPinId(pinId);
@@ -105,8 +108,10 @@ public class SavedPinService {
 			boardDao.updateBoardUpdatedAt(boardId);
 		}
 	}
-
+	
+	// 저장해제 김효 - 기능 6
 	public void unsave(Long savedPinId, Long userId) {
+		// 저장관계 ownerid를 조회
 		Long ownerId = savedPinDao.selectUserIdBySavedPinId(savedPinId);
 		if (ownerId == null) {
 			throw new ApiException(404, " 존재하지 않는 저장입니다.");

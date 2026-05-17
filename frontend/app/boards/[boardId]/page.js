@@ -181,7 +181,7 @@ export default function BoardDetailPage() {
                     onClose={() => setUpdateTargetId(null)}
                     onSuccess={async () => {
                         const resBoard = await axios.get(`/api/boards/${boardId}`);
-                        setPins(resBoard.data.data ?? []);
+                        setPins(resBoard.data.data?.pins ?? []);
                         setUpdateTargetId(null);
                     }}
                 />

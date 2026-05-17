@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Download, Trash2, ExternalLink, ArrowLeft, Heart } from 'lucide-react';
 import { BoardBtn, saveBtnStyle, savedBtnStyle, boardModalStyle } from '../../../components/PinStyles';
 import CommentSection from '../../comment/page';
+import PinDeleteModal from '../../../components/PinDeleteModal';
 
 // TODO: 배포 시 Origin 도메인 환경변수로 분리할 것
 function getToken() { return localStorage.getItem('token'); }
@@ -22,21 +23,23 @@ export default function PinDetailPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [toast, setToast] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  //핀 상세 조회 - 김효 기능2
   const fetchDetail = async () => {
-      try {
-        const res = await axios.get(`/api/pins/${pinId}`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        setPin(res.data.data);
-        setLiked(res.data.data.liked);
-        setLikeCount(res.data.data.likeCount ?? 0);
-      } catch (error) {
-        console.error(error);
-        router.push('/feed');
-      } finally {
-        setLoading(false);
-      }
+    try {
+      const res = await axios.get(`/api/pins/${pinId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      setPin(res.data.data);
+      setLiked(res.data.data.liked);
+      setLikeCount(res.data.data.likeCount ?? 0);
+    } catch (error) {
+      console.error(error);
+      router.push('/feed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -56,6 +59,7 @@ export default function PinDetailPage() {
       }
     };
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDetail();
     fetchBoards();
   }, [pinId]);
@@ -80,22 +84,29 @@ export default function PinDetailPage() {
       alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
-
+  //사용자가 다운로드 버튼 누르면 실행
   const handleDownload = async () => {
     try {
+      //이미지 다운로드-김효 기능3
+      //다운로드 api를 호출
       const res = await axios.get(`/api/pins/${pinId}/download`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+      //백엔드가 실제 이미지 주소 내려줌
       const { downloadUrl } = res.data.data;
       const imageRes = await fetch(downloadUrl);
+      // 브라우저에서 다운로드 가능하게 blob형태로
       const blob = await imageRes.blob();
       const blobUrl = URL.createObjectURL(blob);
+      //실제 다운로드는 a태그로 다운로드를 실행
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = `pin_${pinId}.jpg`;
       document.body.appendChild(a);
+      //a.click으로 실제 다운로드를 발생시키고
       a.click();
       document.body.removeChild(a);
+      //revoke로 임시 url을 정리
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error(error);
@@ -103,32 +114,58 @@ export default function PinDetailPage() {
     }
   };
 
+  //핀 삭제 - 김효 -- 기능 4
   const handleDelete = async () => {
+    // delete요청 전송
     if (!confirm('이 핀을 삭제하시겠습니까?')) return;
     setDeleting(true);
     try {
+      //토큰을 전송해서 사용자 확인 검증
       await axios.delete(`/api/pins/${pinId}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+      //삭제 성공시 피드페이지로 이동시키기
       router.push('/feed');
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+};
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+        await axios.delete(`/api/pins/${pinId}`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        setToast('핀이 삭제되었습니다.');
+        setTimeout(() => router.back(), 1500); // 토스트 보여주고 이동
     } catch (error) {
-      console.error(error);
-      alert('삭제 중 오류가 발생했습니다.');
-      setDeleting(false);
+        console.error(error);
+        setToast('삭제 중 오류가 발생했습니다.');
+        setTimeout(() => setToast(''), 2500);
+        setDeleting(false);
+        throw error;
     }
   };
-
+  // 보드 저장 - 김효 기능5
   const handleSave = async (boardId) => {
     try {
+      // 상페이지 url에서 가져온 pinid를 숫자로
       const body = { pinId: Number(pinId) };
+      //보드 선택시 board id도 추가
+      //보드없이 저장시 null로 
       if (boardId != null) body.boardId = boardId;
+      //api 요청
       const res = await axios.post('/api/saved-pins', body, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+      //백엔드에서 savedpin id받기
       setSavedPinId(res.data.data.savedPinId);
+      // 모달닫기
       setShowBoardModal(false);
+      //선택한 보드id찾아서 안내 메시지
       const board = boards.find(b => b.boardId === boardId);
       const message = board ? `${board.boardName}에 저장되었습니다` : '저장되었습니다';
+      // toast메시지로 보여주기 
       setToast(message);
       setTimeout(() => setToast(''), 2500);
     } catch (error) {
@@ -138,13 +175,16 @@ export default function PinDetailPage() {
       setTimeout(() => setToast(''), 2500);
     }
   };
-
+  // 저장해제 김효 - 기능 6
   const handleUnsave = async () => {
+    // 저장관계 삭제
     if (!savedPinId) return;
     try {
+      //저장삭제 요청보내기(savedpin의 행 삭제)
       await axios.delete(`/api/saved-pins/${savedPinId}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+      //성공시 프론트에서ㅎ 화면을 저장안됨으로
       setSavedPinId(null);
     } catch (error) {
       console.error(error);
@@ -167,7 +207,8 @@ export default function PinDetailPage() {
   }
 
   if (!pin) return null;
-
+  //핀 삭제 - 김효 기능4
+  //핀 작성자와 사용자 id를 비교
   const userId = getUserId();
   const isOwner = pin.author?.userId === userId && userId !== 0;
 
@@ -247,19 +288,24 @@ export default function PinDetailPage() {
               <Download size={18} />
             </button>
 
-            {/* 삭제 (본인만) */}
+            {/* 삭제 (본인만)-기능4 효 
+            true일때만 삭제버튼이 보이게 하고 연타방지로 deleting disabled*/}
             {isOwner && (
               <button onClick={handleDelete} disabled={deleting} title="핀 삭제" style={iconBtnStyle}>
                 <Trash2 size={18} />
               </button>
             )}
-
-            {/* 저장 버튼 */}
+  
+            {/* 저장 버튼
+            김효 - 기능 5/6 */}
             <div style={{ marginLeft: 'auto', position: 'relative' }}>
-              {savedPinId ? (
+               {/* 저장됨 버튼 클릭시 unsave가 실행되서 저장관계 삭제 */}
+              {savedPinId ? (   
                 <button onClick={handleUnsave} style={savedBtnStyle}>저장됨</button>
               ) : (
                 <>
+                  {/*저장 버튼 클릭시 보드 선택 모달이 열림 
+                  보드 목록을 버튼으로 혹은 보드 없이 저장가능하게 */}
                   <button onClick={() => setShowBoardModal(!showBoardModal)} style={saveBtnStyle}>저장</button>
                   {showBoardModal && (
                     <div style={boardModalStyle}>
@@ -329,6 +375,12 @@ export default function PinDetailPage() {
 
         </div>
       </div>
+
+      <PinDeleteModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDeleted={handleDeleteConfirm}
+      />
 
       {toast && (
         <div style={{
