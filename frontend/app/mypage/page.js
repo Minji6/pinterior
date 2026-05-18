@@ -119,10 +119,11 @@ function MyPinList() {
     );
 }
 
+// 마이페이지
 export default function MyPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [profile, setProfile] = useState(null);
+  const searchParams = useSearchParams(); // URL 쿼리 파라미터 감지, 프로필 수정 후 리로드
+  const [profile, setProfile] = useState(null); // 프로필 데이터
   const [activeTab, setActiveTab] = useState('created');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -141,6 +142,8 @@ export default function MyPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 프로필 데이터 조회
+  // 프로필 수정 후 /mypage로 돌아올 때 최신 데이터를 다시 불러옴
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
@@ -156,7 +159,7 @@ export default function MyPage() {
       })
       .catch(() => setError('프로필을 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
-  }, [searchParams]);
+  }, [searchParams]); // URL 쿼리가 바뀔 때마다 재실행
 
   if (loading) return <div className={styles.loading}>불러오는 중...</div>;
   if (error) return <div className={styles.error}>{error}</div>;

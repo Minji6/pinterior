@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import styles from './page.module.css';
 
 export default function ProfileEditPage() {
@@ -18,20 +19,22 @@ export default function ProfileEditPage() {
   const [error, setError] = useState('');
   const [nicknameError, setNicknameError] = useState('');
 
+  // 컴포넌트 마운트 시 현재 프로필 데이터를 불러와서 입력 필드 초기화
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
 
     if (!token || !userId) {
-      router.replace('/login');
+      router.replace('/login'); // 비로그인 상태면 로그인 페이지로 이동
       return;
     }
 
-    fetch(`/api/users/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((json) => {
+    axios
+      .get(`/api/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const json = res.data;
         if (json.status === 200) {
           const data = json.data;
           setProfile(data);
@@ -50,6 +53,7 @@ export default function ProfileEditPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // 파일 선택 시 호출: 선택한 파일을 상태에 저장하고 미리보기 URL 생성
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -57,26 +61,31 @@ export default function ProfileEditPage() {
     setPreviewImg(URL.createObjectURL(file));
   };
 
+  // 프로필 이미지 삭제
   const handleImageDelete = async () => {
     if (!confirm('프로필 이미지를 삭제하시겠습니까?')) return;
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
 
-    const res = await fetch(`/api/users/${userId}/image/delete`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const json = await res.json();
-    if (json.status === 200) {
-      setPreviewImg(null);
-      setSelectedFile(null);
-      setProfile((prev) => ({ ...prev, profileImg: null }));
-      localStorage.removeItem('profileImg');
-    } else {
-      alert(json.message);
+    try {
+      const res = await axios.delete(`/api/users/${userId}/image/delete`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = res.data;
+      if (json.status === 200) {
+        setPreviewImg(null);
+        setSelectedFile(null);
+        setProfile((prev) => ({ ...prev, profileImg: null }));
+        localStorage.removeItem('profileImg');
+      } else {
+        alert(json.message);
+      }
+    } catch (e) {
+      alert('이미지 삭제 중 오류가 발생했습니다.');
     }
   };
 
+  // 이미지 -> 닉네임 -> 소개 순서로 변경된 항목만 API 호출
   const handleSave = async () => {
     if (!nickname || nickname.length < 2 || nickname.length > 20) {
       setNicknameError('닉네임은 2~20자로 입력해주세요.');
@@ -99,12 +108,11 @@ export default function ProfileEditPage() {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('image', selectedFile);
-        const imgRes = await fetch(`/api/users/${userId}/image`, {
-          method: 'PUT',
+        const imgRes = await axios.put(`/api/users/${userId}/image`, formData, {
           headers: { Authorization: `Bearer ${token}` },
-          body: formData,
+          // Content-Type은 axios가 FormData 감지해서 자동으로 multipart/form-data 설정
         });
-        const imgJson = await imgRes.json();
+        const imgJson = imgRes.data;
         if (imgJson.status !== 200) {
           setError(imgJson.message);
           setSaving(false);
@@ -119,15 +127,12 @@ export default function ProfileEditPage() {
 
       // 2. 닉네임 수정
       if (nickname !== profile.nickname) {
-        const nickRes = await fetch(`/api/users/${userId}/nickname`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nickname }),
-        });
-        const nickJson = await nickRes.json();
+        const nickRes = await axios.put(
+          `/api/users/${userId}/nickname`,
+          { nickname },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const nickJson = nickRes.data;
         if (nickJson.status === 409) {
           setNicknameError('이미 사용 중인 닉네임입니다.');
           setSaving(false);
@@ -142,17 +147,17 @@ export default function ProfileEditPage() {
       }
 
       // 3. 소개 수정
+      // 빈 문자열이면 null로 변환
       const bioValue = bio.trim() === '' ? null : bio.trim();
+
+      // 원래 값과 다를 때만 요청
       if (bioValue !== profile.bio) {
-        const bioRes = await fetch(`/api/users/${userId}/bio`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ bio: bioValue }),
-        });
-        const bioJson = await bioRes.json();
+        const bioRes = await axios.put(
+          `/api/users/${userId}/bio`,
+          { bio: bioValue },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const bioJson = bioRes.data;
         if (bioJson.status !== 200) {
           setError(bioJson.message);
           setSaving(false);
@@ -160,7 +165,7 @@ export default function ProfileEditPage() {
         }
       }
 
-      // 저장 완료 → 하드 이동 (캐시 무시하고 완전히 새로 로드)
+      // 저장 완료
       window.location.href = '/mypage';
     } catch (e) {
       setError('저장 중 오류가 발생했습니다.');
