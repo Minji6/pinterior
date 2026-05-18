@@ -181,6 +181,8 @@ export default function SearchPage() {
       fetchingRef.current = false;
       hasNextRef.current = true;
       cursorRef.current = null;
+
+      // 새 검색 시작 전 모든 상태 초기화
       setPins([]);
       setRecommendedPins([]);
       setNoResult(false);
@@ -188,13 +190,13 @@ export default function SearchPage() {
 
       const keywords = tag.trim().split(/\s+/);
       if (keywords.length > 1) {
-        await fetchMultiTagSearch(tag);
+        await fetchMultiTagSearch(tag); // 띄어쓰기 있으면 다중 태그 검색
       } else {
-        await fetchSearch();
+        await fetchSearch(); // 단일 태그 검색
       }
     };
     work();
-  }, [searchParams]);
+  }, [searchParams]); // URL 쿼리가 바뀔 때마다 재실행
 
   // 스크롤 하단 감지 시 다음 페이지 요청
   useEffect(() => {
